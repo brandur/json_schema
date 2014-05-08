@@ -1,6 +1,6 @@
-require_relative "jsonpointer/evaluator"
+require_relative "json_pointer/evaluator"
 
-module Jsonpointer
+module JsonPointer
   def self.evaluate(data, path)
     Evaluator.new(data).evaluate(path)
   end

@@ -1,8 +1,8 @@
 require "test_helper"
 
-describe Jsonpointer::Evaluator do
+describe JsonPointer::Evaluator do
   before do
-    @evaluator = Jsonpointer::Evaluator.new(data)
+    @evaluator = JsonPointer::Evaluator.new(data)
   end
 
   it "evaluates pointers according to spec" do

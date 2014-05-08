@@ -1,4 +1,4 @@
-module Jsonpointer
+module JsonPointer
   class Evaluator
     def initialize(data)
       @data = data
