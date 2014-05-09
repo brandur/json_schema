@@ -1,5 +1,9 @@
 module JsonSchema
   class Schema
+    # Rather than a normal schema, the node may be a JSON Reference. In this
+    # case, no other attributes will be filled in except for #parent.
+    attr_accessor :reference
+
     # the schema keeps a reference to the data it was initialized from for JSON
     # Pointer resolution
     attr_accessor :data

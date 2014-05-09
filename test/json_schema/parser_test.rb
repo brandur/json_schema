@@ -18,7 +18,7 @@ describe JsonSchema::Parser do
 
   it "parses subschemas" do
     schema = @parser.parse(data).definitions_children[0]
-    assert_kind_of JsonSchema::Schema, schema
+    assert_nil schema.reference
     assert_equal "App", schema.title
     assert_equal "An app.", schema.description
     assert_equal "schemata/app", schema.id
@@ -27,10 +27,10 @@ describe JsonSchema::Parser do
   end
 
   it "parses references" do
-    ref = @parser.parse(data).properties_children[0]
-    assert_kind_of JsonReference::Reference, ref
-    assert_nil ref.uri
-    assert_equal "#/definitions/app", ref.pointer
+    schema = @parser.parse(data).properties_children[0]
+    refute_nil schema.reference
+    assert_nil schema.reference.uri
+    assert_equal "#/definitions/app", schema.reference.pointer
   end
 
   it "errors on non-string ids" do

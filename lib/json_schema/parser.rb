@@ -6,7 +6,9 @@ module JsonSchema
 
     def parse(data)
       if ref = data["$ref"]
-        JsonReference::Reference.new(ref)
+        schema = Schema.new
+        schema.reference = JsonReference::Reference.new(ref)
+        schema
       else
         parse_schema(data)
       end
@@ -24,8 +26,8 @@ module JsonSchema
       if data["definitions"]
         data["definitions"].each do |key, definition|
           subschema = parse(definition)
-          if subschema.is_a?(Schema)
-            subschema.parent = schema
+          subschema.parent = schema
+          if !subschema.reference
             subschema.uri = build_uri(subschema.id, schema.uri)
           end
           schema.definitions_children << subschema
@@ -37,8 +39,8 @@ module JsonSchema
       if data["properties"]
         data["properties"].each do |key, definition|
           subschema = parse(definition)
-          if subschema.is_a?(Schema)
-            subschema.parent = schema
+          subschema.parent = schema
+          if !subschema.reference
             subschema.uri = build_uri(subschema.id, schema.uri)
           end
           schema.properties_children << subschema
