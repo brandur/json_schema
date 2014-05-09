@@ -8,12 +8,6 @@ module JsonSchema
     def parse(data)
       schema = Schema.new
 
-      check_type!([String], "id", data["id"])
-      check_type!([String], "title", data["title"])
-      check_type!([String], "description", data["description"])
-
-      check_type!([Array, String], "type", data["type"])
-
       schema.id          = data["id"]
       schema.title       = data["title"]
       schema.description = data["description"]
@@ -26,10 +20,7 @@ module JsonSchema
         ["any"]
       end
 
-      if !(bad_types = schema.type - ALLOWED_TYPES).empty?
-        raise %{Unknown types: #{bad_types.sort.join(", ")}.}
-      end
-
+      validate(data, schema)
       parse_definitions(data, schema)
       parse_properties(data, schema)
 
@@ -61,6 +52,18 @@ module JsonSchema
           subschema.parent = schema
           schema.properties_children << subschema
         end
+      end
+    end
+
+    def validate(data, schema)
+      check_type!([String], "id", schema.id)
+      check_type!([String], "title", schema.title)
+      check_type!([String], "description", schema.description)
+
+      check_type!([Array, String], "type", data["type"])
+
+      if !(bad_types = schema.type - ALLOWED_TYPES).empty?
+        raise %{Unknown types: #{bad_types.sort.join(", ")}.}
       end
     end
   end
