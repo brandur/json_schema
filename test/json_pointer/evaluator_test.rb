@@ -1,5 +1,7 @@
 require "test_helper"
 
+require "json_pointer"
+
 describe JsonPointer::Evaluator do
   before do
     @evaluator = JsonPointer::Evaluator.new(data)
