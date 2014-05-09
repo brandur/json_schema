@@ -6,17 +6,23 @@ module JsonSchema
     def parse(data)
       schema = Schema.new
 
+      check_type!([String], "id", data["id"])
+      check_type!([String], "title", data["title"])
+      check_type!([String], "description", data["description"])
+
+      check_type!([Array, String], "type", data["type"])
+
       schema.id          = data["id"]
       schema.title       = data["title"]
       schema.description = data["description"]
 
-      schema.type        = data["type"]
-
-      check_type!(String, "id", schema.id)
-      check_type!(String, "title", schema.title)
-      check_type!(String, "description", schema.description)
-
-      check_type!(Array, "type", schema.type)
+      schema.type = if data["type"].is_a?(Array)
+        data["type"]
+      elsif data["type"].is_a?(String)
+        [data["type"]]
+      else
+        ["any"]
+      end
 
       parse_definitions(data, schema)
       parse_properties(data, schema)
@@ -26,9 +32,9 @@ module JsonSchema
 
     private
 
-    def check_type!(type, field, value)
-      if !value.nil? && !value.is_a?(type)
-        raise %{Expected "#{field}" to be of type "#{type}"; value was: #{value.inspect}.}
+    def check_type!(types, field, value)
+      if !value.nil? && !types.any? { |t| value.is_a?(t) }
+        raise %{Expected "#{field}" to be of type "#{types.join("/")}"; value was: #{value.inspect}.}
       end
     end
 

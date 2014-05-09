@@ -47,11 +47,11 @@ describe JsonSchema::Parser do
       e.message
   end
 
-  it "errors on non-array types" do
+  it "errors on non-array and non-string types" do
     local_data = data.dup
-    local_data["type"] = "string"
+    local_data["type"] = 4
     e = assert_raises(RuntimeError) { @parser.parse(local_data) }
-    assert_equal %{Expected "type" to be of type "Array"; value was: "string".},
+    assert_equal %{Expected "type" to be of type "Array/String"; value was: 4.},
       e.message
   end
 
