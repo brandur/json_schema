@@ -55,6 +55,14 @@ describe JsonSchema::Parser do
       e.message
   end
 
+  it "errors on unknown types" do
+    local_data = data.dup
+    local_data["type"] = ["float", "double"]
+    e = assert_raises(RuntimeError) { @parser.parse(local_data) }
+    assert_equal %{Unknown types: double, float.},
+      e.message
+  end
+
   def data
     {
       "$schema" => "http://json-schema.org/draft-04/hyper-schema",

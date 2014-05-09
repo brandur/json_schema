@@ -3,6 +3,8 @@ module JsonSchema
   end
 
   class Parser
+    ALLOWED_TYPES = %w{any array boolean integer number null object string}
+
     def parse(data)
       schema = Schema.new
 
@@ -22,6 +24,10 @@ module JsonSchema
         [data["type"]]
       else
         ["any"]
+      end
+
+      if !(bad_types = schema.type - ALLOWED_TYPES).empty?
+        raise %{Unknown types: #{bad_types.sort.join(", ")}.}
       end
 
       parse_definitions(data, schema)
@@ -65,7 +71,8 @@ module JsonSchema
     attr_accessor :title
     attr_accessor :description
 
-    # types assigned to this schema
+    # Types assigned to this schema. Always an array/union type no matter what
+    # was defined in the original schema (defaults to `["any"]`).
     attr_accessor :type
 
     # parent and children schemas
