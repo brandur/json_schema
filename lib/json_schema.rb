@@ -10,6 +10,10 @@ module JsonSchema
       schema.title       = data["title"]
       schema.description = data["description"]
 
+      check_type!(String, "id", schema.id)
+      check_type!(String, "title", schema.title)
+      check_type!(String, "description", schema.description)
+
       parse_definitions(data, schema)
       parse_properties(data, schema)
 
@@ -17,6 +21,12 @@ module JsonSchema
     end
 
     private
+
+    def check_type!(type, field, value)
+      if !value.nil? && !value.is_a?(type)
+        raise %{Expected "#{field}" to be of type "#{type}"; value was: #{value.inspect}.}
+      end
+    end
 
     def parse_definitions(data, schema)
       if data["definitions"]

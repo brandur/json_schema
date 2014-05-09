@@ -21,6 +21,30 @@ describe JsonSchema::Parser do
     assert_equal "schemata/app", schema.id
   end
 
+  it "errors on non-string ids" do
+    local_data = data.dup
+    local_data["id"] = 4
+    e = assert_raises(RuntimeError) { @parser.parse(local_data) }
+    assert_equal %{Expected "id" to be of type "String"; value was: 4.},
+      e.message
+  end
+
+  it "errors on non-string titles" do
+    local_data = data.dup
+    local_data["title"] = 4
+    e = assert_raises(RuntimeError) { @parser.parse(local_data) }
+    assert_equal %{Expected "title" to be of type "String"; value was: 4.},
+      e.message
+  end
+
+  it "errors on non-string descriptions" do
+    local_data = data.dup
+    local_data["description"] = 4
+    e = assert_raises(RuntimeError) { @parser.parse(local_data) }
+    assert_equal %{Expected "description" to be of type "String"; value was: 4.},
+      e.message
+  end
+
   def data
     {
       "$schema" => "http://json-schema.org/draft-04/hyper-schema",
