@@ -68,6 +68,15 @@ module JsonSchema
     end
   end
 
+  class ReferenceExpander
+    def initialize(schema)
+      @data = data
+    end
+
+    def expand!
+    end
+  end
+
   class Schema
     # basic descriptors
     attr_accessor :id
@@ -88,6 +97,10 @@ module JsonSchema
 
       @definitions_children = []
       @properties_children = []
+    end
+
+    def expand_references!
+      ReferenceExpander.new(self).expand
     end
   end
 end
