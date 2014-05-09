@@ -4,14 +4,16 @@ module JsonSchema
   class Parser
     ALLOWED_TYPES = %w{any array boolean integer number null object string}
 
-    def parse(data)
+    def parse(data, parent = nil)
       if ref = data["$ref"]
         schema = Schema.new
         schema.reference = JsonReference::Reference.new(ref)
-        schema
       else
-        parse_schema(data)
+        schema = parse_schema(data)
       end
+
+      schema.parent = parent
+      schema
     end
 
     private
@@ -25,8 +27,7 @@ module JsonSchema
     def parse_definitions(data, schema)
       if data["definitions"]
         data["definitions"].each do |key, definition|
-          subschema = parse(definition)
-          subschema.parent = schema
+          subschema = parse(definition, schema)
           if !subschema.reference
             subschema.uri = build_uri(subschema.id, schema.uri)
           end
@@ -38,8 +39,7 @@ module JsonSchema
     def parse_properties(data, schema)
       if data["properties"]
         data["properties"].each do |key, definition|
-          subschema = parse(definition)
-          subschema.parent = schema
+          subschema = parse(definition, schema)
           if !subschema.reference
             subschema.uri = build_uri(subschema.id, schema.uri)
           end

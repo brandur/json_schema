@@ -24,6 +24,7 @@ describe JsonSchema::Parser do
     assert_equal "schemata/app", schema.id
     assert_equal ["object"], schema.type
     assert_equal "/schemata/app", schema.uri
+    refute_nil schema.parent
   end
 
   it "parses references" do
