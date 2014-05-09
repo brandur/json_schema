@@ -10,9 +10,13 @@ module JsonSchema
       schema.title       = data["title"]
       schema.description = data["description"]
 
+      schema.type        = data["type"]
+
       check_type!(String, "id", schema.id)
       check_type!(String, "title", schema.title)
       check_type!(String, "description", schema.description)
+
+      check_type!(Array, "type", schema.type)
 
       parse_definitions(data, schema)
       parse_properties(data, schema)
@@ -56,7 +60,7 @@ module JsonSchema
     attr_accessor :description
 
     # types assigned to this schema
-    attr_accessor :types
+    attr_accessor :type
 
     # parent and children schemas
     attr_accessor :parent
@@ -64,7 +68,7 @@ module JsonSchema
     attr_accessor :properties_children
 
     def initialize
-      @types = []
+      @type = []
 
       @definitions_children = []
       @properties_children = []

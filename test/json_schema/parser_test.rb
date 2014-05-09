@@ -9,9 +9,10 @@ describe JsonSchema::Parser do
 
   it "parses the basic attributes of a schema" do
     schema = @parser.parse(data)
+    assert_nil schema.id
     assert_equal "Example API", schema.title
     assert_equal "An example API.", schema.description
-    assert_nil schema.id
+    assert_equal ["object"], schema.type
   end
 
   it "parses subschemas" do
@@ -19,6 +20,7 @@ describe JsonSchema::Parser do
     assert_equal "App", schema.title
     assert_equal "An app.", schema.description
     assert_equal "schemata/app", schema.id
+    assert_equal ["object"], schema.type
   end
 
   it "errors on non-string ids" do
@@ -42,6 +44,14 @@ describe JsonSchema::Parser do
     local_data["description"] = 4
     e = assert_raises(RuntimeError) { @parser.parse(local_data) }
     assert_equal %{Expected "description" to be of type "String"; value was: 4.},
+      e.message
+  end
+
+  it "errors on non-array types" do
+    local_data = data.dup
+    local_data["type"] = "string"
+    e = assert_raises(RuntimeError) { @parser.parse(local_data) }
+    assert_equal %{Expected "type" to be of type "Array"; value was: "string".},
       e.message
   end
 
