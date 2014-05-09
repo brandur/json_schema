@@ -13,6 +13,7 @@ describe JsonSchema::Parser do
     assert_equal "Example API", schema.title
     assert_equal "An example API.", schema.description
     assert_equal ["object"], schema.type
+    assert_equal "/", schema.uri
   end
 
   it "parses subschemas" do
@@ -21,6 +22,7 @@ describe JsonSchema::Parser do
     assert_equal "An app.", schema.description
     assert_equal "schemata/app", schema.id
     assert_equal ["object"], schema.type
+    assert_equal "/schemata/app", schema.uri
   end
 
   it "errors on non-string ids" do

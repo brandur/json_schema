@@ -40,6 +40,7 @@ module JsonSchema
         data["definitions"].each do |key, definition|
           subschema = parse(definition)
           subschema.parent = schema
+          subschema.uri = build_uri(subschema.id, schema.uri)
           schema.definitions_children << subschema
         end
       end
@@ -50,8 +51,29 @@ module JsonSchema
         data["properties"].each do |key, definition|
           subschema = parse(definition)
           subschema.parent = schema
+          subschema.uri = build_uri(subschema.id, schema.uri)
           schema.properties_children << subschema
         end
+      end
+    end
+
+    def build_uri(id, parent_uri)
+      # kill any trailing slashes
+      if id
+        id = id.chomp("/")
+      end
+
+      # if id is missing, it's defined as its parent schema's URI
+      if id.nil?
+        parent_uri
+      # if id is defined as absolute, the schema's URI stays absolute
+      elsif id[0] == "/"
+        id
+      # otherwise build it according to the parent's URI
+      else
+        # make sure we don't end up with duplicate slashes
+        parent_uri = parent_uri.chomp("/")
+        parent_uri + "/" + id
       end
     end
 
@@ -92,11 +114,16 @@ module JsonSchema
     attr_accessor :definitions_children
     attr_accessor :properties_children
 
+    # the normalize URI of this schema
+    attr_accessor :uri
+
     def initialize
       @type = []
 
       @definitions_children = []
       @properties_children = []
+
+      @uri = "/"
     end
 
     def expand_references!
