@@ -32,6 +32,7 @@ describe JsonSchema::Parser do
     refute_nil schema.reference
     assert_nil schema.reference.uri
     assert_equal "#/definitions/app", schema.reference.pointer
+    refute_nil schema.parent
   end
 
   it "errors on non-string ids" do
@@ -103,7 +104,7 @@ describe JsonSchema::Parser do
           },
           "properties" => {
             "app" => {
-              "$ref" => "#/definitions/name"
+              "$ref" => "/schemata/app#/definitions/name"
             }
           }
         }
