@@ -19,7 +19,11 @@ module JsonSchema
 
     # parent and children schemas
     attr_accessor :parent
+
+    # map of name --> schema
     attr_accessor :definitions
+
+    # map of name --> schema
     attr_accessor :properties
 
     # the normalize URI of this schema
@@ -28,37 +32,24 @@ module JsonSchema
     def initialize
       @type = []
 
-      @definitions = []
-      @properties = []
+      @definitions = {}
+      @properties = {}
     end
 
     # child schemas of all types
     def children
       Enumerator.new do |yielder|
-        definitions.each do |c|
-          yielder << c
+        definitions.each do |key, schema|
+          yielder << [key, schema]
         end
-        properties.each do |c|
-          yielder << c
+        properties.each do |key, schema|
+          yielder << [key, schema]
         end
       end
     end
 
     def expand_references!
       ReferenceExpander.new(self).expand
-    end
-
-    # @todo: get rid of this thing; terrible
-    def replace_reference(ref, new)
-      if definitions.select { |s| s.reference == ref }
-        definitions.delete_if { |s| s.reference == ref }
-        definitions << new
-      end
-
-      if properties.select { |s| s.reference == ref }
-        properties.delete_if { |s| s.reference == ref }
-        properties << new
-      end
     end
   end
 end

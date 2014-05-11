@@ -33,7 +33,7 @@ module JsonSchema
 
     private
 
-    def dereference(schema)
+    def dereference(key, schema)
       ref = schema.reference
       uri = ref.uri
 
@@ -42,19 +42,19 @@ module JsonSchema
         raise "Reference resolution over #{scheme} is not currently supported."
       # absolute
       elsif uri && uri.path[0] == "/"
-        resolve(schema, uri.path, ref)
+        resolve(key, schema, uri.path, ref)
       # relative
       elsif uri
         # build an absolute path using the URI of the current schema
         schema_uri = schema.uri.chomp("/")
-        resolve(schema, schema_uri + "/" + uri.path, ref)
+        resolve(key, schema, schema_uri + "/" + uri.path, ref)
       # just a JSON Pointer -- resolve against schema root
       else
-        evaluate(schema, @schema, ref)
+        evaluate(key, schema, @schema, ref)
       end
     end
 
-    def evaluate(schema, schema_context, ref)
+    def evaluate(key, schema, schema_context, ref)
       data = JsonPointer.evaluate(schema_context.data, ref.pointer)
 
       # couldn't resolve pointer within known schema; that's an error
@@ -76,15 +76,27 @@ module JsonSchema
 
       # remove old schema from parent's children, and re-link the new one
       if schema.parent
-        schema.parent.replace_reference(ref, new_schema)
+        replace_reference(key, schema, ref, new_schema)
       end
 
       new_schema
     end
 
-    def resolve(schema, uri, ref)
+    def replace_reference(key, schema, ref, new_schema)
+      parent = schema.parent
+
+      if parent.definitions[key] && parent.definitions[key].reference == ref
+        parent.definitions[key] = new_schema
+      end
+
+      if parent.properties[key] && parent.properties[key].reference == ref
+        parent.properties[key] = new_schema
+      end
+    end
+
+    def resolve(key, schema, uri, ref)
       if schema_context = @store[uri]
-        evaluate(schema, schema_context, ref)
+        evaluate(key, schema, schema_context, ref)
       else
         # couldn't resolve, return original reference
         @unresolved_refs.add(ref.to_s)
@@ -99,9 +111,9 @@ module JsonSchema
         @store[schema.uri] = schema
       end
 
-      schema.children.each do |child_schema|
+      schema.children.each do |key, child_schema|
         if child_schema.reference
-          dereference(child_schema)
+          dereference(key, child_schema)
         end
         traverse_schema(child_schema)
       end

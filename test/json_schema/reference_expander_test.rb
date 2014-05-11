@@ -6,9 +6,9 @@ describe JsonSchema::ReferenceExpander do
   it "expands references" do
     expand(data)
     # this was always a fully-defined property
-    referenced = @schema.definitions.first
+    referenced = @schema.definitions["app"]
     # this used to be a $ref
-    reference = @schema.properties.first
+    reference = @schema.properties["app"]
 
     assert_nil reference.reference
     assert_equal referenced.description, reference.description
