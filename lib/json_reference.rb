@@ -27,5 +27,13 @@ module JsonReference
     def resolve_pointer(data)
       JsonPointer.evaluate(data, @pointer)
     end
+
+    def to_s
+      if @uri
+        "#{@uri.to_s}#{@pointer}"
+      else
+        @pointer
+      end
+    end
   end
 end

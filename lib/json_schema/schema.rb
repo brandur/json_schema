@@ -30,8 +30,6 @@ module JsonSchema
 
       @definitions_children = []
       @properties_children = []
-
-      @uri = "/"
     end
 
     # child schemas of all types
@@ -48,6 +46,19 @@ module JsonSchema
 
     def expand_references!
       ReferenceExpander.new(self).expand
+    end
+
+    # @todo: get rid of this thing; terrible
+    def replace_reference(ref, new)
+      if definitions_children.select { |s| s.reference == ref }
+        definitions_children.delete_if { |s| s.reference == ref }
+        definitions_children << new
+      end
+
+      if properties_children.select { |s| s.reference == ref }
+        properties_children.delete_if { |s| s.reference == ref }
+        properties_children << new
+      end
     end
   end
 end
