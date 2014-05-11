@@ -17,7 +17,7 @@ describe JsonSchema::Parser do
   end
 
   it "parses subschemas" do
-    schema = @parser.parse(data).definitions_children[0]
+    schema = @parser.parse(data).definitions[0]
     assert_nil schema.reference
     assert_equal "App", schema.title
     assert_equal "An app.", schema.description
@@ -28,7 +28,7 @@ describe JsonSchema::Parser do
   end
 
   it "parses sub-subschemas" do
-    schema = @parser.parse(data).definitions_children[0].definitions_children[0]
+    schema = @parser.parse(data).definitions[0].definitions[0]
     assert_nil schema.reference
     assert_equal "unique name of app", schema.description
     assert_equal ["string"], schema.type
@@ -37,7 +37,7 @@ describe JsonSchema::Parser do
   end
 
   it "parses references" do
-    schema = @parser.parse(data).properties_children[0]
+    schema = @parser.parse(data).properties[0]
     refute_nil schema.reference
     assert_nil schema.reference.uri
     assert_equal "#/definitions/app", schema.reference.pointer

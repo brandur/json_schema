@@ -19,8 +19,8 @@ module JsonSchema
 
     # parent and children schemas
     attr_accessor :parent
-    attr_accessor :definitions_children
-    attr_accessor :properties_children
+    attr_accessor :definitions
+    attr_accessor :properties
 
     # the normalize URI of this schema
     attr_accessor :uri
@@ -28,17 +28,17 @@ module JsonSchema
     def initialize
       @type = []
 
-      @definitions_children = []
-      @properties_children = []
+      @definitions = []
+      @properties = []
     end
 
     # child schemas of all types
     def children
       Enumerator.new do |yielder|
-        definitions_children.each do |c|
+        definitions.each do |c|
           yielder << c
         end
-        properties_children.each do |c|
+        properties.each do |c|
           yielder << c
         end
       end
@@ -50,14 +50,14 @@ module JsonSchema
 
     # @todo: get rid of this thing; terrible
     def replace_reference(ref, new)
-      if definitions_children.select { |s| s.reference == ref }
-        definitions_children.delete_if { |s| s.reference == ref }
-        definitions_children << new
+      if definitions.select { |s| s.reference == ref }
+        definitions.delete_if { |s| s.reference == ref }
+        definitions << new
       end
 
-      if properties_children.select { |s| s.reference == ref }
-        properties_children.delete_if { |s| s.reference == ref }
-        properties_children << new
+      if properties.select { |s| s.reference == ref }
+        properties.delete_if { |s| s.reference == ref }
+        properties << new
       end
     end
   end

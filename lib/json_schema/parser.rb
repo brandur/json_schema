@@ -28,7 +28,7 @@ module JsonSchema
       if data["definitions"]
         data["definitions"].each do |key, definition|
           subschema = parse(definition, schema)
-          schema.definitions_children << subschema
+          schema.definitions << subschema
         end
       end
     end
@@ -37,7 +37,7 @@ module JsonSchema
       if data["properties"]
         data["properties"].each do |key, definition|
           subschema = parse(definition, schema)
-          schema.properties_children << subschema
+          schema.properties << subschema
         end
       end
     end

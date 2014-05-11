@@ -11,9 +11,9 @@ describe JsonSchema::ReferenceExpander do
   it "expands references" do
     @expander.expand!
     # this was always a fully-defined property
-    referenced = @schema.definitions_children.first
+    referenced = @schema.definitions.first
     # this used to be a $ref
-    reference = @schema.properties_children.first
+    reference = @schema.properties.first
 
     assert_nil reference.reference
     assert_equal referenced.description, reference.description
