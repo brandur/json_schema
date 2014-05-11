@@ -17,6 +17,19 @@ describe JsonSchema::ReferenceExpander do
     assert_equal referenced.uri, reference.uri
   end
 
+  it "will perform multiple passes to resolve all references" do
+    new_data = data.dup
+    new_data["properties"] = {
+      "app" => {
+        "$ref" => "#/properties/my-app"
+      },
+      "my-app" => {
+        "$ref" => "#/definitions/app"
+      }
+    }
+    expand(new_data)
+  end
+
   it "errors on a JSON Pointer that can't be resolved" do
     new_data = data.dup
     new_data["properties"]["app"] = {
