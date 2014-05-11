@@ -29,6 +29,37 @@ module JsonSchema
     # the normalize URI of this schema
     attr_accessor :uri
 
+    # validation: array
+    attr_accessor :max_items
+    attr_accessor :min_items
+    attr_accessor :unique_items
+
+    # validation: number/integer
+    attr_accessor :max
+    attr_accessor :max_exclusive
+    attr_accessor :min
+    attr_accessor :min_exclusive
+    attr_accessor :multiple_of
+
+    # validation: object
+    attr_accessor :additional_properties
+    attr_accessor :dependencies
+    attr_accessor :max_properties
+    attr_accessor :min_properties
+    attr_accessor :pattern_properties
+    attr_accessor :required
+
+    # validation: schema
+    attr_accessor :all_of
+    attr_accessor :any_of
+    attr_accessor :one_of
+    attr_accessor :not
+
+    # validation: string
+    attr_accessor :max_length
+    attr_accessor :min_length
+    attr_accessor :pattern
+
     def initialize
       @type = []
 
@@ -50,6 +81,8 @@ module JsonSchema
 
     def expand_references!
       ReferenceExpander.new(self).expand
+      # return self for convenience
+      self
     end
   end
 end
