@@ -9,7 +9,7 @@ module JsonSchema
         schema = Schema.new
         schema.reference = JsonReference::Reference.new(ref)
       else
-        schema = parse_schema(data)
+        schema = parse_schema(data, parent)
       end
 
       schema.parent = parent
@@ -28,9 +28,6 @@ module JsonSchema
       if data["definitions"]
         data["definitions"].each do |key, definition|
           subschema = parse(definition, schema)
-          if !subschema.reference
-            subschema.uri = build_uri(subschema.id, schema.uri)
-          end
           schema.definitions_children << subschema
         end
       end
@@ -40,15 +37,12 @@ module JsonSchema
       if data["properties"]
         data["properties"].each do |key, definition|
           subschema = parse(definition, schema)
-          if !subschema.reference
-            subschema.uri = build_uri(subschema.id, schema.uri)
-          end
           schema.properties_children << subschema
         end
       end
     end
 
-    def parse_schema(data)
+    def parse_schema(data, parent = nil)
       schema = Schema.new
 
       schema.data        = data
@@ -63,6 +57,13 @@ module JsonSchema
         [data["type"]]
       else
         ["any"]
+      end
+
+      # build a URI to address this schema
+      schema.uri = if parent
+        build_uri(schema.id, parent.uri)
+      else
+        "/"
       end
 
       validate(data, schema)

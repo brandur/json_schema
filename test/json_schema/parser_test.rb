@@ -27,6 +27,15 @@ describe JsonSchema::Parser do
     refute_nil schema.parent
   end
 
+  it "parses sub-subschemas" do
+    schema = @parser.parse(data).definitions_children[0].definitions_children[0]
+    assert_nil schema.reference
+    assert_equal "unique name of app", schema.description
+    assert_equal ["string"], schema.type
+    assert_equal "/schemata/app", schema.uri
+    refute_nil schema.parent
+  end
+
   it "parses references" do
     schema = @parser.parse(data).properties_children[0]
     refute_nil schema.reference
