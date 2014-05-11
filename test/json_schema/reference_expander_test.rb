@@ -17,7 +17,19 @@ describe JsonSchema::ReferenceExpander do
     assert_equal referenced.uri, reference.uri
   end
 
-  it "detects a circular reference" do
+  it "errors on a JSON Pointer that can't be resolved" do
+    new_data = data.dup
+    new_data["properties"]["app"] = {
+      "$ref" => "#/properties/nope"
+    }
+    e = assert_raises(RuntimeError) do
+      expand(new_data)
+    end
+    assert_equal %{Couldn't resolve pointer "#/properties/nope" in schema "/".},
+      e.message
+  end
+
+  it "errors on a circular reference" do
     new_data = data.dup
     new_data["definitions"]["app"] = {
       "$ref" => "#/properties/app"
