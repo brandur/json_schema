@@ -114,7 +114,7 @@ describe JsonSchema::ReferenceExpander do
   end
 
   def expand(data)
-    @schema = JsonSchema.parse(data)
+    @schema = JsonSchema::Parser.new.parse(data)
     @expander = JsonSchema::ReferenceExpander.new(@schema)
     @expander.expand!
   end

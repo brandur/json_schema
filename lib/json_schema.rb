@@ -4,6 +4,6 @@ require_relative "json_schema/schema"
 
 module JsonSchema
   def self.parse(data)
-    Parser.new.parse(data)
+    Parser.new.parse(data).expand_references!
   end
 end
