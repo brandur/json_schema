@@ -27,7 +27,7 @@ module JsonSchema
           raise(%{Couldn't resolve references: #{refs}.})
         end
 
-        last_num_unresolved_refs = @unresolved_refs
+        last_num_unresolved_refs = @unresolved_refs.count
       end
     end
 
@@ -62,8 +62,17 @@ module JsonSchema
         raise %{Couldn't resolve pointer "#{ref.pointer}" in schema "#{schema_context.uri}".}
       end
 
+      # this counts as a resolution
+      @unresolved_refs.delete(ref.to_s)
+
       # parse a new schema and use the same parent node
       new_schema = Parser.new.parse(data, schema.parent)
+
+      # mark a new unresolved reference if the schema we got back is also a
+      # reference
+      if new_schema.reference
+        @unresolved_refs.add(new_schema.reference.to_s)
+      end
 
       # remove old schema from parent's children, and re-link the new one
       if schema.parent
@@ -75,12 +84,10 @@ module JsonSchema
 
     def resolve(schema, uri, ref)
       if schema_context = @store[uri]
-        @unresolved_refs.delete(ref.to_s)
         evaluate(schema, schema_context, ref)
       else
-        @unresolved_refs.add(ref.to_s)
-
         # couldn't resolve, return original reference
+        @unresolved_refs.add(ref.to_s)
         schema
       end
     end

@@ -3,13 +3,8 @@ require "test_helper"
 require "json_schema"
 
 describe JsonSchema::ReferenceExpander do
-  before do
-    @schema = JsonSchema.parse(data)
-    @expander = JsonSchema::ReferenceExpander.new(@schema)
-  end
-
   it "expands references" do
-    @expander.expand!
+    expand(data)
     # this was always a fully-defined property
     referenced = @schema.definitions.first
     # this used to be a $ref
@@ -20,6 +15,17 @@ describe JsonSchema::ReferenceExpander do
     assert_equal referenced.id, reference.id
     assert_equal referenced.type, reference.type
     assert_equal referenced.uri, reference.uri
+  end
+
+  it "detects a circular reference" do
+    new_data = data.dup
+    new_data["definitions"]["app"] = {
+      "$ref" => "#/properties/app"
+    }
+    e = assert_raises(RuntimeError) do
+      expand(new_data)
+    end
+    assert_equal %{Couldn't resolve references: #/definitions/app.}, e.message
   end
 
   def data
@@ -68,5 +74,11 @@ describe JsonSchema::ReferenceExpander do
         }
       ]
     }
+  end
+
+  def expand(data)
+    @schema = JsonSchema.parse(data)
+    @expander = JsonSchema::ReferenceExpander.new(@schema)
+    @expander.expand!
   end
 end
