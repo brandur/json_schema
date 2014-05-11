@@ -20,12 +20,24 @@ describe JsonSchema::ReferenceExpander do
   it "errors on a JSON Pointer that can't be resolved" do
     new_data = data.dup
     new_data["properties"]["app"] = {
-      "$ref" => "#/properties/nope"
+      "$ref" => "#/definitions/nope"
     }
     e = assert_raises(RuntimeError) do
       expand(new_data)
     end
-    assert_equal %{Couldn't resolve pointer "#/properties/nope" in schema "/".},
+    assert_equal %{Couldn't resolve pointer "#/definitions/nope" in schema "/".},
+      e.message
+  end
+
+  it "errors on a schema that can't be resolved" do
+    new_data = data.dup
+    new_data["properties"]["app"] = {
+      "$ref" => "/schemata/user#/definitions/name"
+    }
+    e = assert_raises(RuntimeError) do
+      expand(new_data)
+    end
+    assert_equal %{Couldn't resolve references: /schemata/user#/definitions/name.},
       e.message
   end
 
