@@ -71,6 +71,9 @@ module JsonSchema
     attr_copyable :min_length
     attr_copyable :pattern
 
+    # hyperschema
+    attr_copyable :links
+
     def initialize
       @type = []
 

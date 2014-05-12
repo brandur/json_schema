@@ -115,6 +115,25 @@ module JsonSchema
       end
     end
 
+    def parse_links(schema)
+      if schema.links
+        schema.links = schema.links.map { |l|
+          link             = Link.new
+          link.description = l["description"]
+          link.href        = l["href"]
+          link.method      = l["method"] ? l["method"].downcase.to_sym : nil
+          link.rel         = l["rel"]
+          link.title       = l["title"]
+
+          if l["schema"]
+            link.schema = parse_data(l["schema"], schema)
+          end
+
+          link
+        }
+      end
+    end
+
     def parse_not(schema)
       if schema.not && schema.not.is_a?(Hash)
         schema.not = parse_data(schema.not, schema)
@@ -197,14 +216,18 @@ module JsonSchema
       schema.pattern    = validate_type!(schema, [String], "pattern")
       schema.pattern    = Regexp.new(schema.pattern) if schema.pattern
 
+      # hyperschema
+      schema.links = validate_type!(schema, [Array], "links")
+
       parse_all_of(schema)
       parse_any_of(schema)
       parse_one_of(schema)
       parse_definitions(schema)
       parse_dependencies(schema)
+      parse_links(schema)
+      parse_not(schema)
       parse_pattern_properties(schema)
       parse_properties(schema)
-      parse_not(schema)
 
       schema
     end
