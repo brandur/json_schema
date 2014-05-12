@@ -69,7 +69,7 @@ describe JsonSchema::Parser do
     assert_equal 0.01, schema.multiple_of
   end
 
-  it "parses object validations" do
+  it "parses the basic set of object validations" do
     schema = @parser.parse(data).definitions["app"]
     assert_equal false, schema.additional_properties
     assert_equal 10, schema.max_properties
