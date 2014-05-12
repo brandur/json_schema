@@ -168,10 +168,10 @@ module JsonSchema
       schema.unique_items = validate_type!(schema, BOOLEAN, "uniqueItems")
 
       # validation: number/integer
-      schema.max           = validate_type!(schema, [Float, Integer], "max")
-      schema.max_exclusive = validate_type!(schema, BOOLEAN, "maxExclusive")
-      schema.min           = validate_type!(schema, [Float, Integer], "min")
-      schema.min_exclusive = validate_type!(schema, BOOLEAN, "minExclusive")
+      schema.max           = validate_type!(schema, [Float, Integer], "maximum")
+      schema.max_exclusive = validate_type!(schema, BOOLEAN, "maximumExclusive")
+      schema.min           = validate_type!(schema, [Float, Integer], "minimum")
+      schema.min_exclusive = validate_type!(schema, BOOLEAN, "minimumExclusive")
       schema.multiple_of   = validate_type!(schema, [Float, Integer], "multipleOf")
 
       # validation: object

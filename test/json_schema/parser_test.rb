@@ -53,8 +53,8 @@ describe JsonSchema::Parser do
 
   it "parses integer validations" do
     schema = @parser.parse!(schema_sample).definitions["app"].definitions["id"]
-    assert_equal 1, schema.min
-    assert_equal false, schema.min_exclusive
+    assert_equal 0, schema.min
+    assert_equal true, schema.min_exclusive
     assert_equal 10000, schema.max
     assert_equal false, schema.max_exclusive
     assert_equal 1, schema.multiple_of

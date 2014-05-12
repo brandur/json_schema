@@ -66,10 +66,10 @@ module DataScaffold
             "cost" => {
               "description" => "running price of an app",
               "example" => 35.01,
-              "max" => 1000.00,
-              "maxExclusive" => true,
-              "min" => 0.0,
-              "minExclusive" => false,
+              "maximum" => 1000.00,
+              "maximumExclusive" => true,
+              "minimum" => 0.0,
+              "minimumExclusive" => false,
               "multipleOf" => 0.01,
               "readOnly" => false,
               "type" => ["number"],
@@ -86,10 +86,10 @@ module DataScaffold
             "id" => {
               "description" => "integer identifier of an app",
               "example" => 1,
-              "max" => 10000,
-              "maxExclusive" => false,
-              "min" => 1,
-              "minExclusive" => false,
+              "maximum" => 10000,
+              "maximumExclusive" => false,
+              "minimum" => 0,
+              "minimumExclusive" => true,
               "multipleOf" => 1,
               "readOnly" => true,
               "type" => ["integer"],
@@ -137,11 +137,17 @@ module DataScaffold
             },
           },
           "properties" => {
-            "app" => {
-              "$ref" => "/schemata/app#/definitions/name"
+            "cost" => {
+              "$ref" => "/schemata/app#/definitions/cost"
             },
             "flags" => {
               "$ref" => "/schemata/app#/definitions/flags"
+            },
+            "id" => {
+              "$ref" => "/schemata/app#/definitions/id"
+            },
+            "name" => {
+              "$ref" => "/schemata/app#/definitions/name"
             },
             "production" => {
               "$ref" => "/schemata/app#/definitions/production"
@@ -156,7 +162,7 @@ module DataScaffold
             "ssl" => {
               "properties" => {
                 "cost" => {
-                  "min" => 20.0,
+                  "minimum" => 20.0,
                 },
                 "name" => {
                   "$ref" => "/schemata/app#/definitions/name"
