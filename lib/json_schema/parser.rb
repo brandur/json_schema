@@ -208,10 +208,8 @@ module JsonSchema
     def validate_known_type!(schema)
       if schema.type
         if !(bad_types = schema.type - ALLOWED_TYPES).empty?
-          @errors << SchemaError.new(
-            schema,
-            %{Unknown types: #{bad_types.sort.join(", ")}.}
-          )
+          message = %{Unknown types: #{bad_types.sort.join(", ")}.}
+          @errors << SchemaError.new(schema, message)
         end
       end
     end
@@ -221,10 +219,8 @@ module JsonSchema
         types.map { |t| FRIENDLY_TYPES[t] || t }.sort.uniq.join("/")
       value = schema.data[field]
       if !value.nil? && !types.any? { |t| value.is_a?(t) }
-        @errors << SchemaError.new(
-          schema,
-          %{Expected "#{field}" to be of type "#{friendly_types}"; value was: #{value.inspect}.}
-        )
+        message = %{Expected "#{field}" to be of type "#{friendly_types}"; value was: #{value.inspect}.}
+        @errors << SchemaError.new(schema, message)
         nil
       else
         value

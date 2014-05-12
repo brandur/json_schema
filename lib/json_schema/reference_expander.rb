@@ -25,10 +25,8 @@ module JsonSchema
         # references; we're out of luck
         if @unresolved_refs.count == last_num_unresolved_refs
           refs = @unresolved_refs.to_a.join(", ")
-          @errors << SchemaError.new(
-            @schema,
-            %{Couldn't resolve references (possible circular dependency): #{refs}.}
-          )
+          message = %{Couldn't resolve references (possible circular dependency): #{refs}.}
+          @errors << SchemaError.new(@schema, message)
           break
         end
 
@@ -52,10 +50,8 @@ module JsonSchema
 
       if uri && uri.host
         scheme = uri.scheme || "http"
-        @errors << SchemaError.new(
-          schema,
-          %{Reference resolution over #{scheme} is not currently supported.}
-        )
+        message = %{Reference resolution over #{scheme} is not currently supported.}
+        @errors << SchemaError.new(schema, message)
       # absolute
       elsif uri && uri.path[0] == "/"
         resolve(schema, uri.path, ref)
@@ -75,10 +71,8 @@ module JsonSchema
 
       # couldn't resolve pointer within known schema; that's an error
       if data.nil?
-        @errors << SchemaError.new(
-          schema_context,
-          %{Couldn't resolve pointer "#{ref.pointer}".}
-        )
+        message = %{Couldn't resolve pointer "#{ref.pointer}".}
+        @errors << SchemaError.new(schema_context, message)
         return
       end
 
