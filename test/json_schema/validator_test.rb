@@ -155,6 +155,15 @@ describe JsonSchema::Validator do
       %{Expected data to be a multiple of 0.01, value was: 0.005.}
   end
 
+  it "validates additionalProperties" do
+    pointer(schema_sample, "#/definitions/app").merge!(
+      "additionalProperties" => false
+    )
+    data_sample["foo"] = "bar"
+    refute validate
+    assert_includes error_messages, %{Extra keys in object: foo.}
+  end
+
   # placeholder
 
   it "validates allOf" do

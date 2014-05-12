@@ -73,6 +73,7 @@ module JsonSchema
       @type = []
 
       # a few defaults
+      @additional_properties = true
       @max_exclusive = false
       @min_exclusive = false
 

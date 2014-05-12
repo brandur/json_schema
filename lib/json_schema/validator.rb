@@ -56,6 +56,7 @@ module JsonSchema
 
       # validation: object
       if data.is_a?(Hash)
+        valid = strict_and valid, validate_additional_properties(schema, data, errors)
         valid = strict_and valid, validate_dependencies(schema, data, errors)
         valid = strict_and valid, validate_pattern_properties(schema, data, errors)
         valid = strict_and valid, validate_properties(schema, data, errors)
@@ -76,6 +77,17 @@ module JsonSchema
       end
 
       valid
+    end
+
+    def validate_additional_properties(schema, data, errors)
+      return true if schema.additional_properties
+      if (extra = data.keys - schema.properties.keys).empty?
+        true
+      else
+        message = %{Extra keys in object: #{extra.sort.join(", ")}.}
+        errors << SchemaError.new(schema, message)
+        false
+      end
     end
 
     def validate_all_of(schema, data, errors)
@@ -253,7 +265,7 @@ module JsonSchema
       if (missing = required - data.keys).empty?
         true
       else
-        message = %{Missing required keys in object: #{missing.join(", ")}.}
+        message = %{Missing required keys in object: #{missing.sort.join(", ")}.}
         errors << SchemaError.new(schema, message)
         false
       end
