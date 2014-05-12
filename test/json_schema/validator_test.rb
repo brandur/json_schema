@@ -196,6 +196,16 @@ describe JsonSchema::Validator do
       %{Data did not match exactly one subschema of "oneOf" condition.}
   end
 
+  it "validates not" do
+    pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
+      "not" => { "pattern" => "^$" }
+    )
+    data_sample["contrived"] = ""
+    refute validate
+    assert_includes error_messages,
+      %{Data matched subschema of "not" condition.}
+  end
+
   it "validates maxLength" do
     pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
       "maxLength" => 3
