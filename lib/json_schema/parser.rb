@@ -39,11 +39,62 @@ module JsonSchema
       value
     end
 
+    def parse_all_of(schema)
+      if schema.all_of && schema.all_of.is_a?(Array)
+        schema.all_of = schema.all_of.map { |s| parse(s, schema) }
+      end
+    end
+
+    def parse_any_of(schema)
+      if schema.any_of && schema.any_of.is_a?(Array)
+        schema.any_of = schema.any_of.map { |s| parse(s, schema) }
+      end
+    end
+
+    def parse_one_of(schema)
+      if schema.one_of && schema.one_of.is_a?(Array)
+        schema.one_of = schema.one_of.map { |s| parse(s, schema) }
+      end
+    end
+
     def parse_definitions(data, schema)
       if data["definitions"]
         data["definitions"].each do |key, definition|
           subschema = parse(definition, schema)
           schema.definitions[key] = subschema
+        end
+      end
+    end
+
+    def parse_dependencies(schema)
+      if schema.dependencies && schema.dependencies.is_a?(Hash)
+        # leave the original data reference intact
+        schema.dependencies = schema.dependencies.dup
+        schema.dependencies.each do |k, s|
+          # may be Array, String (simple dependencies), or Hash (schema
+          # dependency)
+          if s.is_a?(Hash)
+            schema.dependencies[k] = parse(s, schema)
+          elsif s.is_a?(String)
+            # just normalize all simple dependencies to arrays
+            schema.dependencies[k] = [s]
+          end
+        end
+      end
+    end
+
+    def parse_not(schema)
+      if schema.not && schema.not.is_a?(Hash)
+        schema.not = parse(schema.not, schema)
+      end
+    end
+
+    def parse_pattern_properties(schema)
+      if schema.pattern_properties && schema.pattern_properties.is_a?(Hash)
+        # leave the original data reference intact
+        schema.pattern_properties = schema.pattern_properties.dup
+        schema.pattern_properties.each do |k, s|
+          schema.pattern_properties[k] = parse(s, schema)
         end
       end
     end
@@ -109,45 +160,14 @@ module JsonSchema
         "/"
       end
 
+      parse_all_of(schema)
+      parse_any_of(schema)
+      parse_one_of(schema)
       parse_definitions(data, schema)
+      parse_dependencies(schema)
+      parse_pattern_properties(schema)
       parse_properties(data, schema)
-
-      # parse out the subschemas in the object validations category
-      if schema.dependencies && schema.dependencies.is_a?(Hash)
-        # leave the original data reference intact
-        schema.dependencies = schema.dependencies.dup
-        schema.dependencies.each do |k, s|
-          # may be Array, String (simple dependencies), or Hash (schema
-          # dependency)
-          if s.is_a?(Hash)
-            schema.dependencies[k] = parse(s, schema)
-          elsif s.is_a?(String)
-            # just normalize all simple dependencies to arrays
-            schema.dependencies[k] = [s]
-          end
-        end
-      end
-      if schema.pattern_properties && schema.pattern_properties.is_a?(Hash)
-        # leave the original data reference intact
-        schema.pattern_properties = schema.pattern_properties.dup
-        schema.pattern_properties.each do |k, s|
-          schema.pattern_properties[k] = parse(s, schema)
-        end
-      end
-
-      # parse out the subschemas in the schema validations category
-      if schema.all_of && schema.all_of.is_a?(Array)
-        schema.all_of = schema.all_of.map { |s| parse(s, schema) }
-      end
-      if schema.any_of && schema.any_of.is_a?(Array)
-        schema.any_of = schema.any_of.map { |s| parse(s, schema) }
-      end
-      if schema.one_of && schema.one_of.is_a?(Array)
-        schema.one_of = schema.one_of.map { |s| parse(s, schema) }
-      end
-      if schema.not && schema.not.is_a?(Hash)
-        schema.not = parse(schema.not, schema)
-      end
+      parse_not(schema)
 
       schema
     end
