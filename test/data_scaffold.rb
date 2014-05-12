@@ -37,8 +37,8 @@ module DataScaffold
                 { "minLength" => 3 }
               ],
               "anyOf" => [
-                { "maxLength" => 30 },
-                { "minLength" => 3 }
+                { "minLength" => 3 },
+                { "minLength" => 5 }
               ],
               "oneOf" => [
                 { "pattern" => "^(|aaa)$" },

@@ -20,8 +20,8 @@ describe JsonSchema::ReferenceExpander do
   it "will expand anyOf" do
     expand(schema_sample)
     schema = @schema.properties["app"].definitions["contrived_plus"]
-    assert_equal 30, schema.any_of[0].max_length
-    assert_equal 3, schema.any_of[1].min_length
+    assert_equal 3, schema.any_of[0].min_length
+    assert_equal 5, schema.any_of[1].min_length
   end
 
   it "will expand allOf" do

@@ -170,6 +170,32 @@ describe JsonSchema::Validator do
       %{Expected string to have a minimum length of 3, was 2 character(s) long.}
   end
 
+  it "validates anyOf" do
+    pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
+      "anyOf" => [
+        { "minLength" => 5 },
+        { "minLength" => 3 }
+      ]
+    )
+    data_sample["contrived"] = "ab"
+    refute validate
+    assert_includes error_messages,
+      %{Data did not match any subschema of "anyOf" condition.}
+  end
+
+  it "validates oneOf" do
+    pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
+      "anyOf" => [
+        { "minLength" => 5 },
+        { "minLength" => 3 }
+      ]
+    )
+    data_sample["contrived"] = "ab"
+    refute validate
+    assert_includes error_messages,
+      %{Data did not match any subschema of "anyOf" condition.}
+  end
+
   it "validates maxLength" do
     pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
       "maxLength" => 3
