@@ -70,12 +70,8 @@ module JsonSchema
     # child schemas of all types
     def children
       Enumerator.new do |yielder|
-        definitions.each do |key, schema|
-          yielder << [key, schema]
-        end
-        properties.each do |key, schema|
-          yielder << [key, schema]
-        end
+        definitions.each { |k, s| yielder << [k, s] }
+        properties.each { |k, s| yielder << [k, s] }
       end
     end
 

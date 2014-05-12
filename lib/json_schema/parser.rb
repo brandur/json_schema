@@ -60,9 +60,7 @@ module JsonSchema
       elsif schema.type.nil?
         schema.type = ["any"]
       end
-      if !(bad_types = schema.type - ALLOWED_TYPES).empty?
-        raise %{Unknown types: #{bad_types.sort.join(", ")}.}
-      end
+      validate_known_type!(schema)
 
       # validation: array
       schema.max_items    = validate_type!(data, [Integer], "maxItems")
@@ -75,6 +73,12 @@ module JsonSchema
       schema.min           = validate_type!(data, [Float, Integer], "min")
       schema.min_exclusive = validate_type!(data, BOOLEAN, "minExclusive")
       schema.multiple_of   = validate_type!(data, [Float, Integer], "multipleOf")
+
+      # validation: schema
+      schema.all_of        = validate_type!(data, [Array], "allOf")
+      schema.any_of        = validate_type!(data, [Array], "anyOf")
+      schema.one_of        = validate_type!(data, [Array], "oneOf")
+      schema.not           = validate_type!(data, [Array], "not")
 
       # validation: string
       schema.max_length = validate_type!(data, [Integer], "maxLength")
@@ -90,6 +94,12 @@ module JsonSchema
 
       parse_definitions(data, schema)
       parse_properties(data, schema)
+
+      # parse out the subschemas in the schema validations category
+      schema.all_of = schema.all_of.map { |s| parse(s, schema) } if schema.all_of
+      schema.any_of = schema.any_of.map { |s| parse(s, schema) } if schema.any_of
+      schema.one_of = schema.one_of.map { |s| parse(s, schema) } if schema.one_of
+      schema.not    = parse(schema.not, schema) if schema.not
 
       schema
     end
@@ -111,6 +121,12 @@ module JsonSchema
         # make sure we don't end up with duplicate slashes
         parent_uri = parent_uri.chomp("/")
         parent_uri + "/" + id
+      end
+    end
+
+    def validate_known_type!(schema)
+      if !(bad_types = schema.type - ALLOWED_TYPES).empty?
+        raise %{Unknown types: #{bad_types.sort.join(", ")}.}
       end
     end
   end

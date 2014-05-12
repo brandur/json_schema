@@ -69,6 +69,13 @@ describe JsonSchema::Parser do
     assert_equal 0.01, schema.multiple_of
   end
 
+  it "parses schema validations" do
+    schema = @parser.parse(data).definitions["app"].definitions["identity"]
+    assert_equal 2, schema.any_of.count
+    assert_equal "/schemata/app#/definitions/id", schema.any_of[0].reference.to_s
+    assert_equal "/schemata/app#/definitions/name", schema.any_of[1].reference.to_s
+  end
+
   it "parses string validations" do
     schema = @parser.parse(data).definitions["app"].definitions["name"]
     assert_equal 30, schema.max_length
@@ -165,6 +172,12 @@ describe JsonSchema::Parser do
               "readOnly" => false,
               "type" => ["integer"],
             },
+            "identity" => {
+              "anyOf" => [
+                { "$ref" => "/schemata/app#/definitions/id" },
+                { "$ref" => "/schemata/app#/definitions/name" },
+              ]
+            },
             "name" => {
               "description" => "unique name of app",
               "example" => "name",
@@ -185,7 +198,7 @@ describe JsonSchema::Parser do
       "properties" => {
         "app" => {
           "$ref" => "#/definitions/app"
-        }
+        },
       },
       "links" => [
         {
