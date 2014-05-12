@@ -57,9 +57,11 @@ module JsonSchema
       end
     end
 
-    def parse_definitions(data, schema)
-      if data["definitions"]
-        data["definitions"].each do |key, definition|
+    def parse_definitions(schema)
+      if schema.definitions && schema.definitions.is_a?(Hash)
+        # leave the original data reference intact
+        schema.definitions = schema.definitions.dup
+        schema.definitions.each do |key, definition|
           subschema = parse(definition, schema)
           schema.definitions[key] = subschema
         end
@@ -99,9 +101,11 @@ module JsonSchema
       end
     end
 
-    def parse_properties(data, schema)
-      if data["properties"]
-        data["properties"].each do |key, definition|
+    def parse_properties(schema)
+      # leave the original data reference intact
+      schema.properties = schema.properties.dup
+      if schema.properties && schema.properties.is_a?(Hash)
+        schema.properties.each do |key, definition|
           subschema = parse(definition, schema)
           schema.properties[key] = subschema
         end
@@ -116,6 +120,9 @@ module JsonSchema
       schema.id          = validate_type!(data, [String], "id")
       schema.title       = validate_type!(data, [String], "title")
       schema.description = validate_type!(data, [String], "description")
+
+      schema.definitions = validate_type!(data, [Hash], "definitions") || {}
+      schema.properties  = validate_type!(data, [Hash], "properties") || {}
 
       schema.type = validate_type!(data, [Array, String], "type")
       schema.type = [schema.type] if schema.type.is_a?(String)
@@ -163,10 +170,10 @@ module JsonSchema
       parse_all_of(schema)
       parse_any_of(schema)
       parse_one_of(schema)
-      parse_definitions(data, schema)
+      parse_definitions(schema)
       parse_dependencies(schema)
       parse_pattern_properties(schema)
-      parse_properties(data, schema)
+      parse_properties(schema)
       parse_not(schema)
 
       schema
