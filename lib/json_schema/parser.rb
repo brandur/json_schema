@@ -7,7 +7,7 @@ module JsonSchema
     FRIENDLY_TYPES = {
       Array      => "array",
       FalseClass => "boolean",
-      Float      => "float",
+      Float      => "number",
       Hash       => "object",
       Integer    => "integer",
       NilClass   => "null",
