@@ -51,6 +51,24 @@ describe JsonSchema::Parser do
     assert_equal true, schema.unique_items
   end
 
+  it "parses integer validations" do
+    schema = @parser.parse(data).definitions["app"].definitions["dynos"]
+    assert_equal 0, schema.min
+    assert_equal false, schema.min_exclusive
+    assert_equal 50, schema.max
+    assert_equal false, schema.max_exclusive
+    assert_equal 1, schema.multiple_of
+  end
+
+  it "parses number validations" do
+    schema = @parser.parse(data).definitions["app"].definitions["cost"]
+    assert_equal 0.0, schema.min
+    assert_equal false, schema.min_exclusive
+    assert_equal 1000.0, schema.max
+    assert_equal true, schema.max_exclusive
+    assert_equal 0.01, schema.multiple_of
+  end
+
   it "errors on non-string ids" do
     local_data = data.dup
     local_data["id"] = 4
@@ -109,6 +127,28 @@ describe JsonSchema::Parser do
             "object"
           ],
           "definitions" => {
+            "cost" => {
+              "description" => "running price of an app",
+              "example" => 35.01,
+              "max" => 1000.00,
+              "maxExclusive" => true,
+              "min" => 0.0,
+              "minExclusive" => false,
+              "multipleOf" => 0.01,
+              "readOnly" => false,
+              "type" => ["number"],
+            },
+            "dynos" => {
+              "description" => "number of web dynos of an app",
+              "example" => 1,
+              "max" => 50,
+              "maxExclusive" => false,
+              "min" => 0,
+              "minExclusive" => false,
+              "multipleOf" => 1,
+              "readOnly" => false,
+              "type" => ["integer"],
+            },
             "flags" => {
               "description" => "flags for an app",
               "example" => ["websockets"],

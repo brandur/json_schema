@@ -68,6 +68,14 @@ module JsonSchema
       schema.unique_items =
         validate_type!(data, [FalseClass, TrueClass], "uniqueItems")
 
+      schema.max = validate_type!(data, [Float, Integer], "max")
+      schema.max_exclusive =
+        validate_type!(data, [FalseClass, TrueClass], "maxExclusive")
+      schema.min = validate_type!(data, [Float, Integer], "min")
+      schema.min_exclusive =
+        validate_type!(data, [FalseClass, TrueClass], "minExclusive")
+      schema.multiple_of = validate_type!(data, [Float, Integer], "multipleOf")
+
       # build a URI to address this schema
       schema.uri = if parent
         build_uri(schema.id, parent.uri)
