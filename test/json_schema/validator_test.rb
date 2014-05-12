@@ -145,7 +145,7 @@ describe JsonSchema::Validator do
       %{Expected data to be a multiple of 2, value was: 1.}
   end
 
-  it "validates multipleOf for a numer" do
+  it "validates multipleOf for a number" do
     pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
       "multipleOf" => 0.01
     )
