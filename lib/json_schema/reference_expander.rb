@@ -94,24 +94,11 @@ module JsonSchema
         @unresolved_refs.add(new_schema.reference.to_s)
       end
 
-      # remove old schema from parent's children, and re-link the new one
-      if schema.parent
-        replace_reference(key, schema, ref, new_schema)
-      end
+      parent = schema.parent
+      schema.copy_from(new_schema)
+      schema.parent = parent
 
       new_schema
-    end
-
-    def replace_reference(key, schema, ref, new_schema)
-      parent = schema.parent
-
-      if parent.definitions[key] && parent.definitions[key].reference == ref
-        parent.definitions[key] = new_schema
-      end
-
-      if parent.properties[key] && parent.properties[key].reference == ref
-        parent.properties[key] = new_schema
-      end
     end
 
     def resolve(key, schema, uri, ref)
