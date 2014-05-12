@@ -207,7 +207,14 @@ describe JsonSchema::Validator do
     assert_includes error_messages, %{Expected object to have a minimum of 2 property/ies; it had 1.}
   end
 
-  # placeholder
+  it "validates required" do
+    pointer(schema_sample, "#/definitions/app/dependencies").merge!(
+      "required" => ["name"]
+    )
+    data_sample.delete("name")
+    refute validate
+    assert_includes error_messages, %{Missing required keys in object: name.}
+  end
 
   it "validates allOf" do
     pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
