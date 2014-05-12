@@ -116,7 +116,7 @@ describe JsonSchema::Parser do
     local_data = data.dup
     local_data["id"] = 4
     e = assert_raises(RuntimeError) { @parser.parse!(local_data) }
-    assert_equal %{/: Expected "id" to be of type "string"; value was: 4.},
+    assert_equal %{At "/": Expected "id" to be of type "string"; value was: 4.},
       e.message
   end
 
@@ -124,7 +124,7 @@ describe JsonSchema::Parser do
     local_data = data.dup
     local_data["title"] = 4
     e = assert_raises(RuntimeError) { @parser.parse!(local_data) }
-    assert_equal %{/: Expected "title" to be of type "string"; value was: 4.},
+    assert_equal %{At "/": Expected "title" to be of type "string"; value was: 4.},
       e.message
   end
 
@@ -132,7 +132,7 @@ describe JsonSchema::Parser do
     local_data = data.dup
     local_data["description"] = 4
     e = assert_raises(RuntimeError) { @parser.parse!(local_data) }
-    assert_equal %{/: Expected "description" to be of type "string"; value was: 4.},
+    assert_equal %{At "/": Expected "description" to be of type "string"; value was: 4.},
       e.message
   end
 
@@ -140,7 +140,7 @@ describe JsonSchema::Parser do
     local_data = data.dup
     local_data["type"] = 4
     e = assert_raises(RuntimeError) { @parser.parse!(local_data) }
-    assert_equal %{/: Expected "type" to be of type "array/string"; value was: 4.},
+    assert_equal %{At "/": Expected "type" to be of type "array/string"; value was: 4.},
       e.message
   end
 
@@ -148,7 +148,7 @@ describe JsonSchema::Parser do
     local_data = data.dup
     local_data["type"] = ["float", "double"]
     e = assert_raises(RuntimeError) { @parser.parse!(local_data) }
-    assert_equal %{/: Unknown types: double, float.},
+    assert_equal %{At "/": Unknown types: double, float.},
       e.message
   end
 
