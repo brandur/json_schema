@@ -27,7 +27,7 @@ module JsonSchema
           refs = @unresolved_refs.to_a.join(", ")
           @errors << SchemaError.new(
             @schema,
-            %{Couldn't resolve references: #{refs}.}
+            %{Couldn't resolve references (possible circular dependency): #{refs}.}
           )
           break
         end

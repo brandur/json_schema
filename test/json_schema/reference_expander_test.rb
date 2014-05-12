@@ -91,7 +91,7 @@ describe JsonSchema::ReferenceExpander do
     e = assert_raises(RuntimeError) do
       expand(new_data)
     end
-    assert_equal %{At "/": Couldn't resolve references: /schemata/user#/definitions/name.},
+    assert_equal %{At "/": Couldn't resolve references (possible circular dependency): /schemata/user#/definitions/name.},
       e.message
   end
 
@@ -103,7 +103,7 @@ describe JsonSchema::ReferenceExpander do
     e = assert_raises(RuntimeError) do
       expand(new_data)
     end
-    assert_equal %{At "/": Couldn't resolve references: #/definitions/app.}, e.message
+    assert_equal %{At "/": Couldn't resolve references (possible circular dependency): #/definitions/app.}, e.message
   end
 
   def data
