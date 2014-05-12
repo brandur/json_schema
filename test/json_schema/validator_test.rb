@@ -29,6 +29,14 @@ describe JsonSchema::Validator do
       %{Expected array to have at least 1 item(s), had 0 item(s).}
   end
 
+  it "validates uniqueItems" do
+    local_data = data_sample.dup
+    local_data["flags"] = [1, 1]
+    refute validate(local_data)
+    assert_includes error_messages,
+      %{Expected array items to be unique, but duplicate items were found.}
+  end
+
   def data_sample
     DataScaffold.data_sample
   end
