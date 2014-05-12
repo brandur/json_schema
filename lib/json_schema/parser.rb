@@ -55,11 +55,7 @@ module JsonSchema
       schema.description = validate_type!(data, [String], "description")
 
       schema.type = validate_type!(data, [Array, String], "type")
-      if schema.type.is_a?(String)
-        schema.type = [schema.type]
-      elsif schema.type.nil?
-        schema.type = ["any"]
-      end
+      schema.type = [schema.type] if schema.type.is_a?(String)
       validate_known_type!(schema)
 
       # validation: array
@@ -125,8 +121,10 @@ module JsonSchema
     end
 
     def validate_known_type!(schema)
-      if !(bad_types = schema.type - ALLOWED_TYPES).empty?
-        raise %{Unknown types: #{bad_types.sort.join(", ")}.}
+      if schema.type
+        if !(bad_types = schema.type - ALLOWED_TYPES).empty?
+          raise %{Unknown types: #{bad_types.sort.join(", ")}.}
+        end
       end
     end
   end
