@@ -58,9 +58,25 @@ describe JsonSchema::Validator do
   end
 
   it "validates maximum for a number with exclusiveMaximum false" do
+    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+      "exclusiveMaximum" => false,
+      "maximum"          => 10.0
+    )
+    data_sample["cost"] = 10.1
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be smaller than maximum 10.0 (exclusive: false), value was: 10.1.}
   end
 
   it "validates maximum for a number with exclusiveMaximum true" do
+    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+      "exclusiveMaximum" => true,
+      "maximum"          => 10.0
+    )
+    data_sample["cost"] = 10.0
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be smaller than maximum 10.0 (exclusive: true), value was: 10.0.}
   end
 
   it "validates minimum for an integer with exclusiveMaximum false" do
