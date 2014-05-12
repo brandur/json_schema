@@ -140,6 +140,9 @@ module DataScaffold
             "app" => {
               "$ref" => "/schemata/app#/definitions/name"
             },
+            "flags" => {
+              "$ref" => "/schemata/app#/definitions/flags"
+            },
             "production" => {
               "$ref" => "/schemata/app#/definitions/production"
             },

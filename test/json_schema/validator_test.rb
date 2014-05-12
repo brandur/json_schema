@@ -13,6 +13,14 @@ describe JsonSchema::Validator do
       %{Expected data to be of type "object"; value was: 4.}
   end
 
+  it "validates maxItems" do
+    local_data = data_sample.dup
+    local_data["flags"] = (0...11).to_a
+    refute validate(local_data)
+    assert_includes error_messages,
+      %{Expected array to have no more than 10 item(s), had 11 item(s).}
+  end
+
   def data_sample
     DataScaffold.data_sample
   end
@@ -22,7 +30,7 @@ describe JsonSchema::Validator do
   end
 
   def validate(data_sample)
-    @schema = JsonSchema.parse!(DataScaffold.schema_sample)
+    @schema = JsonSchema.parse!(DataScaffold.schema_sample).definitions["app"]
     @validator = JsonSchema::Validator.new(@schema)
     @validator.validate(data_sample)
   end
