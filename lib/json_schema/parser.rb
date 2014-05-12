@@ -73,10 +73,11 @@ module JsonSchema
       # validation: object
       schema.additional_properties =
         validate_type!(data, BOOLEAN, "additionalProperties")
-      schema.max_properties = validate_type!(data, [Integer], "maxProperties")
-      schema.min_properties = validate_type!(data, [Integer], "minProperties")
+      schema.dependencies       = validate_type!(data, [Hash], "dependencies")
+      schema.max_properties     = validate_type!(data, [Integer], "maxProperties")
+      schema.min_properties     = validate_type!(data, [Integer], "minProperties")
       schema.pattern_properties = validate_type!(data, [Hash], "patternProperties")
-      schema.required = validate_type!(data, [Array], "required")
+      schema.required           = validate_type!(data, [Array], "required")
 
       # validation: schema
       schema.all_of        = validate_type!(data, [Array], "allOf")
@@ -100,6 +101,18 @@ module JsonSchema
       parse_properties(data, schema)
 
       # parse out the subschemas in the object validations category
+      if schema.dependencies
+        schema.dependencies.each do |k, s|
+          # may be Array, String (simple dependencies), or Hash (schema
+          # dependency)
+          if s.is_a?(Hash)
+            schema.dependencies[k] = parse(s, schema)
+          elsif s.is_a?(String)
+            # just normalize all simple dependencies to arrays
+            schema.dependencies[k] = [s]
+          end
+        end
+      end
       if schema.pattern_properties
         schema.pattern_properties.each do |k, s|
           schema.pattern_properties[k] = parse(s, schema)

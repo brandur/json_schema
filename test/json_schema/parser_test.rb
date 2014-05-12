@@ -71,13 +71,19 @@ describe JsonSchema::Parser do
 
   it "parses object validations" do
     schema = @parser.parse(data).definitions["app"]
-    assert_equal true, schema.additional_properties
+    assert_equal false, schema.additional_properties
     assert_equal 10, schema.max_properties
     assert_equal 1, schema.min_properties
     assert_equal ["name"], schema.required
   end
 
-  it "parses the PatternProperties object validation" do
+  it "parses the dependencies object validation" do
+    schema = @parser.parse(data).definitions["app"]
+    assert_equal ["ssl"], schema.dependencies["production"]
+    assert_equal 20.0, schema.dependencies["ssl"].properties["cost"].min
+  end
+
+  it "parses the patternProperties object validation" do
     schema = @parser.parse(data).definitions["app"].definitions["config_vars"]
     property = schema.pattern_properties.first
     assert_equal "^\w+$", property[0]
@@ -209,7 +215,7 @@ describe JsonSchema::Parser do
               "min" => 1,
               "minExclusive" => false,
               "multipleOf" => 1,
-              "readOnly" => false,
+              "readOnly" => true,
               "type" => ["integer"],
             },
             "identity" => {
@@ -227,13 +233,41 @@ describe JsonSchema::Parser do
               "readOnly" => false,
               "type" => ["string"]
             },
+            "production" => {
+              "description" => "whether this is a production app",
+              "example" => false,
+              "readOnly" => false,
+              "type" => ["boolean"]
+            },
+            "ssl" => {
+              "description" => "whether this app has SSL termination",
+              "example" => false,
+              "readOnly" => false,
+              "type" => ["boolean"]
+            },
           },
           "properties" => {
             "app" => {
               "$ref" => "/schemata/app#/definitions/name"
+            },
+            "production" => {
+              "$ref" => "/schemata/app#/definitions/production"
+            },
+            "ssl" => {
+              "$ref" => "/schemata/app#/definitions/ssl"
             }
           },
-          "additionalProperties" => true,
+          "additionalProperties" => false,
+          "dependencies" => {
+            "production" => "ssl",
+            "ssl" => {
+              "properties" => {
+                "cost" => {
+                  "min" => 20.0,
+                }
+              }
+            }
+          },
           "maxProperties" => 10,
           "minProperties" => 1,
           "required" => ["name"]
