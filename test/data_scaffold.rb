@@ -1,5 +1,10 @@
 module DataScaffold
-  def self.sample
+  def self.data_sample
+    {
+    }
+  end
+
+  def self.schema_sample
     {
       "$schema" => "http://json-schema.org/draft-04/hyper-schema",
       "title" => "Example API",
