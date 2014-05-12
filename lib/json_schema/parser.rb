@@ -4,6 +4,16 @@ module JsonSchema
   class Parser
     ALLOWED_TYPES = %w{any array boolean integer number null object string}
     BOOLEAN = [FalseClass, TrueClass]
+    FRIENDLY_TYPES = {
+      Array      => "array",
+      FalseClass => "boolean",
+      Float      => "float",
+      Hash       => "object",
+      Integer    => "integer",
+      NilClass   => "null",
+      String     => "string",
+      TrueClass  => "boolean",
+    }
 
     def parse(data, parent = nil)
       if ref = data["$ref"]
@@ -20,9 +30,11 @@ module JsonSchema
     private
 
     def validate_type!(data, types, field)
+      friendly_types =
+        types.map { |t| FRIENDLY_TYPES[t] || t }.sort.uniq.join("/")
       value = data[field]
       if !value.nil? && !types.any? { |t| value.is_a?(t) }
-        raise %{Expected "#{field}" to be of type "#{types.join("/")}"; value was: #{value.inspect}.}
+        raise %{Expected "#{field}" to be of type "#{friendly_types}"; value was: #{value.inspect}.}
       end
       value
     end
