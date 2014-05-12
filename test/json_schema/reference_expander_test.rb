@@ -40,8 +40,8 @@ describe JsonSchema::ReferenceExpander do
   it "will expand oneOf" do
     expand(schema_sample)
     schema = @schema.properties["app"].definitions["contrived_plus"]
-    assert_equal /^(|aaa)$/, schema.one_of[0].pattern
-    assert_equal /^(|zzz)$/, schema.one_of[1].pattern
+    assert_equal /^(foo|aaa)$/, schema.one_of[0].pattern
+    assert_equal /^(foo|zzz)$/, schema.one_of[1].pattern
   end
 
   it "will expand not" do

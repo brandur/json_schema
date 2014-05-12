@@ -159,7 +159,7 @@ module DataScaffold
               "$ref" => "/schemata/app#/definitions/ssl"
             }
           },
-          "additionalProperties" => true,
+          "additionalProperties" => false,
           "dependencies" => {
             "production" => "ssl",
             "ssl" => {
