@@ -46,7 +46,7 @@ describe JsonSchema::Parser do
 
   it "parses array validations" do
     schema = @parser.parse!(schema_sample).definitions["app"].definitions["flags"]
-    assert_equal 0, schema.min_items
+    assert_equal 1, schema.min_items
     assert_equal 10, schema.max_items
     assert_equal true, schema.unique_items
   end

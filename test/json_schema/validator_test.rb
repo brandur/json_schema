@@ -21,6 +21,14 @@ describe JsonSchema::Validator do
       %{Expected array to have no more than 10 item(s), had 11 item(s).}
   end
 
+  it "validates minItems" do
+    local_data = data_sample.dup
+    local_data["flags"] = []
+    refute validate(local_data)
+    assert_includes error_messages,
+      %{Expected array to have at least 1 item(s), had 0 item(s).}
+  end
+
   def data_sample
     DataScaffold.data_sample
   end

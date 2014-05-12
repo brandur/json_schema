@@ -78,7 +78,7 @@ module DataScaffold
               "description" => "flags for an app",
               "example" => ["websockets"],
               "maxItems" => 10,
-              "minItems" => 0,
+              "minItems" => 1,
               "readOnly" => false,
               "type" => ["array"],
               "uniqueItems" => true
