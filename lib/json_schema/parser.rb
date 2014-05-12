@@ -55,18 +55,23 @@ module JsonSchema
       end
     end
 
-    def validate_type!(schema, types, field)
-      friendly_types =
-        types.map { |t| FRIENDLY_TYPES[t] || t }.sort.uniq.join("/")
-      value = schema.data[field]
-      if !value.nil? && !types.any? { |t| value.is_a?(t) }
-        @errors << SchemaError.new(
-          schema,
-          %{Expected "#{field}" to be of type "#{friendly_types}"; value was: #{value.inspect}.}
-        )
-        nil
+    def build_uri(id, parent_uri)
+      # kill any trailing slashes
+      if id
+        id = id.chomp("/")
+      end
+
+      # if id is missing, it's defined as its parent schema's URI
+      if id.nil?
+        parent_uri
+      # if id is defined as absolute, the schema's URI stays absolute
+      elsif id[0] == "/"
+        id
+      # otherwise build it according to the parent's URI
       else
-        value
+        # make sure we don't end up with duplicate slashes
+        parent_uri = parent_uri.chomp("/")
+        parent_uri + "/" + id
       end
     end
 
@@ -218,26 +223,6 @@ module JsonSchema
       schema
     end
 
-    def build_uri(id, parent_uri)
-      # kill any trailing slashes
-      if id
-        id = id.chomp("/")
-      end
-
-      # if id is missing, it's defined as its parent schema's URI
-      if id.nil?
-        parent_uri
-      # if id is defined as absolute, the schema's URI stays absolute
-      elsif id[0] == "/"
-        id
-      # otherwise build it according to the parent's URI
-      else
-        # make sure we don't end up with duplicate slashes
-        parent_uri = parent_uri.chomp("/")
-        parent_uri + "/" + id
-      end
-    end
-
     def validate_known_type!(schema)
       if schema.type
         if !(bad_types = schema.type - ALLOWED_TYPES).empty?
@@ -246,6 +231,21 @@ module JsonSchema
             %{Unknown types: #{bad_types.sort.join(", ")}.}
           )
         end
+      end
+    end
+
+    def validate_type!(schema, types, field)
+      friendly_types =
+        types.map { |t| FRIENDLY_TYPES[t] || t }.sort.uniq.join("/")
+      value = schema.data[field]
+      if !value.nil? && !types.any? { |t| value.is_a?(t) }
+        @errors << SchemaError.new(
+          schema,
+          %{Expected "#{field}" to be of type "#{friendly_types}"; value was: #{value.inspect}.}
+        )
+        nil
+      else
+        value
       end
     end
   end
