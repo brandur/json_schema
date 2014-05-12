@@ -137,6 +137,9 @@ module DataScaffold
             },
           },
           "properties" => {
+            "contrived" => {
+              "$ref" => "/schemata/app#/definitions/contrived"
+            },
             "cost" => {
               "$ref" => "/schemata/app#/definitions/cost"
             },

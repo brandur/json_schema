@@ -56,19 +56,17 @@ module JsonSchema
 
       # validation: object
       if data.is_a?(Hash)
+        valid = strict_and valid, validate_dependencies(schema, data, errors)
+        valid = strict_and valid, validate_pattern_properties(schema, data, errors)
+        valid = strict_and valid, validate_properties(schema, data, errors)
         valid = strict_and valid, validate_required(schema, data, errors, schema.required)
       end
 
       # validation: schema
-      if data.is_a?(Hash)
-        valid = strict_and valid, validate_all_of(schema, data, errors)
-        valid = strict_and valid, validate_any_of(schema, data, errors)
-        valid = strict_and valid, validate_dependencies(schema, data, errors)
-        valid = strict_and valid, validate_one_of(schema, data, errors)
-        valid = strict_and valid, validate_pattern_properties(schema, data, errors)
-        valid = strict_and valid, validate_properties(schema, data, errors)
-        valid = strict_and valid, validate_not(schema, data, errors)
-      end
+      valid = strict_and valid, validate_all_of(schema, data, errors)
+      valid = strict_and valid, validate_any_of(schema, data, errors)
+      valid = strict_and valid, validate_one_of(schema, data, errors)
+      valid = strict_and valid, validate_not(schema, data, errors)
 
       # validation: string
       if data.is_a?(String)
@@ -82,7 +80,7 @@ module JsonSchema
 
     def validate_all_of(schema, data, errors)
       return true if schema.all_of.empty?
-      valid = schema.any_of.all? do |subschema|
+      valid = schema.all_of.all? do |subschema|
         validate_data(subschema, data, errors)
       end
       message = %{Data did not match all subschemas of "allOf" condition.}
@@ -209,7 +207,7 @@ module JsonSchema
       return true unless schema.not
       # don't bother accumulating these errors, they'll all be worded
       # incorrectly for the inverse condition
-      valid = !validate_data(schema.not)
+      valid = !validate_data(schema.not, data, {})
       message = %{Data matched subschema of "not" condition.}
       errors << SchemaError.new(schema, message) if !valid
       valid
@@ -262,6 +260,7 @@ module JsonSchema
     end
 
     def validate_type(schema, data, errors)
+      return true unless schema.type
       valid_types = schema.type.map { |t| TYPE_MAP[t] }.flatten.compact
       if valid_types.any? { |t| data.is_a?(t) }
         true

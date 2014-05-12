@@ -157,6 +157,19 @@ describe JsonSchema::Validator do
 
   # placeholder
 
+  it "validates allOf" do
+    pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
+      "allOf" => [
+        { "maxLength" => 30 },
+        { "minLength" => 3 }
+      ]
+    )
+    data_sample["contrived"] = "ab"
+    refute validate
+    assert_includes error_messages,
+      %{Expected string to have a minimum length of 3, was 2 character(s) long.}
+  end
+
   it "validates maxLength" do
     pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
       "maxLength" => 3
