@@ -31,50 +31,50 @@ module JsonSchema
     private
 
     # works around &&'s "lazy" behavior
-    def compose(valid_old, valid_new)
+    def strict_and(valid_old, valid_new)
       valid_old && valid_new
     end
 
     def validate_data(schema, data, errors)
       valid = true
 
-      valid = compose valid, validate_type(schema, data, errors)
+      valid = strict_and valid, validate_type(schema, data, errors)
 
       # validation: array
       if data.is_a?(Array)
-        valid = compose valid, validate_max_items(schema, data, errors)
-        valid = compose valid, validate_min_items(schema, data, errors)
-        valid = compose valid, validate_unique_items(schema, data, errors)
+        valid = strict_and valid, validate_max_items(schema, data, errors)
+        valid = strict_and valid, validate_min_items(schema, data, errors)
+        valid = strict_and valid, validate_unique_items(schema, data, errors)
       end
 
       # validation: integer/number
       if data.is_a?(Float) || data.is_a?(Integer)
-        valid = compose valid, validate_max(schema, data, errors)
-        valid = compose valid, validate_min(schema, data, errors)
-        valid = compose valid, validate_multiple_of(schema, data, errors)
+        valid = strict_and valid, validate_max(schema, data, errors)
+        valid = strict_and valid, validate_min(schema, data, errors)
+        valid = strict_and valid, validate_multiple_of(schema, data, errors)
       end
 
       # validation: object
       if data.is_a?(Hash)
-        valid = compose valid, validate_required(schema, data, errors, schema.required)
+        valid = strict_and valid, validate_required(schema, data, errors, schema.required)
       end
 
       # validation: schema
       if data.is_a?(Hash)
-        valid = compose valid, validate_all_of(schema, data, errors)
-        valid = compose valid, validate_any_of(schema, data, errors)
-        valid = compose valid, validate_dependencies(schema, data, errors)
-        valid = compose valid, validate_one_of(schema, data, errors)
-        valid = compose valid, validate_pattern_properties(schema, data, errors)
-        valid = compose valid, validate_properties(schema, data, errors)
-        valid = compose valid, validate_not(schema, data, errors)
+        valid = strict_and valid, validate_all_of(schema, data, errors)
+        valid = strict_and valid, validate_any_of(schema, data, errors)
+        valid = strict_and valid, validate_dependencies(schema, data, errors)
+        valid = strict_and valid, validate_one_of(schema, data, errors)
+        valid = strict_and valid, validate_pattern_properties(schema, data, errors)
+        valid = strict_and valid, validate_properties(schema, data, errors)
+        valid = strict_and valid, validate_not(schema, data, errors)
       end
 
       # validation: string
       if data.is_a?(String)
-        valid = compose valid, validate_max_length(schema, data, errors)
-        valid = compose valid, validate_min_length(schema, data, errors)
-        valid = compose valid, validate_pattern(schema, data, errors)
+        valid = strict_and valid, validate_max_length(schema, data, errors)
+        valid = strict_and valid, validate_min_length(schema, data, errors)
+        valid = strict_and valid, validate_pattern(schema, data, errors)
       end
 
       valid
