@@ -123,6 +123,26 @@ describe JsonSchema::Validator do
       %{Expected data to be larger than minimum 0.0 (exclusive: true), value was: 0.0.}
   end
 
+  it "validates multipleOf for an integer" do
+    pointer(schema_sample, "#/definitions/app/definitions/id").merge!(
+      "multipleOf" => 2
+    )
+    data_sample["id"] = 1
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be a multiple of 2, value was: 1.}
+  end
+
+  it "validates multipleOf for a numer" do
+    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+      "multipleOf" => 0.01
+    )
+    data_sample["cost"] = 0.005
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be a multiple of 0.01, value was: 0.005.}
+  end
+
   def data_sample
     @data_sample ||= DataScaffold.data_sample
   end

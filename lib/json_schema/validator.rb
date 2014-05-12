@@ -143,7 +143,14 @@ module JsonSchema
     end
 
     def validate_multiple_of(schema, data, errors)
-      true
+      return true unless schema.multiple_of
+      if data % schema.multiple_of == 0
+        true
+      else
+        message = %{Expected data to be a multiple of #{schema.multiple_of}, value was: #{data}.}
+        errors << SchemaError.new(schema, message)
+        false
+      end
     end
 
     def validate_one_of(schema, data, errors)
