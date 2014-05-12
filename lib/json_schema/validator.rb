@@ -40,6 +40,11 @@ module JsonSchema
       valid &&= validate_min_items(schema, data, errors)
       valid &&= validate_unique_items(schema, data, errors)
 
+      # validation: integer/number
+      valid &&= validate_max(schema, data, errors)
+      valid &&= validate_min(schema, data, errors)
+      valid &&= validate_multiple_of(schema, data, errors)
+
       # validation: object
       valid &&= validate_required(schema, data, errors, schema.required)
 
@@ -89,12 +94,38 @@ module JsonSchema
       end
     end
 
+    def validate_max(schema, data, error)
+      return true unless schema.max
+      if schema.max_exclusive && data < schema.max
+        true
+      elsif !schema.max_exclusive && data <= schema.max
+        true
+      else
+        message = %{Expected data to be smaller than maximum #{schema.max} (exclusive: #{schema.max_exclusive}), value was: #{data}.}
+        errors << SchemaError.new(schema, message)
+        false
+      end
+    end
+
     def validate_max_items(schema, data, error)
       return true unless schema.max_items
       if data.size <= schema.max_items
         true
       else
         message = %{Expected array to have no more than #{schema.max_items} item(s), had #{data.size} item(s).}
+        errors << SchemaError.new(schema, message)
+        false
+      end
+    end
+
+    def validate_min(schema, data, error)
+      return true unless schema.min
+      if schema.min_exclusive && data > schema.min
+        true
+      elsif !schema.min_exclusive && data >= schema.min
+        true
+      else
+        message = %{Expected data to be larger than minimum #{schema.min} (exclusive: #{schema.min_exclusive}), value was: #{data}.}
         errors << SchemaError.new(schema, message)
         false
       end
@@ -109,6 +140,10 @@ module JsonSchema
         errors << SchemaError.new(schema, message)
         false
       end
+    end
+
+    def validate_multiple_of(schema, data, errors)
+      true
     end
 
     def validate_one_of(schema, data, errors)

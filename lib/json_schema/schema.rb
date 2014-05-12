@@ -72,6 +72,10 @@ module JsonSchema
     def initialize
       @type = []
 
+      # a few defaults
+      @max_exclusive = false
+      @min_exclusive = false
+
       # these are all the subschema types; default them to empty data
       # structures for simplified iteration
       @all_of = []

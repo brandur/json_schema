@@ -37,6 +37,38 @@ describe JsonSchema::Validator do
       %{Expected array items to be unique, but duplicate items were found.}
   end
 
+  it "validates maximum for an integer with exclusiveMaximum false" do
+    local_schema = schema_sample.dup
+    local_schema["definitions"]["app"]["definitions"]["id"]["exclusiveMaximum"] = false
+    local_schema["definitions"]["app"]["definitions"]["id"]["maximum"] = 10
+    local_data = data_sample.dup
+    local_data["id"] = 11
+    refute validate(local_data, local_schema)
+    assert_includes error_messages,
+      %{Expected data to be smaller than maximum 10 (exclusive: false), value was: 11.}
+  end
+
+  it "validates maximum for an integer with exclusiveMaximum true" do
+  end
+
+  it "validates maximum for a number with exclusiveMaximum false" do
+  end
+
+  it "validates maximum for a number with exclusiveMaximum true" do
+  end
+
+  it "validates minimum for an integer with exclusiveMaximum false" do
+  end
+
+  it "validates minimum for an integer with exclusiveMaximum true" do
+  end
+
+  it "validates minimum for a number with exclusiveMaximum false" do
+  end
+
+  it "validates minimum for a number with exclusiveMaximum true" do
+  end
+
   def data_sample
     DataScaffold.data_sample
   end
@@ -45,8 +77,13 @@ describe JsonSchema::Validator do
     @validator.errors.map { |e| e.message }
   end
 
-  def validate(data_sample)
-    @schema = JsonSchema.parse!(DataScaffold.schema_sample).definitions["app"]
+  def schema_sample
+    DataScaffold.schema_sample
+  end
+
+  def validate(data_sample, schema_sample = nil)
+    schema_sample ||= DataScaffold.schema_sample
+    @schema = JsonSchema.parse!(schema_sample).definitions["app"]
     @validator = JsonSchema::Validator.new(@schema)
     @validator.validate(data_sample)
   end
