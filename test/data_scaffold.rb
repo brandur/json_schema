@@ -109,6 +109,20 @@ module DataScaffold
               "readOnly" => false,
               "type" => ["boolean"]
             },
+            "role" => {
+              "description" => "name of a role on an app",
+              "example" => "collaborator",
+              "readOnly" => true,
+              "type" => ["string"],
+            },
+            "roles" => {
+              "additionalProperties" => true,
+              "patternProperties" => {
+                "^\w+$" => {
+                  "$ref" => "/schemata/app#/definitions/role"
+                }
+              }
+            },
             "ssl" => {
               "description" => "whether this app has SSL termination",
               "example" => false,

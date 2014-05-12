@@ -50,6 +50,14 @@ describe JsonSchema::ReferenceExpander do
     assert_equal "^$", schema.not.pattern
   end
 
+  it "will expand patternProperties" do
+    expand(data)
+    # value ([1]) of the #first tuple in hash
+    schema = @schema.properties["app"].definitions["roles"].
+      pattern_properties.first[1]
+    assert_equal ["string"], schema.type
+  end
+
   it "will perform multiple passes to resolve all references" do
     new_data = data.dup
     new_data["properties"] = {
