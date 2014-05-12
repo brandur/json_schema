@@ -70,6 +70,13 @@ module JsonSchema
       schema.min_exclusive = validate_type!(data, BOOLEAN, "minExclusive")
       schema.multiple_of   = validate_type!(data, [Float, Integer], "multipleOf")
 
+      # validation: object
+      schema.additional_properties =
+        validate_type!(data, BOOLEAN, "additionalProperties")
+      schema.max_properties = validate_type!(data, [Integer], "maxProperties")
+      schema.min_properties = validate_type!(data, [Integer], "minProperties")
+      schema.required = validate_type!(data, [Array], "required")
+
       # validation: schema
       schema.all_of        = validate_type!(data, [Array], "allOf")
       schema.any_of        = validate_type!(data, [Array], "anyOf")

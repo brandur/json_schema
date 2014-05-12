@@ -69,6 +69,14 @@ describe JsonSchema::Parser do
     assert_equal 0.01, schema.multiple_of
   end
 
+  it "parses object validations" do
+    schema = @parser.parse(data).definitions["app"]
+    assert_equal true, schema.additional_properties
+    assert_equal 10, schema.max_properties
+    assert_equal 1, schema.min_properties
+    assert_equal ["name"], schema.required
+  end
+
   it "parses schema validations" do
     # anyOf example is slightly less contrived; handle that first
     schema = @parser.parse(data).definitions["app"].definitions["identity"]
@@ -209,7 +217,11 @@ describe JsonSchema::Parser do
             "app" => {
               "$ref" => "/schemata/app#/definitions/name"
             }
-          }
+          },
+          "additionalProperties" => true,
+          "maxProperties" => 10,
+          "minProperties" => 1,
+          "required" => ["name"]
         }
       },
       "properties" => {
