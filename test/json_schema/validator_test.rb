@@ -155,6 +155,38 @@ describe JsonSchema::Validator do
       %{Expected data to be a multiple of 0.01, value was: 0.005.}
   end
 
+  # placeholder
+
+  it "validates maxLength" do
+    pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
+      "maxLength" => 3
+    )
+    data_sample["name"] = "abcd"
+    refute validate
+    assert_includes error_messages,
+      %{Expected string to have a maximum length of 3, was 4 character(s) long.}
+  end
+
+  it "validates minLength" do
+    pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
+      "minLength" => 3
+    )
+    data_sample["name"] = "ab"
+    refute validate
+    assert_includes error_messages,
+      %{Expected string to have a minimum length of 3, was 2 character(s) long.}
+  end
+
+  it "validates pattern" do
+    pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
+      "pattern" => "^[a-z][a-z0-9-]{3,30}$",
+    )
+    data_sample["name"] = "ab"
+    refute validate
+    assert_includes error_messages,
+      %{Expected string to match pattern "/^[a-z][a-z0-9-]{3,30}$/", value was: ab.}
+  end
+
   def data_sample
     @data_sample ||= DataScaffold.data_sample
   end

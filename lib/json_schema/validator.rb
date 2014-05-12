@@ -30,32 +30,52 @@ module JsonSchema
 
     private
 
+    # works around &&'s "lazy" behavior
+    def compose(valid_old, valid_new)
+      valid_old && valid_new
+    end
+
     def validate_data(schema, data, errors)
       valid = true
 
-      valid &&= validate_type(schema, data, errors)
+      valid = compose valid, validate_type(schema, data, errors)
 
       # validation: array
-      valid &&= validate_max_items(schema, data, errors)
-      valid &&= validate_min_items(schema, data, errors)
-      valid &&= validate_unique_items(schema, data, errors)
+      if data.is_a?(Array)
+        valid = compose valid, validate_max_items(schema, data, errors)
+        valid = compose valid, validate_min_items(schema, data, errors)
+        valid = compose valid, validate_unique_items(schema, data, errors)
+      end
 
       # validation: integer/number
-      valid &&= validate_max(schema, data, errors)
-      valid &&= validate_min(schema, data, errors)
-      valid &&= validate_multiple_of(schema, data, errors)
+      if data.is_a?(Float) || data.is_a?(Integer)
+        valid = compose valid, validate_max(schema, data, errors)
+        valid = compose valid, validate_min(schema, data, errors)
+        valid = compose valid, validate_multiple_of(schema, data, errors)
+      end
 
       # validation: object
-      valid &&= validate_required(schema, data, errors, schema.required)
+      if data.is_a?(Hash)
+        valid = compose valid, validate_required(schema, data, errors, schema.required)
+      end
 
       # validation: schema
-      valid &&= validate_all_of(schema, data, errors)
-      valid &&= validate_any_of(schema, data, errors)
-      valid &&= validate_dependencies(schema, data, errors)
-      valid &&= validate_one_of(schema, data, errors)
-      valid &&= validate_pattern_properties(schema, data, errors)
-      valid &&= validate_properties(schema, data, errors)
-      valid &&= validate_not(schema, data, errors)
+      if data.is_a?(Hash)
+        valid = compose valid, validate_all_of(schema, data, errors)
+        valid = compose valid, validate_any_of(schema, data, errors)
+        valid = compose valid, validate_dependencies(schema, data, errors)
+        valid = compose valid, validate_one_of(schema, data, errors)
+        valid = compose valid, validate_pattern_properties(schema, data, errors)
+        valid = compose valid, validate_properties(schema, data, errors)
+        valid = compose valid, validate_not(schema, data, errors)
+      end
+
+      # validation: string
+      if data.is_a?(String)
+        valid = compose valid, validate_max_length(schema, data, errors)
+        valid = compose valid, validate_min_length(schema, data, errors)
+        valid = compose valid, validate_pattern(schema, data, errors)
+      end
 
       valid
     end
@@ -118,6 +138,17 @@ module JsonSchema
       end
     end
 
+    def validate_max_length(schema, data, error)
+      return true unless schema.max_length
+      if data.length <= schema.max_length
+        true
+      else
+        message = %{Expected string to have a maximum length of #{schema.max_length}, was #{data.length} character(s) long.}
+        errors << SchemaError.new(schema, message)
+        false
+      end
+    end
+
     def validate_min(schema, data, error)
       return true unless schema.min
       if schema.min_exclusive && data > schema.min
@@ -137,6 +168,17 @@ module JsonSchema
         true
       else
         message = %{Expected array to have at least #{schema.min_items} item(s), had #{data.size} item(s).}
+        errors << SchemaError.new(schema, message)
+        false
+      end
+    end
+
+    def validate_min_length(schema, data, error)
+      return true unless schema.min_length
+      if data.length >= schema.min_length
+        true
+      else
+        message = %{Expected string to have a minimum length of #{schema.min_length}, was #{data.length} character(s) long.}
         errors << SchemaError.new(schema, message)
         false
       end
@@ -171,6 +213,17 @@ module JsonSchema
       message = %{Data matched subschema of "not" condition.}
       errors << SchemaError.new(schema, message) if !valid
       valid
+    end
+
+    def validate_pattern(schema, data, error)
+      return true unless schema.pattern
+      if data =~ schema.pattern
+        true
+      else
+        message = %{Expected string to match pattern "#{schema.pattern.inspect}", value was: #{data}.}
+        errors << SchemaError.new(schema, message)
+        false
+      end
     end
 
     def validate_pattern_properties(schema, data, errors)
