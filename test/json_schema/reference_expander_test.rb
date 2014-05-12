@@ -66,51 +66,7 @@ describe JsonSchema::ReferenceExpander do
   end
 
   def data
-    {
-      "$schema" => "http://json-schema.org/draft-04/hyper-schema",
-      "title" => "Example API",
-      "description" => "An example API.",
-      "type" => [
-        "object"
-      ],
-      "definitions" => {
-        "app" => {
-          "$schema" => "http://json-schema.org/draft-04/hyper-schema",
-          "title" => "App",
-          "description" => "An app.",
-          "id" => "schemata/app",
-          "type" => [
-            "object"
-          ],
-          "definitions" => {
-            "name" => {
-              "description" => "unique name of app",
-              "example" => "name",
-              "readOnly" => false,
-              "type" => [
-                "string"
-              ]
-            },
-          },
-          "properties" => {
-            "app" => {
-              "$ref" => "/schemata/app#/definitions/name"
-            }
-          }
-        }
-      },
-      "properties" => {
-        "app" => {
-          "$ref" => "#/definitions/app"
-        }
-      },
-      "links" => [
-        {
-          "href" => "http://example.com",
-          "rel" => "self"
-        }
-      ]
-    }
+    DataScaffold.sample
   end
 
   def expand(data)

@@ -102,6 +102,8 @@ module JsonSchema
 
       # parse out the subschemas in the object validations category
       if schema.dependencies
+        # leave the original data reference intact
+        schema.dependencies = schema.dependencies.dup
         schema.dependencies.each do |k, s|
           # may be Array, String (simple dependencies), or Hash (schema
           # dependency)
@@ -114,6 +116,8 @@ module JsonSchema
         end
       end
       if schema.pattern_properties
+        # leave the original data reference intact
+        schema.pattern_properties = schema.pattern_properties.dup
         schema.pattern_properties.each do |k, s|
           schema.pattern_properties[k] = parse(s, schema)
         end
