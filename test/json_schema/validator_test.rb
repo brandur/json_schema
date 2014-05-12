@@ -189,6 +189,24 @@ describe JsonSchema::Validator do
     assert_includes error_messages, %{Expected data to be larger than minimum 20.0 (exclusive: false), value was: 10.0.}
   end
 
+  it "validates maxProperties" do
+    pointer(schema_sample, "#/definitions/app").merge!(
+      "maxProperties" => 0
+    )
+    data_sample["name"] = "cloudnasium"
+    refute validate
+    assert_includes error_messages, %{Expected object to have a maximum of 0 property/ies; it had 1.}
+  end
+
+  it "validates minProperties" do
+    pointer(schema_sample, "#/definitions/app").merge!(
+      "minProperties" => 2
+    )
+    data_sample["name"] = "cloudnasium"
+    refute validate
+    assert_includes error_messages, %{Expected object to have a minimum of 2 property/ies; it had 1.}
+  end
+
   # placeholder
 
   it "validates allOf" do

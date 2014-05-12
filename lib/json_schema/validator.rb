@@ -58,7 +58,8 @@ module JsonSchema
       if data.is_a?(Hash)
         valid = strict_and valid, validate_additional_properties(schema, data, errors)
         valid = strict_and valid, validate_dependencies(schema, data, errors)
-        valid = strict_and valid, validate_pattern_properties(schema, data, errors)
+        valid = strict_and valid, validate_max_properties(schema, data, errors)
+        valid = strict_and valid, validate_min_properties(schema, data, errors)
         valid = strict_and valid, validate_properties(schema, data, errors)
         valid = strict_and valid, validate_required(schema, data, errors, schema.required)
       end
@@ -159,6 +160,17 @@ module JsonSchema
       end
     end
 
+    def validate_max_properties(schema, data, error)
+      return true unless schema.max_properties
+      if data.keys.size <= schema.max_properties
+        true
+      else
+        message = %{Expected object to have a maximum of #{schema.max_properties} property/ies; it had #{data.keys.size}.}
+        errors << SchemaError.new(schema, message)
+        false
+      end
+    end
+
     def validate_min(schema, data, error)
       return true unless schema.min
       if schema.min_exclusive && data > schema.min
@@ -189,6 +201,17 @@ module JsonSchema
         true
       else
         message = %{Expected string to have a minimum length of #{schema.min_length}, was #{data.length} character(s) long.}
+        errors << SchemaError.new(schema, message)
+        false
+      end
+    end
+
+    def validate_min_properties(schema, data, error)
+      return true unless schema.min_properties
+      if data.keys.size >= schema.min_properties
+        true
+      else
+        message = %{Expected object to have a minimum of #{schema.min_properties} property/ies; it had #{data.keys.size}.}
         errors << SchemaError.new(schema, message)
         false
       end
