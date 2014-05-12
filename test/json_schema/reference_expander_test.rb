@@ -17,6 +17,33 @@ describe JsonSchema::ReferenceExpander do
     assert_equal referenced.uri, reference.uri
   end
 
+  it "will expand anyOf" do
+    expand(data)
+    schema = @schema.properties["app"].definitions["contrived_plus"]
+    assert_equal 30, schema.any_of[0].max_length
+    assert_equal 3, schema.any_of[1].min_length
+  end
+
+  it "will expand allOf" do
+    expand(data)
+    schema = @schema.properties["app"].definitions["contrived_plus"]
+    assert_equal 30, schema.all_of[0].max_length
+    assert_equal 3, schema.all_of[1].min_length
+  end
+
+  it "will expand one_of" do
+    expand(data)
+    schema = @schema.properties["app"].definitions["contrived_plus"]
+    assert_equal "^(|aaa)$", schema.one_of[0].pattern
+    assert_equal "^(|zzz)$", schema.one_of[1].pattern
+  end
+
+  it "will expand not" do
+    expand(data)
+    schema = @schema.properties["app"].definitions["contrived_plus"]
+    assert_equal "^$", schema.not.pattern
+  end
+
   it "will perform multiple passes to resolve all references" do
     new_data = data.dup
     new_data["properties"] = {

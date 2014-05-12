@@ -72,6 +72,8 @@ module JsonSchema
     def initialize
       @type = []
 
+      # these are all the subschema types; default them to empty data
+      # structures for simplified iteration
       @all_of = []
       @any_of = []
       @one_of = []

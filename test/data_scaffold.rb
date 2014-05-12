@@ -30,11 +30,32 @@ module DataScaffold
                 { "maxLength" => 30 },
                 { "minLength" => 3 }
               ],
+              "anyOf" => [
+                { "maxLength" => 30 },
+                { "minLength" => 3 }
+              ],
               "oneOf" => [
                 { "pattern" => "^(|aaa)$" },
                 { "pattern" => "^(|zzz)$" }
               ],
               "not" => { "pattern" => "^$" }
+            },
+            "contrived_plus" => {
+              "allOf" => [
+                { "$ref" => "/schemata/app#/definitions/contrived/allOf/0" },
+                { "$ref" => "/schemata/app#/definitions/contrived/allOf/1" }
+              ],
+              "anyOf" => [
+                { "$ref" => "/schemata/app#/definitions/contrived/anyOf/0" },
+                { "$ref" => "/schemata/app#/definitions/contrived/anyOf/1" }
+              ],
+              "oneOf" => [
+                { "$ref" => "/schemata/app#/definitions/contrived/oneOf/0" },
+                { "$ref" => "/schemata/app#/definitions/contrived/oneOf/1" }
+              ],
+              "not" => {
+                "$ref" => "/schemata/app#/definitions/contrived/not"
+              }
             },
             "cost" => {
               "description" => "running price of an app",
