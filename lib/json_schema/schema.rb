@@ -72,15 +72,31 @@ module JsonSchema
     def initialize
       @type = []
 
+      @all_of = []
+      @any_of = []
+      @one_of = []
       @definitions = {}
+      @dependencies = {}
+      @pattern_properties = {}
       @properties = {}
     end
 
     # child schemas of all types
     def children
       Enumerator.new do |yielder|
-        definitions.each { |k, s| yielder << [k, s] }
-        properties.each { |k, s| yielder << [k, s] }
+        all_of.each { |s| yielder << s }
+        any_of.each { |s| yielder << s }
+        one_of.each { |s| yielder << s }
+        definitions.each { |_, s| yielder << s }
+        pattern_properties.each { |_, s| yielder << s }
+        properties.each { |_, s| yielder << s }
+        yielder << self.not if self.not
+
+        # dependencies can either be simple or "schema"; only replace the
+        # latter
+        dependencies.values.
+          select { |s| s.is_a?(Schema) }.
+          each { |s| yielder << s }
       end
     end
 

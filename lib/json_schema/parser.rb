@@ -176,16 +176,16 @@ module JsonSchema
       # validation: object
       schema.additional_properties =
         validate_type!(schema, BOOLEAN, "additionalProperties")
-      schema.dependencies       = validate_type!(schema, [Hash], "dependencies")
+      schema.dependencies       = validate_type!(schema, [Hash], "dependencies") || {}
       schema.max_properties     = validate_type!(schema, [Integer], "maxProperties")
       schema.min_properties     = validate_type!(schema, [Integer], "minProperties")
-      schema.pattern_properties = validate_type!(schema, [Hash], "patternProperties")
+      schema.pattern_properties = validate_type!(schema, [Hash], "patternProperties") || {}
       schema.required           = validate_type!(schema, [Array], "required")
 
       # validation: schema
-      schema.all_of        = validate_type!(schema, [Array], "allOf")
-      schema.any_of        = validate_type!(schema, [Array], "anyOf")
-      schema.one_of        = validate_type!(schema, [Array], "oneOf")
+      schema.all_of        = validate_type!(schema, [Array], "allOf") || []
+      schema.any_of        = validate_type!(schema, [Array], "anyOf") || []
+      schema.one_of        = validate_type!(schema, [Array], "oneOf") || []
       schema.not           = validate_type!(schema, [Hash], "not")
 
       # validation: string

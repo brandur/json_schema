@@ -46,7 +46,7 @@ module JsonSchema
 
     private
 
-    def dereference(key, schema)
+    def dereference(schema)
       ref = schema.reference
       uri = ref.uri
 
@@ -58,19 +58,19 @@ module JsonSchema
         )
       # absolute
       elsif uri && uri.path[0] == "/"
-        resolve(key, schema, uri.path, ref)
+        resolve(schema, uri.path, ref)
       # relative
       elsif uri
         # build an absolute path using the URI of the current schema
         schema_uri = schema.uri.chomp("/")
-        resolve(key, schema, schema_uri + "/" + uri.path, ref)
+        resolve(schema, schema_uri + "/" + uri.path, ref)
       # just a JSON Pointer -- resolve against schema root
       else
-        evaluate(key, schema, @schema, ref)
+        evaluate(schema, @schema, ref)
       end
     end
 
-    def evaluate(key, schema, schema_context, ref)
+    def evaluate(schema, schema_context, ref)
       data = JsonPointer.evaluate(schema_context.data, ref.pointer)
 
       # couldn't resolve pointer within known schema; that's an error
@@ -94,6 +94,7 @@ module JsonSchema
         @unresolved_refs.add(new_schema.reference.to_s)
       end
 
+      # copy new schema into existing one while preserving parent
       parent = schema.parent
       schema.copy_from(new_schema)
       schema.parent = parent
@@ -101,9 +102,9 @@ module JsonSchema
       new_schema
     end
 
-    def resolve(key, schema, uri, ref)
+    def resolve(schema, uri, ref)
       if schema_context = @store[uri]
-        evaluate(key, schema, schema_context, ref)
+        evaluate(schema, schema_context, ref)
       else
         # couldn't resolve, return original reference
         @unresolved_refs.add(ref.to_s)
@@ -118,9 +119,9 @@ module JsonSchema
         @store[schema.uri] = schema
       end
 
-      schema.children.each do |key, child_schema|
+      schema.children.each do |child_schema|
         if child_schema.reference
-          dereference(key, child_schema)
+          dereference(child_schema)
         end
         traverse_schema(child_schema)
       end
