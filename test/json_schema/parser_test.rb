@@ -90,17 +90,19 @@ describe JsonSchema::Parser do
     assert_equal ["null", "string"], property[1].type
   end
 
-  it "parses schema validations" do
-    # anyOf example is slightly less contrived; handle that first
-    schema = @parser.parse(data).definitions["app"].definitions["identity"]
-    assert_equal 2, schema.any_of.count
-    assert_equal "/schemata/app#/definitions/id", schema.any_of[0].reference.to_s
-    assert_equal "/schemata/app#/definitions/name", schema.any_of[1].reference.to_s
-
+  # couldn't think of any non-contrived examples to work with here
+  it "parses the basic set of schema validations" do
     schema = @parser.parse(data).definitions["app"].definitions["contrived"]
     assert_equal 2, schema.all_of.count
     assert_equal 2, schema.one_of.count
     assert schema.not
+  end
+
+  it "parses the anyOf schema validation" do
+    schema = @parser.parse(data).definitions["app"].definitions["identity"]
+    assert_equal 2, schema.any_of.count
+    assert_equal "/schemata/app#/definitions/id", schema.any_of[0].reference.to_s
+    assert_equal "/schemata/app#/definitions/name", schema.any_of[1].reference.to_s
   end
 
   it "parses string validations" do

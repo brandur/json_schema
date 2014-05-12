@@ -113,7 +113,7 @@ module JsonSchema
       parse_properties(data, schema)
 
       # parse out the subschemas in the object validations category
-      if schema.dependencies
+      if schema.dependencies && schema.dependencies.is_a?(Hash)
         # leave the original data reference intact
         schema.dependencies = schema.dependencies.dup
         schema.dependencies.each do |k, s|
@@ -127,7 +127,7 @@ module JsonSchema
           end
         end
       end
-      if schema.pattern_properties
+      if schema.pattern_properties && schema.pattern_properties.is_a?(Hash)
         # leave the original data reference intact
         schema.pattern_properties = schema.pattern_properties.dup
         schema.pattern_properties.each do |k, s|
@@ -136,10 +136,18 @@ module JsonSchema
       end
 
       # parse out the subschemas in the schema validations category
-      schema.all_of = schema.all_of.map { |s| parse(s, schema) } if schema.all_of
-      schema.any_of = schema.any_of.map { |s| parse(s, schema) } if schema.any_of
-      schema.one_of = schema.one_of.map { |s| parse(s, schema) } if schema.one_of
-      schema.not    = parse(schema.not, schema) if schema.not
+      if schema.all_of && schema.all_of.is_a?(Array)
+        schema.all_of = schema.all_of.map { |s| parse(s, schema) }
+      end
+      if schema.any_of && schema.any_of.is_a?(Array)
+        schema.any_of = schema.any_of.map { |s| parse(s, schema) }
+      end
+      if schema.one_of && schema.one_of.is_a?(Array)
+        schema.one_of = schema.one_of.map { |s| parse(s, schema) }
+      end
+      if schema.not && schema.not.is_a?(Hash)
+        schema.not = parse(schema.not, schema)
+      end
 
       schema
     end
