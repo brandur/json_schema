@@ -164,6 +164,18 @@ describe JsonSchema::Validator do
     assert_includes error_messages, %{Extra keys in object: foo.}
   end
 
+  it "validates simple dependencies" do
+    pointer(schema_sample, "#/definitions/app/dependencies").merge!(
+      "production" => "ssl"
+    )
+    data_sample["production"] = true
+    refute validate
+    assert_includes error_messages, %{Missing required keys in object: ssl.}
+  end
+
+  it "validates schema dependencies" do
+  end
+
   # placeholder
 
   it "validates allOf" do

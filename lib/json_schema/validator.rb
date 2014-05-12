@@ -119,7 +119,7 @@ module JsonSchema
           validate_data(schema, value, errors)
         else
           # if not a schema, value is an array of required fields
-          validate_required(schema, data, errors, value)
+          validate_required(schema, data, errors, obj)
         end
       end
     end
