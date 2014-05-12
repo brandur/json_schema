@@ -44,6 +44,13 @@ describe JsonSchema::Parser do
     refute_nil schema.parent
   end
 
+  it "parses array validations" do
+    schema = @parser.parse(data).definitions["app"].definitions["flags"]
+    assert_equal 0, schema.min_items
+    assert_equal 10, schema.max_items
+    assert_equal true, schema.unique_items
+  end
+
   it "errors on non-string ids" do
     local_data = data.dup
     local_data["id"] = 4
@@ -102,13 +109,20 @@ describe JsonSchema::Parser do
             "object"
           ],
           "definitions" => {
+            "flags" => {
+              "description" => "flags for an app",
+              "example" => ["websockets"],
+              "maxItems" => 10,
+              "minItems" => 0,
+              "readOnly" => false,
+              "type" => ["array"],
+              "uniqueItems" => true
+            },
             "name" => {
               "description" => "unique name of app",
               "example" => "name",
               "readOnly" => false,
-              "type" => [
-                "string"
-              ]
+              "type" => ["string"]
             },
           },
           "properties" => {
