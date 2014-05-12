@@ -39,8 +39,10 @@ describe JsonSchema::Validator do
 
   it "validates maximum for an integer with exclusiveMaximum false" do
     local_schema = schema_sample.dup
-    local_schema["definitions"]["app"]["definitions"]["id"]["exclusiveMaximum"] = false
-    local_schema["definitions"]["app"]["definitions"]["id"]["maximum"] = 10
+    id = pointer(local_schema, "#/definitions/app/definitions/id").merge!(
+      "exclusiveMaximum" => false,
+      "maximum"          => 10
+    )
     local_data = data_sample.dup
     local_data["id"] = 11
     refute validate(local_data, local_schema)
@@ -75,6 +77,10 @@ describe JsonSchema::Validator do
 
   def error_messages
     @validator.errors.map { |e| e.message }
+  end
+
+  def pointer(data, path)
+    JsonPointer.evaluate(data, path)
   end
 
   def schema_sample
