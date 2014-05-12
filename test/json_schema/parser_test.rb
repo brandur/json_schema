@@ -52,10 +52,10 @@ describe JsonSchema::Parser do
   end
 
   it "parses integer validations" do
-    schema = @parser.parse(data).definitions["app"].definitions["dynos"]
-    assert_equal 0, schema.min
+    schema = @parser.parse(data).definitions["app"].definitions["id"]
+    assert_equal 1, schema.min
     assert_equal false, schema.min_exclusive
-    assert_equal 50, schema.max
+    assert_equal 10000, schema.max
     assert_equal false, schema.max_exclusive
     assert_equal 1, schema.multiple_of
   end
@@ -145,17 +145,6 @@ describe JsonSchema::Parser do
               "readOnly" => false,
               "type" => ["number"],
             },
-            "dynos" => {
-              "description" => "number of web dynos of an app",
-              "example" => 1,
-              "max" => 50,
-              "maxExclusive" => false,
-              "min" => 0,
-              "minExclusive" => false,
-              "multipleOf" => 1,
-              "readOnly" => false,
-              "type" => ["integer"],
-            },
             "flags" => {
               "description" => "flags for an app",
               "example" => ["websockets"],
@@ -164,6 +153,17 @@ describe JsonSchema::Parser do
               "readOnly" => false,
               "type" => ["array"],
               "uniqueItems" => true
+            },
+            "id" => {
+              "description" => "integer identifier of an app",
+              "example" => 1,
+              "max" => 10000,
+              "maxExclusive" => false,
+              "min" => 1,
+              "minExclusive" => false,
+              "multipleOf" => 1,
+              "readOnly" => false,
+              "type" => ["integer"],
             },
             "name" => {
               "description" => "unique name of app",
