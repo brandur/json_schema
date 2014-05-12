@@ -18,10 +18,12 @@ module JsonSchema
 
     private
 
-    def check_type!(types, field, value)
+    def validate_type!(data, types, field)
+      value = data[field]
       if !value.nil? && !types.any? { |t| value.is_a?(t) }
         raise %{Expected "#{field}" to be of type "#{types.join("/")}"; value was: #{value.inspect}.}
       end
+      value
     end
 
     def parse_definitions(data, schema)
@@ -47,17 +49,24 @@ module JsonSchema
 
       schema.data        = data
 
-      schema.id          = data["id"]
-      schema.title       = data["title"]
-      schema.description = data["description"]
+      schema.id          = validate_type!(data, [String], "id")
+      schema.title       = validate_type!(data, [String], "title")
+      schema.description = validate_type!(data, [String], "description")
 
-      schema.type = if data["type"].is_a?(Array)
-        data["type"]
-      elsif data["type"].is_a?(String)
-        [data["type"]]
-      else
-        ["any"]
+      schema.type = validate_type!(data, [Array, String], "type")
+      if schema.type.is_a?(String)
+        schema.type = [schema.type]
+      elsif schema.type.nil?
+        schema.type = ["any"]
       end
+      if !(bad_types = schema.type - ALLOWED_TYPES).empty?
+        raise %{Unknown types: #{bad_types.sort.join(", ")}.}
+      end
+
+      schema.max_items   = validate_type!(data, [Integer], "maxItems")
+      schema.min_items   = validate_type!(data, [Integer], "minItems")
+      schema.unique_items =
+        validate_type!(data, [FalseClass, TrueClass], "uniqueItems")
 
       # build a URI to address this schema
       schema.uri = if parent
@@ -66,7 +75,6 @@ module JsonSchema
         "/"
       end
 
-      validate(data, schema)
       parse_definitions(data, schema)
       parse_properties(data, schema)
 
@@ -90,18 +98,6 @@ module JsonSchema
         # make sure we don't end up with duplicate slashes
         parent_uri = parent_uri.chomp("/")
         parent_uri + "/" + id
-      end
-    end
-
-    def validate(data, schema)
-      check_type!([String], "id", schema.id)
-      check_type!([String], "title", schema.title)
-      check_type!([String], "description", schema.description)
-
-      check_type!([Array, String], "type", data["type"])
-
-      if !(bad_types = schema.type - ALLOWED_TYPES).empty?
-        raise %{Unknown types: #{bad_types.sort.join(", ")}.}
       end
     end
   end
