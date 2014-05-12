@@ -24,7 +24,6 @@ module DataScaffold
           ],
           "definitions" => {
             "config_vars" => {
-              "additionalProperties" => true,
               "patternProperties" => {
                 "^\\w+$" => {
                   "type" => ["null", "string"]
@@ -144,6 +143,9 @@ module DataScaffold
             },
           },
           "properties" => {
+            "config_vars" => {
+              "$ref" => "/schemata/app#/definitions/config_vars"
+            },
             "contrived" => {
               "$ref" => "/schemata/app#/definitions/contrived"
             },

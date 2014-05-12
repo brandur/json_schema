@@ -63,6 +63,7 @@ module JsonSchema
         valid = strict_and valid, validate_dependencies(schema, data, errors)
         valid = strict_and valid, validate_max_properties(schema, data, errors)
         valid = strict_and valid, validate_min_properties(schema, data, errors)
+        valid = strict_and valid, validate_pattern_properties(schema, data, errors)
         valid = strict_and valid, validate_properties(schema, data, errors)
         valid = strict_and valid, validate_required(schema, data, errors, schema.required)
       end
@@ -276,7 +277,7 @@ module JsonSchema
     def validate_pattern_properties(schema, data, errors)
       return true if schema.pattern_properties.empty?
       valid = true
-      schema.properties.each do |pattern, subschema|
+      schema.pattern_properties.each do |pattern, subschema|
         data.each do |key, value|
           if key =~ pattern
             valid &&= validate_data(subschema, value, errors)

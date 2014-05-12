@@ -217,6 +217,23 @@ describe JsonSchema::Validator do
     assert_includes error_messages, %{Expected object to have a minimum of 2 property/ies; it had 1.}
   end
 
+  it "validates patternProperties" do
+    pointer(schema_sample, "#/definitions/app/definitions/config_vars").merge!(
+      "patternProperties" => {
+        "^\\w+$" => {
+          "type" => ["null", "string"]
+        }
+      }
+    )
+    data_sample["config_vars"] = {
+      ""    => 123,
+      "KEY" => 456
+    }
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be of type "null/string"; value was: 456.}
+  end
+
   it "validates required" do
     pointer(schema_sample, "#/definitions/app/dependencies").merge!(
       "required" => ["name"]
