@@ -195,10 +195,10 @@ module JsonSchema
 
     def validate_one_of(schema, data, errors)
       return true if schema.one_of.empty?
-      num_valid = schema.any_of.count do |subschema|
+      num_valid = schema.one_of.count do |subschema|
         validate_data(subschema, data, {})
       end
-      message = %{Data did not match exactly one subschema of "anyOf" condition.}
+      message = %{Data did not match exactly one subschema of "oneOf" condition.}
       errors << SchemaError.new(schema, message) if num_valid != 1
       num_valid == 1
     end

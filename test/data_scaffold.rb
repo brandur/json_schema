@@ -41,8 +41,8 @@ module DataScaffold
                 { "minLength" => 5 }
               ],
               "oneOf" => [
-                { "pattern" => "^(|aaa)$" },
-                { "pattern" => "^(|zzz)$" }
+                { "pattern" => "^(foo|aaa)$" },
+                { "pattern" => "^(foo|zzz)$" }
               ],
               "not" => { "pattern" => "^$" }
             },

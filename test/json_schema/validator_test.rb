@@ -185,15 +185,15 @@ describe JsonSchema::Validator do
 
   it "validates oneOf" do
     pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
-      "anyOf" => [
-        { "minLength" => 5 },
-        { "minLength" => 3 }
+      "oneOf" => [
+        { "pattern" => "^(foo|aaa)$" },
+        { "pattern" => "^(foo|zzz)$" }
       ]
     )
-    data_sample["contrived"] = "ab"
+    data_sample["contrived"] = "foo"
     refute validate
     assert_includes error_messages,
-      %{Data did not match any subschema of "anyOf" condition.}
+      %{Data did not match exactly one subschema of "oneOf" condition.}
   end
 
   it "validates maxLength" do
