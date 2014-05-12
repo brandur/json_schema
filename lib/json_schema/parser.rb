@@ -75,6 +75,7 @@ module JsonSchema
         validate_type!(data, BOOLEAN, "additionalProperties")
       schema.max_properties = validate_type!(data, [Integer], "maxProperties")
       schema.min_properties = validate_type!(data, [Integer], "minProperties")
+      schema.pattern_properties = validate_type!(data, [Hash], "patternProperties")
       schema.required = validate_type!(data, [Array], "required")
 
       # validation: schema
@@ -97,6 +98,13 @@ module JsonSchema
 
       parse_definitions(data, schema)
       parse_properties(data, schema)
+
+      # parse out the subschemas in the object validations category
+      if schema.pattern_properties
+        schema.pattern_properties.each do |k, s|
+          schema.pattern_properties[k] = parse(s, schema)
+        end
+      end
 
       # parse out the subschemas in the schema validations category
       schema.all_of = schema.all_of.map { |s| parse(s, schema) } if schema.all_of

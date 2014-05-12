@@ -77,6 +77,13 @@ describe JsonSchema::Parser do
     assert_equal ["name"], schema.required
   end
 
+  it "parses the PatternProperties object validation" do
+    schema = @parser.parse(data).definitions["app"].definitions["config_vars"]
+    property = schema.pattern_properties.first
+    assert_equal "^\w+$", property[0]
+    assert_equal ["null", "string"], property[1].type
+  end
+
   it "parses schema validations" do
     # anyOf example is slightly less contrived; handle that first
     schema = @parser.parse(data).definitions["app"].definitions["identity"]
@@ -155,6 +162,14 @@ describe JsonSchema::Parser do
             "object"
           ],
           "definitions" => {
+            "config_vars" => {
+              "additionalProperties" => true,
+              "patternProperties" => {
+                "^\w+$" => {
+                  "type" => ["null", "string"]
+                }
+              }
+            },
             "contrived" => {
               "allOf" => [
                 { "maxLength" => 30 },
