@@ -8,6 +8,9 @@ describe JsonSchema::Validator do
   end
 
   it "validates type" do
+    pointer(schema_sample, "#/definitions/app").merge!(
+      "type" => ["object"]
+    )
     @data_sample = 4
     refute validate
     assert_includes error_messages,
@@ -15,6 +18,9 @@ describe JsonSchema::Validator do
   end
 
   it "validates maxItems" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "maxItems" => 10
+    )
     data_sample["flags"] = (0...11).to_a
     refute validate
     assert_includes error_messages,
@@ -22,6 +28,9 @@ describe JsonSchema::Validator do
   end
 
   it "validates minItems" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "minItems" => 1
+    )
     data_sample["flags"] = []
     refute validate
     assert_includes error_messages,
@@ -29,6 +38,9 @@ describe JsonSchema::Validator do
   end
 
   it "validates uniqueItems" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "uniqueItems" => true
+    )
     data_sample["flags"] = [1, 1]
     refute validate
     assert_includes error_messages,
