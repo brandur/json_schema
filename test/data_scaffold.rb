@@ -1,6 +1,7 @@
 module DataScaffold
   def self.data_sample
     {
+      "name" => "cloudnasium"
     }
   end
 

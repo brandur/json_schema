@@ -113,5 +113,9 @@ module JsonSchema
       # return self for convenience
       self
     end
+
+    def validate!(data)
+      Validator.new(self).validate!(data)
+    end
   end
 end
