@@ -70,10 +70,16 @@ describe JsonSchema::Parser do
   end
 
   it "parses schema validations" do
+    # anyOf example is slightly less contrived; handle that first
     schema = @parser.parse(data).definitions["app"].definitions["identity"]
     assert_equal 2, schema.any_of.count
     assert_equal "/schemata/app#/definitions/id", schema.any_of[0].reference.to_s
     assert_equal "/schemata/app#/definitions/name", schema.any_of[1].reference.to_s
+
+    schema = @parser.parse(data).definitions["app"].definitions["contrived"]
+    assert_equal 2, schema.all_of.count
+    assert_equal 2, schema.one_of.count
+    assert schema.not
   end
 
   it "parses string validations" do
@@ -141,6 +147,17 @@ describe JsonSchema::Parser do
             "object"
           ],
           "definitions" => {
+            "contrived" => {
+              "allOf" => [
+                { "maxLength" => 30 },
+                { "minLength" => 3 }
+              ],
+              "oneOf" => [
+                { "pattern" => "^(|aaa)$" },
+                { "pattern" => "^(|zzz)$" }
+              ],
+              "not" => { "pattern" => "^$" }
+            },
             "cost" => {
               "description" => "running price of an app",
               "example" => 35.01,

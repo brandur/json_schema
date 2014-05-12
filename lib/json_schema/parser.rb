@@ -78,7 +78,7 @@ module JsonSchema
       schema.all_of        = validate_type!(data, [Array], "allOf")
       schema.any_of        = validate_type!(data, [Array], "anyOf")
       schema.one_of        = validate_type!(data, [Array], "oneOf")
-      schema.not           = validate_type!(data, [Array], "not")
+      schema.not           = validate_type!(data, [Hash], "not")
 
       # validation: string
       schema.max_length = validate_type!(data, [Integer], "maxLength")
