@@ -3,6 +3,7 @@ require "json_reference"
 module JsonSchema
   class Parser
     ALLOWED_TYPES = %w{any array boolean integer number null object string}
+    BOOLEAN = [FalseClass, TrueClass]
 
     def parse(data, parent = nil)
       if ref = data["$ref"]
@@ -63,18 +64,22 @@ module JsonSchema
         raise %{Unknown types: #{bad_types.sort.join(", ")}.}
       end
 
-      schema.max_items   = validate_type!(data, [Integer], "maxItems")
-      schema.min_items   = validate_type!(data, [Integer], "minItems")
-      schema.unique_items =
-        validate_type!(data, [FalseClass, TrueClass], "uniqueItems")
+      # validation: array
+      schema.max_items    = validate_type!(data, [Integer], "maxItems")
+      schema.min_items    = validate_type!(data, [Integer], "minItems")
+      schema.unique_items = validate_type!(data, BOOLEAN, "uniqueItems")
 
-      schema.max = validate_type!(data, [Float, Integer], "max")
-      schema.max_exclusive =
-        validate_type!(data, [FalseClass, TrueClass], "maxExclusive")
-      schema.min = validate_type!(data, [Float, Integer], "min")
-      schema.min_exclusive =
-        validate_type!(data, [FalseClass, TrueClass], "minExclusive")
-      schema.multiple_of = validate_type!(data, [Float, Integer], "multipleOf")
+      # validation: number/integer
+      schema.max           = validate_type!(data, [Float, Integer], "max")
+      schema.max_exclusive = validate_type!(data, BOOLEAN, "maxExclusive")
+      schema.min           = validate_type!(data, [Float, Integer], "min")
+      schema.min_exclusive = validate_type!(data, BOOLEAN, "minExclusive")
+      schema.multiple_of   = validate_type!(data, [Float, Integer], "multipleOf")
+
+      # validation: string
+      schema.max_length = validate_type!(data, [Integer], "maxLength")
+      schema.min_length = validate_type!(data, [Integer], "minLength")
+      schema.pattern    = validate_type!(data, [String], "pattern")
 
       # build a URI to address this schema
       schema.uri = if parent

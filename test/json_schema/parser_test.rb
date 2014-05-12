@@ -69,6 +69,13 @@ describe JsonSchema::Parser do
     assert_equal 0.01, schema.multiple_of
   end
 
+  it "parses string validations" do
+    schema = @parser.parse(data).definitions["app"].definitions["name"]
+    assert_equal 30, schema.max_length
+    assert_equal 3, schema.min_length
+    assert_equal "^[a-z][a-z0-9-]{3,30}$", schema.pattern
+  end
+
   it "errors on non-string ids" do
     local_data = data.dup
     local_data["id"] = 4
@@ -161,6 +168,9 @@ describe JsonSchema::Parser do
             "name" => {
               "description" => "unique name of app",
               "example" => "name",
+              "maxLength" => 30,
+              "minLength" => 3,
+              "pattern" => "^[a-z][a-z0-9-]{3,30}$",
               "readOnly" => false,
               "type" => ["string"]
             },
