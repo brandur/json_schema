@@ -80,15 +80,47 @@ describe JsonSchema::Validator do
   end
 
   it "validates minimum for an integer with exclusiveMaximum false" do
+    pointer(schema_sample, "#/definitions/app/definitions/id").merge!(
+      "exclusiveMinimum" => false,
+      "minimum"          => 1
+    )
+    data_sample["id"] = 0
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be larger than minimum 1 (exclusive: false), value was: 0.}
   end
 
   it "validates minimum for an integer with exclusiveMaximum true" do
+    pointer(schema_sample, "#/definitions/app/definitions/id").merge!(
+      "exclusiveMinimum" => true,
+      "minimum"          => 1
+    )
+    data_sample["id"] = 1
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be larger than minimum 1 (exclusive: true), value was: 1.}
   end
 
   it "validates minimum for a number with exclusiveMaximum false" do
+    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+      "exclusiveMinimum" => false,
+      "minimum"          => 0.0
+    )
+    data_sample["cost"] = -0.01
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be larger than minimum 0.0 (exclusive: false), value was: -0.01.}
   end
 
   it "validates minimum for a number with exclusiveMaximum true" do
+    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+      "exclusiveMinimum" => true,
+      "minimum"          => 0.0
+    )
+    data_sample["cost"] = 0.0
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be larger than minimum 0.0 (exclusive: true), value was: 0.0.}
   end
 
   def data_sample
