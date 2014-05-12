@@ -22,10 +22,6 @@ module JsonSchema
     attr_copyable :title
     attr_copyable :description
 
-    # Types assigned to this schema. Always an array/union type no matter what
-    # was defined in the original schema (defaults to `["any"]`).
-    attr_copyable :type
-
     # parent and children schemas
     attr_copyable :parent
 
@@ -37,6 +33,12 @@ module JsonSchema
 
     # the normalize URI of this schema
     attr_copyable :uri
+
+    # validation: all
+    attr_copyable :enum
+    # Types assigned to this schema. Always an array/union type no matter what
+    # was defined in the original schema.
+    attr_copyable :type
 
     # validation: array
     attr_copyable :max_items

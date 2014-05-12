@@ -7,6 +7,16 @@ describe JsonSchema::Validator do
     assert validate
   end
 
+  it "validates enum" do
+    pointer(schema_sample, "#/definitions/app/definitions/visibility").merge!(
+      "enum" => ["private", "public"]
+    )
+    data_sample["visibility"] = "personal"
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be a member of enum ["private", "public"], value was: personal.}
+  end
+
   it "validates type" do
     pointer(schema_sample, "#/definitions/app").merge!(
       "type" => ["object"]

@@ -135,6 +135,13 @@ module DataScaffold
               "readOnly" => false,
               "type" => ["boolean"]
             },
+            "visibility" => {
+              "description" => "the visibility of hte app",
+              "enum" => ["private", "public"],
+              "example" => false,
+              "readOnly" => false,
+              "type" => ["string"]
+            },
           },
           "properties" => {
             "contrived" => {
@@ -157,6 +164,9 @@ module DataScaffold
             },
             "ssl" => {
               "$ref" => "/schemata/app#/definitions/ssl"
+            },
+            "visibility" => {
+              "$ref" => "/schemata/app#/definitions/visibility"
             }
           },
           "additionalProperties" => false,

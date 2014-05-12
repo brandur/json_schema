@@ -40,6 +40,9 @@ module JsonSchema
 
       valid = strict_and valid, validate_type(schema, data, errors)
 
+      # validation: all
+      valid = strict_and valid, validate_enum(schema, data, errors)
+
       # validation: array
       if data.is_a?(Array)
         valid = strict_and valid, validate_max_items(schema, data, errors)
@@ -122,6 +125,17 @@ module JsonSchema
           # if not a schema, value is an array of required fields
           validate_required(schema, data, errors, obj)
         end
+      end
+    end
+
+    def validate_enum(schema, data, errors)
+      return true unless schema.enum
+      if schema.enum.include?(data)
+        true
+      else
+        message = %{Expected data to be a member of enum #{schema.enum}, value was: #{data}.}
+        errors << SchemaError.new(schema, message)
+        false
       end
     end
 

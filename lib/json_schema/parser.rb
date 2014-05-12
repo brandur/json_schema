@@ -158,6 +158,8 @@ module JsonSchema
       schema.definitions = validate_type!(schema, [Hash], "definitions") || {}
       schema.properties  = validate_type!(schema, [Hash], "properties") || {}
 
+      # validation: all
+      schema.enum = validate_type!(schema, [Array], "enum")
       schema.type = validate_type!(schema, [Array, String], "type")
       schema.type = [schema.type] if schema.type.is_a?(String)
       validate_known_type!(schema)

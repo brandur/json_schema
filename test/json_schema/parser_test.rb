@@ -44,6 +44,11 @@ describe JsonSchema::Parser do
     refute_nil schema.parent
   end
 
+  it "parses enum validation" do
+    schema = @parser.parse!(schema_sample).definitions["app"].definitions["visibility"]
+    assert_equal ["private", "public"], schema.enum
+  end
+
   it "parses array validations" do
     schema = @parser.parse!(schema_sample).definitions["app"].definitions["flags"]
     assert_equal 1, schema.min_items
@@ -105,7 +110,7 @@ describe JsonSchema::Parser do
     assert_equal "/schemata/app#/definitions/name", schema.any_of[1].reference.to_s
   end
 
-  it "parses string validations" do
+  it "parses basic set of string validations" do
     schema = @parser.parse!(schema_sample).definitions["app"].definitions["name"]
     assert_equal 30, schema.max_length
     assert_equal 3, schema.min_length
