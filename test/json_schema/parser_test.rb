@@ -86,7 +86,7 @@ describe JsonSchema::Parser do
   it "parses the patternProperties object validation" do
     schema = @parser.parse!(data).definitions["app"].definitions["config_vars"]
     property = schema.pattern_properties.first
-    assert_equal "^\w+$", property[0]
+    assert_equal /^\w+$/, property[0]
     assert_equal ["null", "string"], property[1].type
   end
 
@@ -109,7 +109,7 @@ describe JsonSchema::Parser do
     schema = @parser.parse!(data).definitions["app"].definitions["name"]
     assert_equal 30, schema.max_length
     assert_equal 3, schema.min_length
-    assert_equal "^[a-z][a-z0-9-]{3,30}$", schema.pattern
+    assert_equal /^[a-z][a-z0-9-]{3,30}$/, schema.pattern
   end
 
   it "errors on non-string ids" do

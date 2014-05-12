@@ -20,7 +20,7 @@ module DataScaffold
             "config_vars" => {
               "additionalProperties" => true,
               "patternProperties" => {
-                "^\w+$" => {
+                "^\\w+$" => {
                   "type" => ["null", "string"]
                 }
               }
@@ -118,7 +118,7 @@ module DataScaffold
             "roles" => {
               "additionalProperties" => true,
               "patternProperties" => {
-                "^\w+$" => {
+                "^\\w+$" => {
                   "$ref" => "/schemata/app#/definitions/role"
                 }
               }

@@ -124,10 +124,11 @@ module JsonSchema
     def parse_pattern_properties(schema)
       if schema.pattern_properties && schema.pattern_properties.is_a?(Hash)
         # leave the original data reference intact
-        schema.pattern_properties = schema.pattern_properties.dup
-        schema.pattern_properties.each do |k, s|
-          schema.pattern_properties[k] = parse_data(s, schema)
+        properties = schema.pattern_properties.dup
+        properties = properties.map do |k, s|
+          [Regexp.new(k), parse_data(s, schema)]
         end
+        schema.pattern_properties = Hash[*properties.flatten]
       end
     end
 
@@ -192,6 +193,7 @@ module JsonSchema
       schema.max_length = validate_type!(schema, [Integer], "maxLength")
       schema.min_length = validate_type!(schema, [Integer], "minLength")
       schema.pattern    = validate_type!(schema, [String], "pattern")
+      schema.pattern    = Regexp.new(schema.pattern) if schema.pattern
 
       parse_all_of(schema)
       parse_any_of(schema)
