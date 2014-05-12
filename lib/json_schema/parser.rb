@@ -116,8 +116,11 @@ module JsonSchema
       schema = Schema.new
 
       schema.data        = data
-
       schema.id          = validate_type!(data, [String], "id")
+
+      # build URI early so we can reference it in errors
+      schema.uri = parent ?  build_uri(schema.id, parent.uri) : "/"
+
       schema.title       = validate_type!(data, [String], "title")
       schema.description = validate_type!(data, [String], "description")
 
@@ -159,13 +162,6 @@ module JsonSchema
       schema.max_length = validate_type!(data, [Integer], "maxLength")
       schema.min_length = validate_type!(data, [Integer], "minLength")
       schema.pattern    = validate_type!(data, [String], "pattern")
-
-      # build a URI to address this schema
-      schema.uri = if parent
-        build_uri(schema.id, parent.uri)
-      else
-        "/"
-      end
 
       parse_all_of(schema)
       parse_any_of(schema)
