@@ -174,6 +174,19 @@ describe JsonSchema::Validator do
   end
 
   it "validates schema dependencies" do
+    pointer(schema_sample, "#/definitions/app/dependencies").merge!(
+      "ssl" => {
+        "properties" => {
+          "cost" => {
+            "minimum" => 20.0,
+          }
+        }
+      }
+    )
+    data_sample["cost"] = 10.0
+    data_sample["ssl"] = true
+    refute validate
+    assert_includes error_messages, %{Expected data to be larger than minimum 20.0 (exclusive: false), value was: 10.0.}
   end
 
   # placeholder

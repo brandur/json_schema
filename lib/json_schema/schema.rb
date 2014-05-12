@@ -72,11 +72,6 @@ module JsonSchema
     def initialize
       @type = []
 
-      # a few defaults
-      @additional_properties = true
-      @max_exclusive = false
-      @min_exclusive = false
-
       # these are all the subschema types; default them to empty data
       # structures for simplified iteration
       @all_of = []
@@ -86,6 +81,18 @@ module JsonSchema
       @dependencies = {}
       @pattern_properties = {}
       @properties = {}
+    end
+
+    def additional_properties
+      !@additional_properties.nil? ? @additional_properties : true
+    end
+
+    def max_exclusive
+      !@max_exclusive.nil? ? @max_exclusive : false
+    end
+
+    def min_exclusive
+      !@min_exclusive.nil? ? @min_exclusive : false
     end
 
     # child schemas of all types

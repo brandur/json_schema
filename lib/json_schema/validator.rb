@@ -114,9 +114,9 @@ module JsonSchema
       return true if schema.dependencies.empty?
       schema.dependencies.each do |key, obj|
         # if the key is not present, the dependency is fulfilled by definition
-        next unless value = data[key]
+        next unless data[key]
         if obj.is_a?(Schema)
-          validate_data(schema, value, errors)
+          validate_data(obj, data, errors)
         else
           # if not a schema, value is an array of required fields
           validate_required(schema, data, errors, obj)
