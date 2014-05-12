@@ -7,8 +7,18 @@ describe JsonSchema::Validator do
     assert validate(data_sample)
   end
 
+  it "validates type" do
+    refute validate(4)
+    assert_includes error_messages,
+      %{Expected data to be of type "object"; value was: 4.}
+  end
+
   def data_sample
     DataScaffold.data_sample
+  end
+
+  def error_messages
+    @validator.errors.map { |e| e.message }
   end
 
   def validate(data_sample)

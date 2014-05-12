@@ -171,7 +171,7 @@ module JsonSchema
       if valid_types.any? { |t| data.is_a?(t) }
         true
       else
-        message = %{Expected data to be of type #{schema.type.join("/")}; value was: #{data.inspect}.}
+        message = %{Expected data to be of type "#{schema.type.join("/")}"; value was: #{data.inspect}.}
         errors << SchemaError.new(schema, message)
         false
       end
