@@ -109,7 +109,7 @@ module JsonSchema
     end
 
     def expand_references!
-      ReferenceExpander.new(self).expand
+      ReferenceExpander.new(self).expand!
       # return self for convenience
       self
     end
