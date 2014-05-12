@@ -134,7 +134,10 @@ module DataScaffold
               "properties" => {
                 "cost" => {
                   "min" => 20.0,
-                }
+                },
+                "name" => {
+                  "$ref" => "/schemata/app#/definitions/name"
+                },
               }
             }
           },

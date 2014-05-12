@@ -31,7 +31,13 @@ describe JsonSchema::ReferenceExpander do
     assert_equal 3, schema.all_of[1].min_length
   end
 
-  it "will expand one_of" do
+  it "will expand dependencies" do
+    expand(data)
+    schema = @schema.properties["app"].dependencies["ssl"].properties["name"]
+    assert_equal ["string"], schema.type
+  end
+
+  it "will expand oneOf" do
     expand(data)
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal "^(|aaa)$", schema.one_of[0].pattern
