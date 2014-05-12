@@ -7,7 +7,8 @@ module JsonSchema
       @schema = schema
     end
 
-    def expand!
+    def expand
+      @errors = []
       @store = {}
       @unresolved_refs = Set.new
       last_num_unresolved_refs = 0
@@ -24,10 +25,22 @@ module JsonSchema
         # references; we're out of luck
         if @unresolved_refs.count == last_num_unresolved_refs
           refs = @unresolved_refs.to_a.join(", ")
-          raise(%{Couldn't resolve references: #{refs}.})
+          @errors << SchemaError.new(
+            @schema,
+            %{Couldn't resolve references: #{refs}.}
+          )
+          break
         end
 
         last_num_unresolved_refs = @unresolved_refs.count
+      end
+
+      @errors.count == 0
+    end
+
+    def expand!
+      if !expand
+        raise SchemaError.aggregate(@errors)
       end
     end
 
@@ -39,7 +52,10 @@ module JsonSchema
 
       if uri && uri.host
         scheme = uri.scheme || "http"
-        raise "Reference resolution over #{scheme} is not currently supported."
+        @errors << SchemaError.new(
+          schema,
+          %{Reference resolution over #{scheme} is not currently supported.}
+        )
       # absolute
       elsif uri && uri.path[0] == "/"
         resolve(key, schema, uri.path, ref)
@@ -59,7 +75,11 @@ module JsonSchema
 
       # couldn't resolve pointer within known schema; that's an error
       if data.nil?
-        raise %{Couldn't resolve pointer "#{ref.pointer}" in schema "#{schema_context.uri}".}
+        @errors << SchemaError.new(
+          schema_context,
+          %{Couldn't resolve pointer "#{ref.pointer}".}
+        )
+        return
       end
 
       # this counts as a resolution
