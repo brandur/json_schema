@@ -178,59 +178,59 @@ module JsonSchema
       schema = Schema.new
 
       schema.data        = data
-      schema.id          = validate_type!(schema, [String], "id")
+      schema.id          = validate_type(schema, [String], "id")
 
       # build URI early so we can reference it in errors
       schema.uri = parent ?  build_uri(schema.id, parent.uri) : "/"
 
-      schema.title       = validate_type!(schema, [String], "title")
-      schema.description = validate_type!(schema, [String], "description")
-      schema.default     = validate_type!(schema, [String], "default")
+      schema.title       = validate_type(schema, [String], "title")
+      schema.description = validate_type(schema, [String], "description")
+      schema.default     = validate_type(schema, [String], "default")
 
       # validation: any
-      schema.all_of        = validate_type!(schema, [Array], "allOf") || []
-      schema.any_of        = validate_type!(schema, [Array], "anyOf") || []
-      schema.definitions   = validate_type!(schema, [Hash], "definitions") || {}
-      schema.enum          = validate_type!(schema, [Array], "enum")
-      schema.one_of        = validate_type!(schema, [Array], "oneOf") || []
-      schema.not           = validate_type!(schema, [Hash], "not")
-      schema.type          = validate_type!(schema, [Array, String], "type")
+      schema.all_of        = validate_type(schema, [Array], "allOf") || []
+      schema.any_of        = validate_type(schema, [Array], "anyOf") || []
+      schema.definitions   = validate_type(schema, [Hash], "definitions") || {}
+      schema.enum          = validate_type(schema, [Array], "enum")
+      schema.one_of        = validate_type(schema, [Array], "oneOf") || []
+      schema.not           = validate_type(schema, [Hash], "not")
+      schema.type          = validate_type(schema, [Array, String], "type")
       schema.type          = [schema.type] if schema.type.is_a?(String)
       validate_known_type!(schema)
 
       # validation: array
-      schema.additional_items = validate_type!(schema, BOOLEAN, "additionalItems")
-      schema.items            = validate_type!(schema, [Array, Hash], "items")
-      schema.max_items        = validate_type!(schema, [Integer], "maxItems")
-      schema.min_items        = validate_type!(schema, [Integer], "minItems")
-      schema.unique_items     = validate_type!(schema, BOOLEAN, "uniqueItems")
+      schema.additional_items = validate_type(schema, BOOLEAN, "additionalItems")
+      schema.items            = validate_type(schema, [Array, Hash], "items")
+      schema.max_items        = validate_type(schema, [Integer], "maxItems")
+      schema.min_items        = validate_type(schema, [Integer], "minItems")
+      schema.unique_items     = validate_type(schema, BOOLEAN, "uniqueItems")
 
       # validation: number/integer
-      schema.max           = validate_type!(schema, [Float, Integer], "maximum")
-      schema.max_exclusive = validate_type!(schema, BOOLEAN, "exclusiveMaximum")
-      schema.min           = validate_type!(schema, [Float, Integer], "minimum")
-      schema.min_exclusive = validate_type!(schema, BOOLEAN, "exclusiveMinimum")
-      schema.multiple_of   = validate_type!(schema, [Float, Integer], "multipleOf")
+      schema.max           = validate_type(schema, [Float, Integer], "maximum")
+      schema.max_exclusive = validate_type(schema, BOOLEAN, "exclusiveMaximum")
+      schema.min           = validate_type(schema, [Float, Integer], "minimum")
+      schema.min_exclusive = validate_type(schema, BOOLEAN, "exclusiveMinimum")
+      schema.multiple_of   = validate_type(schema, [Float, Integer], "multipleOf")
 
       # validation: object
       schema.additional_properties =
-        validate_type!(schema, BOOLEAN, "additionalProperties")
-      schema.dependencies       = validate_type!(schema, [Hash], "dependencies") || {}
-      schema.max_properties     = validate_type!(schema, [Integer], "maxProperties")
-      schema.min_properties     = validate_type!(schema, [Integer], "minProperties")
-      schema.pattern_properties = validate_type!(schema, [Hash], "patternProperties") || {}
-      schema.properties         = validate_type!(schema, [Hash], "properties") || {}
-      schema.required           = validate_type!(schema, [Array], "required")
+        validate_type(schema, BOOLEAN, "additionalProperties")
+      schema.dependencies       = validate_type(schema, [Hash], "dependencies") || {}
+      schema.max_properties     = validate_type(schema, [Integer], "maxProperties")
+      schema.min_properties     = validate_type(schema, [Integer], "minProperties")
+      schema.pattern_properties = validate_type(schema, [Hash], "patternProperties") || {}
+      schema.properties         = validate_type(schema, [Hash], "properties") || {}
+      schema.required           = validate_type(schema, [Array], "required")
 
       # validation: string
-      schema.format     = validate_type!(schema, [String], "format")
-      schema.max_length = validate_type!(schema, [Integer], "maxLength")
-      schema.min_length = validate_type!(schema, [Integer], "minLength")
-      schema.pattern    = validate_type!(schema, [String], "pattern")
+      schema.format     = validate_type(schema, [String], "format")
+      schema.max_length = validate_type(schema, [Integer], "maxLength")
+      schema.min_length = validate_type(schema, [Integer], "minLength")
+      schema.pattern    = validate_type(schema, [String], "pattern")
       schema.pattern    = Regexp.new(schema.pattern) if schema.pattern
 
       # hyperschema
-      schema.links = validate_type!(schema, [Array], "links")
+      schema.links = validate_type(schema, [Array], "links")
 
       parse_all_of(schema)
       parse_any_of(schema)
@@ -255,7 +255,7 @@ module JsonSchema
       end
     end
 
-    def validate_type!(schema, types, field)
+    def validate_type(schema, types, field)
       friendly_types =
         types.map { |t| FRIENDLY_TYPES[t] || t }.sort.uniq.join("/")
       value = schema.data[field]
