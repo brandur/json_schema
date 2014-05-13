@@ -1,7 +1,8 @@
 # TODO
 
+* Don't have any default property settings in schema for possible Prmd support.
+* Use all question mark `?` methods where possible from validator for consistency.
 * Optimize reference expander for leaf-first expansion (probably more optimal).
-* Create gemspec and push gem.
 
 ## Testing
 
