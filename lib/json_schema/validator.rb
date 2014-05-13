@@ -127,6 +127,7 @@ module JsonSchema
       end
     end
 
+    EMAIL_PATTERN = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i
     RFC_3339_PATTERN = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-2][0-9]:[0-5][0-9]:[0-5][0-9](Z|[\-+][0-9]{2}:[0-5][0-9])$/
 
     def validate_format(schema, data, errors)
@@ -135,6 +136,7 @@ module JsonSchema
       when "date-time"
         data =~ RFC_3339_PATTERN
       when "email"
+        data =~ EMAIL_PATTERN
       when "hostname"
       when "ipv4"
       when "ipv6"

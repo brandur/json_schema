@@ -318,6 +318,24 @@ describe JsonSchema::Validator do
       %{Expected data to match "date-time" format, value was: 2014-05-13T08:42:40.}
   end
 
+  it "validates email format successfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "email"
+    )
+    data_sample["owner"] = "dwarf@example.com"
+    assert validate
+  end
+
+  it "validates email format unsuccessfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "email"
+    )
+    data_sample["owner"] = "@example.com"
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to match "email" format, value was: @example.com.}
+  end
+
   it "validates maxLength" do
     pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
       "maxLength" => 3
