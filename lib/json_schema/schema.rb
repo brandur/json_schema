@@ -101,10 +101,7 @@ module JsonSchema
     attr_reader_default :min_exclusive, false
     attr_reader_default :pattern_properties, {}
     attr_reader_default :properties, {}
-
-    def initialize
-      @type = []
-    end
+    attr_reader_default :type, []
 
     def copy_from(schema)
       @@copyable.each do |copyable|
