@@ -6,7 +6,7 @@ module JsonSchema
       "array"   => Array,
       "boolean" => [FalseClass, TrueClass],
       "integer" => Integer,
-      "number"  => Float,
+      "number"  => [Integer, Float],
       "null"    => NilClass,
       "object"  => Hash,
       "string"  => String,
