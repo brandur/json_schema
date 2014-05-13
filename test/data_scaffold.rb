@@ -203,6 +203,17 @@ module DataScaffold
           "minProperties" => 1,
           "required" => ["name"],
           "links" => [
+            "description" => "Create a new app.",
+            "href" => "/apps",
+            "method" => "POST",
+            "rel" => "create",
+            "schema" => {
+              "properties" => {
+                "name" => {
+                  "$ref" => "#/definitions/app/definitions/name"
+                },
+              }
+            }
           ],
           "media" => {
             "type" => "application/json"

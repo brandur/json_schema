@@ -58,6 +58,12 @@ describe JsonSchema::ReferenceExpander do
     assert_equal ["string"], schema.type
   end
 
+  it "will expand hyperschema link schemas" do
+    expand
+    schema = @schema.properties["app"].links[0].schema.properties["name"]
+    assert_equal ["string"], schema.type
+  end
+
   it "will perform multiple passes to resolve all references" do
     schema_sample["properties"] = {
       "app" => {

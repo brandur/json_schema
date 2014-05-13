@@ -103,6 +103,10 @@ module JsonSchema
       !@additional_properties.nil? ? @additional_properties : true
     end
 
+    def links
+      !@links.nil? ? @links : []
+    end
+
     def max_exclusive
       !@max_exclusive.nil? ? @max_exclusive : false
     end
@@ -118,6 +122,7 @@ module JsonSchema
         any_of.each { |s| yielder << s }
         one_of.each { |s| yielder << s }
         definitions.each { |_, s| yielder << s }
+        links.map { |l| l.schema }.compact.each { |s| yielder << s }
         pattern_properties.each { |_, s| yielder << s }
         properties.each { |_, s| yielder << s }
 
