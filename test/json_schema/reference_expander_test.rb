@@ -37,6 +37,31 @@ describe JsonSchema::ReferenceExpander do
     assert_equal ["string"], schema.type
   end
 
+  it "will expand items list schema" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "items" => {
+        "$ref" => "#/definitions/app/definitions/name"
+      }
+    )
+    expand
+    schema = @schema.properties["app"].properties["flags"].items
+    assert_equal ["string"], schema.type
+  end
+
+  it "will expand items tuple schema" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "items" => [
+        { "$ref" => "#/definitions/app/definitions/name" },
+        { "$ref" => "#/definitions/app/definitions/owner" }
+      ]
+    )
+    expand
+    schema0 = @schema.properties["app"].properties["flags"].items[0]
+    schema1 = @schema.properties["app"].properties["flags"].items[0]
+    assert_equal ["string"], schema0.type
+    assert_equal ["string"], schema1.type
+  end
+
   it "will expand oneOf" do
     expand
     schema = @schema.properties["app"].definitions["contrived_plus"]
@@ -100,6 +125,10 @@ describe JsonSchema::ReferenceExpander do
     }
     e = assert_raises(RuntimeError) { expand }
     assert_equal %{At "/": Couldn't resolve references (possible circular dependency): #/definitions/app.}, e.message
+  end
+
+  def pointer(path)
+    JsonPointer.evaluate(schema_sample, path)
   end
 
   def schema_sample
