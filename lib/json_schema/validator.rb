@@ -198,12 +198,12 @@ module JsonSchema
 
     def validate_max(schema, data, error)
       return true unless schema.max
-      if schema.max_exclusive && data < schema.max
+      if schema.max_exclusive? && data < schema.max
         true
-      elsif !schema.max_exclusive && data <= schema.max
+      elsif !schema.max_exclusive? && data <= schema.max
         true
       else
-        message = %{Expected data to be smaller than maximum #{schema.max} (exclusive: #{schema.max_exclusive}), value was: #{data}.}
+        message = %{Expected data to be smaller than maximum #{schema.max} (exclusive: #{schema.max_exclusive?}), value was: #{data}.}
         errors << SchemaError.new(schema, message)
         false
       end
@@ -244,12 +244,12 @@ module JsonSchema
 
     def validate_min(schema, data, error)
       return true unless schema.min
-      if schema.min_exclusive && data > schema.min
+      if schema.min_exclusive? && data > schema.min
         true
-      elsif !schema.min_exclusive && data >= schema.min
+      elsif !schema.min_exclusive? && data >= schema.min
         true
       else
-        message = %{Expected data to be larger than minimum #{schema.min} (exclusive: #{schema.min_exclusive}), value was: #{data}.}
+        message = %{Expected data to be larger than minimum #{schema.min} (exclusive: #{schema.min_exclusive?}), value was: #{data}.}
         errors << SchemaError.new(schema, message)
         false
       end
@@ -378,7 +378,7 @@ module JsonSchema
     end
 
     def validate_unique_items(schema, data, error)
-      return true unless schema.unique_items
+      return true unless schema.unique_items?
       if data.size == data.uniq.size
         true
       else

@@ -77,14 +77,6 @@ module JsonSchema
     attr_copyable :path_start
     attr_copyable :read_only
 
-    # allow booleans to be access with question mark
-    alias :additional_items? :additional_items
-    alias :additional_properties? :additional_properties
-    alias :max_exclusive? :max_exclusive
-    alias :min_exclusive? :min_exclusive
-    alias :read_only? :read_only
-    alias :unique_items? :unique_items
-
     # Give these properties reader defaults for particular behavior so that we
     # can preserve the `nil` nature of their instance variables. Knowing that
     # these were `nil` when we read them allows us to properly reflect the
@@ -102,6 +94,14 @@ module JsonSchema
     attr_reader_default :pattern_properties, {}
     attr_reader_default :properties, {}
     attr_reader_default :type, []
+
+    # allow booleans to be access with question mark
+    alias :additional_items? :additional_items
+    alias :additional_properties? :additional_properties
+    alias :max_exclusive? :max_exclusive
+    alias :min_exclusive? :min_exclusive
+    alias :read_only? :read_only
+    alias :unique_items? :unique_items
 
     def copy_from(schema)
       @@copyable.each do |copyable|

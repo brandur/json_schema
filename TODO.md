@@ -1,6 +1,5 @@
 # TODO
 
-* Use all question mark `?` methods where possible from validator for consistency.
 * Optimize reference expander for leaf-first expansion (probably more optimal).
 
 ## Testing
