@@ -9,6 +9,10 @@ module JsonSchema
       @@copyable << "@#{attr}".to_sym
     end
 
+    def self.attr_reader_default(attr, default)
+      class_eval("def #{attr} ; !@#{attr}.nil? ? @#{attr} : #{default} ; end")
+    end
+
     # Rather than a normal schema, the node may be a JSON Reference. In this
     # case, no other attributes will be filled in except for #parent.
     attr_copyable :reference
@@ -81,6 +85,16 @@ module JsonSchema
     alias :read_only? :read_only
     alias :unique_items? :unique_items
 
+    # Give these properties reader defaults for particular behavior so that we
+    # can preserve the `nil` nature of their instance variables. Knowing that
+    # these were `nil` when we reade them allows us to properly reflect the
+    # parsed schema back to JSON.
+    attr_reader_default :additional_items, true
+    attr_reader_default :additional_properties, true
+    attr_reader_default :links, []
+    attr_reader_default :max_exclusive, false
+    attr_reader_default :min_exclusive, false
+
     def initialize
       @type = []
 
@@ -93,26 +107,6 @@ module JsonSchema
       @dependencies = {}
       @pattern_properties = {}
       @properties = {}
-    end
-
-    def additional_items
-      !@additional_items.nil? ? @additional_items : true
-    end
-
-    def additional_properties
-      !@additional_properties.nil? ? @additional_properties : true
-    end
-
-    def links
-      !@links.nil? ? @links : []
-    end
-
-    def max_exclusive
-      !@max_exclusive.nil? ? @max_exclusive : false
-    end
-
-    def min_exclusive
-      !@min_exclusive.nil? ? @min_exclusive : false
     end
 
     def copy_from(schema)
