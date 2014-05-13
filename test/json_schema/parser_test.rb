@@ -128,7 +128,29 @@ describe JsonSchema::Parser do
   end
 
   it "parses hypermedia links" do
+    pointer("#/definitions/app").merge!(
+      "links" => [
+        "description" => "Create a new app.",
+        "href" => "/apps",
+        "method" => "POST",
+        "rel" => "create",
+        "schema" => {
+          "properties" => {
+            "name" => {
+              "$ref" => "#/definitions/app/definitions/name"
+            },
+          }
+        }
+      ]
+    )
     schema = parse.definitions["app"]
+    link = schema.links[0]
+    assert_equal "Create a new app.", link.description
+    assert_equal "/apps", link.href
+    assert_equal :post, link.method
+    assert_equal "create", link.rel
+    assert_equal "#/definitions/app/definitions/name",
+      link.schema.properties["name"].reference.pointer
   end
 
   it "parses hypermedia media" do
