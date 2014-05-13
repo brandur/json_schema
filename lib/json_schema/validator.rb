@@ -86,7 +86,7 @@ module JsonSchema
     end
 
     def validate_additional_properties(schema, data, errors)
-      return true if schema.additional_properties
+      return true if schema.additional_properties?
       if (extra = data.keys - schema.properties.keys).empty?
         true
       else
@@ -175,7 +175,7 @@ module JsonSchema
           message = %{Expected array to have at least #{schema.items.count} item(s), had #{data.size} item(s).}
           errors << SchemaError.new(schema, message)
           false
-        elsif data.size > schema.items.count && !schema.additional_items
+        elsif data.size > schema.items.count && !schema.additional_items?
           message = %{Expected array to have no more than #{schema.items.count} item(s), had #{data.size} item(s).}
           errors << SchemaError.new(schema, message)
           false
