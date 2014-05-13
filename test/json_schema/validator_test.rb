@@ -372,6 +372,24 @@ describe JsonSchema::Validator do
       %{Expected data to match "ipv4" format, value was: 1.2.3.4.5.}
   end
 
+  it "validates ipv6 format successfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "ipv6"
+    )
+    data_sample["owner"] = "1::3:4:5:6:7:8"
+    assert validate
+  end
+
+  it "validates ipv6 format unsuccessfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "ipv6"
+    )
+    data_sample["owner"] = "1::3:4:5:6:7:8:9"
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to match "ipv6" format, value was: 1::3:4:5:6:7:8:9.}
+  end
+
   it "validates maxLength" do
     pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
       "maxLength" => 3
