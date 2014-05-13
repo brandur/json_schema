@@ -1,6 +1,5 @@
 # TODO
 
-* Move schema `#children` into reference expander.
 * Optimize reference expander for leaf-first expansion (probably more optimal).
 * Create gemspec and push gem.
 
