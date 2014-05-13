@@ -87,7 +87,7 @@ module JsonSchema
 
     # Give these properties reader defaults for particular behavior so that we
     # can preserve the `nil` nature of their instance variables. Knowing that
-    # these were `nil` when we reade them allows us to properly reflect the
+    # these were `nil` when we read them allows us to properly reflect the
     # parsed schema back to JSON.
     attr_reader_default :additional_items, true
     attr_reader_default :additional_properties, true
