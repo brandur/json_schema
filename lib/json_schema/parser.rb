@@ -174,13 +174,15 @@ module JsonSchema
       schema.title       = validate_type!(schema, [String], "title")
       schema.description = validate_type!(schema, [String], "description")
 
-      schema.definitions = validate_type!(schema, [Hash], "definitions") || {}
-      schema.properties  = validate_type!(schema, [Hash], "properties") || {}
-
-      # validation: all
-      schema.enum = validate_type!(schema, [Array], "enum")
-      schema.type = validate_type!(schema, [Array, String], "type")
-      schema.type = [schema.type] if schema.type.is_a?(String)
+      # validation: any
+      schema.all_of        = validate_type!(schema, [Array], "allOf") || []
+      schema.any_of        = validate_type!(schema, [Array], "anyOf") || []
+      schema.definitions   = validate_type!(schema, [Hash], "definitions") || {}
+      schema.enum          = validate_type!(schema, [Array], "enum")
+      schema.one_of        = validate_type!(schema, [Array], "oneOf") || []
+      schema.not           = validate_type!(schema, [Hash], "not")
+      schema.type          = validate_type!(schema, [Array, String], "type")
+      schema.type          = [schema.type] if schema.type.is_a?(String)
       validate_known_type!(schema)
 
       # validation: array
@@ -202,13 +204,8 @@ module JsonSchema
       schema.max_properties     = validate_type!(schema, [Integer], "maxProperties")
       schema.min_properties     = validate_type!(schema, [Integer], "minProperties")
       schema.pattern_properties = validate_type!(schema, [Hash], "patternProperties") || {}
+      schema.properties         = validate_type!(schema, [Hash], "properties") || {}
       schema.required           = validate_type!(schema, [Array], "required")
-
-      # validation: schema
-      schema.all_of        = validate_type!(schema, [Array], "allOf") || []
-      schema.any_of        = validate_type!(schema, [Array], "anyOf") || []
-      schema.one_of        = validate_type!(schema, [Array], "oneOf") || []
-      schema.not           = validate_type!(schema, [Hash], "not")
 
       # validation: string
       schema.max_length = validate_type!(schema, [Integer], "maxLength")

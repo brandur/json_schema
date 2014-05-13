@@ -38,10 +38,13 @@ module JsonSchema
     def validate_data(schema, data, errors)
       valid = true
 
-      valid = strict_and valid, validate_type(schema, data, errors)
-
-      # validation: all
+      # validation: any
+      valid = strict_and valid, validate_all_of(schema, data, errors)
+      valid = strict_and valid, validate_any_of(schema, data, errors)
       valid = strict_and valid, validate_enum(schema, data, errors)
+      valid = strict_and valid, validate_one_of(schema, data, errors)
+      valid = strict_and valid, validate_not(schema, data, errors)
+      valid = strict_and valid, validate_type(schema, data, errors)
 
       # validation: array
       if data.is_a?(Array)
@@ -67,12 +70,6 @@ module JsonSchema
         valid = strict_and valid, validate_properties(schema, data, errors)
         valid = strict_and valid, validate_required(schema, data, errors, schema.required)
       end
-
-      # validation: schema
-      valid = strict_and valid, validate_all_of(schema, data, errors)
-      valid = strict_and valid, validate_any_of(schema, data, errors)
-      valid = strict_and valid, validate_one_of(schema, data, errors)
-      valid = strict_and valid, validate_not(schema, data, errors)
 
       # validation: string
       if data.is_a?(String)

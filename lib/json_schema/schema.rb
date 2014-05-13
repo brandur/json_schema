@@ -17,27 +17,24 @@ module JsonSchema
     # Pointer resolution
     attr_copyable :data
 
+    # parent and children schemas
+    attr_copyable :parent
+
+    # the normalize URI of this schema
+    attr_copyable :uri
+
     # basic descriptors
     attr_copyable :id
     attr_copyable :title
     attr_copyable :description
 
-    # parent and children schemas
-    attr_copyable :parent
-
-    # map of name --> schema
+    # validation: any
+    attr_copyable :all_of
+    attr_copyable :any_of
     attr_copyable :definitions
-
-    # map of name --> schema
-    attr_copyable :properties
-
-    # the normalize URI of this schema
-    attr_copyable :uri
-
-    # validation: all
     attr_copyable :enum
-    # Types assigned to this schema. Always an array/union type no matter what
-    # was defined in the original schema.
+    attr_copyable :one_of
+    attr_copyable :not
     attr_copyable :type
 
     # validation: array
@@ -58,13 +55,8 @@ module JsonSchema
     attr_copyable :max_properties
     attr_copyable :min_properties
     attr_copyable :pattern_properties
+    attr_copyable :properties
     attr_copyable :required
-
-    # validation: schema
-    attr_copyable :all_of
-    attr_copyable :any_of
-    attr_copyable :one_of
-    attr_copyable :not
 
     # validation: string
     attr_copyable :max_length
@@ -73,6 +65,16 @@ module JsonSchema
 
     # hyperschema
     attr_copyable :links
+    attr_copyable :media
+    attr_copyable :read_only
+    attr_copyable :path_start
+
+    # allow booleans to be access with question mark
+    alias :additional_properties? :additional_properties
+    alias :max_exclusive? :max_exclusive
+    alias :min_exclusive? :min_exclusive
+    alias :read_only? :read_only
+    alias :unique_items? :unique_items
 
     def initialize
       @type = []
