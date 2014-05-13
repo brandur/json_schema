@@ -91,22 +91,19 @@ module JsonSchema
     # parsed schema back to JSON.
     attr_reader_default :additional_items, true
     attr_reader_default :additional_properties, true
+    attr_reader_default :all_of, []
+    attr_reader_default :any_of, []
+    attr_reader_default :definitions, {}
+    attr_reader_default :dependencies, {}
     attr_reader_default :links, []
+    attr_reader_default :one_of, []
     attr_reader_default :max_exclusive, false
     attr_reader_default :min_exclusive, false
+    attr_reader_default :pattern_properties, {}
+    attr_reader_default :properties, {}
 
     def initialize
       @type = []
-
-      # these are all the subschema types; default them to empty data
-      # structures for simplified iteration
-      @all_of = []
-      @any_of = []
-      @one_of = []
-      @definitions = {}
-      @dependencies = {}
-      @pattern_properties = {}
-      @properties = {}
     end
 
     def copy_from(schema)
