@@ -26,6 +26,7 @@ describe JsonSchema::Parser do
   it "parses sub-subschemas" do
     schema = parse.definitions["app"].definitions["name"]
     assert_nil schema.reference
+    assert_equal "hello-world", schema.default
     assert_equal "unique name of app", schema.description
     assert_equal ["string"], schema.type
     assert_equal "/schemata/app", schema.uri

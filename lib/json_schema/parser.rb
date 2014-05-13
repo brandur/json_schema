@@ -173,6 +173,7 @@ module JsonSchema
 
       schema.title       = validate_type!(schema, [String], "title")
       schema.description = validate_type!(schema, [String], "description")
+      schema.default     = validate_type!(schema, [String], "default")
 
       # validation: any
       schema.all_of        = validate_type!(schema, [Array], "allOf") || []
