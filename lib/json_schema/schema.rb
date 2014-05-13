@@ -115,39 +115,6 @@ module JsonSchema
       !@min_exclusive.nil? ? @min_exclusive : false
     end
 
-    # child schemas of all types
-    def children
-      Enumerator.new do |yielder|
-        all_of.each { |s| yielder << s }
-        any_of.each { |s| yielder << s }
-        one_of.each { |s| yielder << s }
-        definitions.each { |_, s| yielder << s }
-        links.map { |l| l.schema }.compact.each { |s| yielder << s }
-        pattern_properties.each { |_, s| yielder << s }
-        properties.each { |_, s| yielder << s }
-
-        if self.not
-          yielder << self.not
-        end
-
-        # can either be a single schema (list validation) or multiple (tuple
-        # validation)
-        if items
-          if items.is_a?(Array)
-            items.each { |s| yielder << s }
-          else
-            yielder << items
-          end
-        end
-
-        # dependencies can either be simple or "schema"; only replace the
-        # latter
-        dependencies.values.
-          select { |s| s.is_a?(Schema) }.
-          each { |s| yielder << s }
-      end
-    end
-
     def copy_from(schema)
       @@copyable.each do |copyable|
         instance_variable_set(copyable, schema.instance_variable_get(copyable))

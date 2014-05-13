@@ -106,6 +106,38 @@ module JsonSchema
       end
     end
 
+    def schema_children(schema)
+      Enumerator.new do |yielder|
+        schema.all_of.each { |s| yielder << s }
+        schema.any_of.each { |s| yielder << s }
+        schema.one_of.each { |s| yielder << s }
+        schema.definitions.each { |_, s| yielder << s }
+        schema.links.map { |l| l.schema }.compact.each { |s| yielder << s }
+        schema.pattern_properties.each { |_, s| yielder << s }
+        schema.properties.each { |_, s| yielder << s }
+
+        if schema.not
+          yielder << schema.not
+        end
+
+        # can either be a single schema (list validation) or multiple (tuple
+        # validation)
+        if schema.items
+          if schema.items.is_a?(Array)
+            schema.items.each { |s| yielder << s }
+          else
+            yielder << schema.items
+          end
+        end
+
+        # dependencies can either be simple or "schema"; only replace the
+        # latter
+        schema.dependencies.values.
+          select { |s| s.is_a?(Schema) }.
+          each { |s| yielder << s }
+      end
+    end
+
     def traverse_schema(schema)
       # Children without an ID keep the same URI as their parents. So since we
       # traverse trees from top to bottom, just keep the first reference.
@@ -113,11 +145,11 @@ module JsonSchema
         @store[schema.uri] = schema
       end
 
-      schema.children.each do |child_schema|
-        if child_schema.reference
-          dereference(child_schema)
+      schema_children(schema).each do |subschema|
+        if subschema.reference
+          dereference(subschema)
         end
-        traverse_schema(child_schema)
+        traverse_schema(subschema)
       end
     end
   end
