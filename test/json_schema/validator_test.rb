@@ -390,6 +390,24 @@ describe JsonSchema::Validator do
       %{Expected data to match "ipv6" format, value was: 1::3:4:5:6:7:8:9.}
   end
 
+  it "validates uri format successfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "uri"
+    )
+    data_sample["owner"] = "https://example.com"
+    assert validate
+  end
+
+  it "validates uri format unsuccessfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "uri"
+    )
+    data_sample["owner"] = "example.com"
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to match "uri" format, value was: example.com.}
+  end
+
   it "validates maxLength" do
     pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
       "maxLength" => 3

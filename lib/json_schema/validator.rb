@@ -1,3 +1,5 @@
+require "uri"
+
 module JsonSchema
   class Validator
     TYPE_MAP = {
@@ -153,6 +155,7 @@ module JsonSchema
       when "ipv6"
         data =~ IPV6_PATTERN
       when "uri"
+        data =~ URI.regexp
       when "uuid"
       end
       if valid
