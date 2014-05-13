@@ -7,7 +7,15 @@ describe JsonSchema::Validator do
     assert validate
   end
 
-  it "validates enum" do
+  it "validates enum successfully" do
+    pointer("#/definitions/app/definitions/visibility").merge!(
+      "enum" => ["private", "public"]
+    )
+    data_sample["visibility"] = "public"
+    assert validate
+  end
+
+  it "validates enum unsuccessfully" do
     pointer("#/definitions/app/definitions/visibility").merge!(
       "enum" => ["private", "public"]
     )
@@ -17,7 +25,15 @@ describe JsonSchema::Validator do
       %{Expected data to be a member of enum ["private", "public"], value was: personal.}
   end
 
-  it "validates type" do
+  it "validates type successfully" do
+    pointer("#/definitions/app").merge!(
+      "type" => ["object"]
+    )
+    @data_sample = { "name" => "cloudnasium" }
+    assert validate
+  end
+
+  it "validates type unsuccessfully" do
     pointer("#/definitions/app").merge!(
       "type" => ["object"]
     )
@@ -113,7 +129,15 @@ describe JsonSchema::Validator do
       %{Expected data to be a member of enum ["http", "https"], value was: 1337.}
   end
 
-  it "validates maxItems" do
+  it "validates maxItems successfully" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "maxItems" => 10
+    )
+    data_sample["flags"] = (0...10).to_a
+    assert validate
+  end
+
+  it "validates maxItems unsuccessfully" do
     pointer("#/definitions/app/definitions/flags").merge!(
       "maxItems" => 10
     )
@@ -123,7 +147,15 @@ describe JsonSchema::Validator do
       %{Expected array to have no more than 10 item(s), had 11 item(s).}
   end
 
-  it "validates minItems" do
+  it "validates minItems successfully" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "minItems" => 1
+    )
+    data_sample["flags"] = ["websockets"]
+    assert validate
+  end
+
+  it "validates minItems unsuccessfully" do
     pointer("#/definitions/app/definitions/flags").merge!(
       "minItems" => 1
     )
@@ -133,11 +165,19 @@ describe JsonSchema::Validator do
       %{Expected array to have at least 1 item(s), had 0 item(s).}
   end
 
-  it "validates uniqueItems" do
+  it "validates uniqueItems successfully" do
     pointer("#/definitions/app/definitions/flags").merge!(
       "uniqueItems" => true
     )
-    data_sample["flags"] = [1, 1]
+    data_sample["flags"] = ["websockets"]
+    assert validate
+  end
+
+  it "validates uniqueItems unsuccessfully" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "uniqueItems" => true
+    )
+    data_sample["flags"] = ["websockets", "websockets"]
     refute validate
     assert_includes error_messages,
       %{Expected array items to be unique, but duplicate items were found.}
