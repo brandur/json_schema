@@ -1,4 +1,3 @@
-require_relative "json_schema/link"
 require_relative "json_schema/parser"
 require_relative "json_schema/reference_expander"
 require_relative "json_schema/schema"

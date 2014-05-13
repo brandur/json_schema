@@ -70,8 +70,8 @@ module JsonSchema
     # hyperschema
     attr_copyable :links
     attr_copyable :media
-    attr_copyable :read_only
     attr_copyable :path_start
+    attr_copyable :read_only
 
     # allow booleans to be access with question mark
     alias :additional_items? :additional_items
@@ -157,6 +157,22 @@ module JsonSchema
 
     def validate!(data)
       Validator.new(self).validate!(data)
+    end
+
+    # Link subobject for a hyperschema.
+    class Link
+      attr_accessor :description
+      attr_accessor :href
+      attr_accessor :method
+      attr_accessor :rel
+      attr_accessor :schema
+      attr_accessor :title
+    end
+
+    # Media type subobject for a hyperschema.
+    class Media
+      attr_accessor :binary_encoding
+      attr_accessor :type
     end
   end
 end

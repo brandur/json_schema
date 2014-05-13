@@ -130,7 +130,7 @@ module JsonSchema
     def parse_links(schema)
       if schema.links
         schema.links = schema.links.map { |l|
-          link             = Link.new
+          link             = Schema::Link.new
           link.description = l["description"]
           link.href        = l["href"]
           link.method      = l["method"] ? l["method"].downcase.to_sym : nil
@@ -143,6 +143,14 @@ module JsonSchema
 
           link
         }
+      end
+    end
+
+    def parse_media(schema)
+      if data = schema.media
+        schema.media = Schema::Media.new
+        schema.media.binary_encoding = data["binaryEncoding"]
+        schema.media.type            = data["type"]
       end
     end
 
@@ -230,7 +238,10 @@ module JsonSchema
       schema.pattern    = Regexp.new(schema.pattern) if schema.pattern
 
       # hyperschema
-      schema.links = validate_type(schema, [Array], "links")
+      schema.links      = validate_type(schema, [Array], "links")
+      schema.media      = validate_type(schema, [Hash], "media")
+      schema.path_start = validate_type(schema, [String], "pathStart")
+      schema.read_only  = validate_type(schema, BOOLEAN, "readOnly")
 
       parse_all_of(schema)
       parse_any_of(schema)
@@ -239,6 +250,7 @@ module JsonSchema
       parse_dependencies(schema)
       parse_items(schema)
       parse_links(schema)
+      parse_media(schema)
       parse_not(schema)
       parse_pattern_properties(schema)
       parse_properties(schema)

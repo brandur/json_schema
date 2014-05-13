@@ -127,6 +127,37 @@ describe JsonSchema::Parser do
     assert_equal /^[a-z][a-z0-9-]{3,30}$/, schema.pattern
   end
 
+  it "parses hypermedia links" do
+    schema = parse.definitions["app"]
+  end
+
+  it "parses hypermedia media" do
+    pointer("#/definitions/app/media").merge!(
+      "binaryEncoding" => "base64",
+      "type"           => "image/png"
+    )
+    schema = parse.definitions["app"]
+    media = JsonSchema::Schema::Media.new
+    assert_equal "base64", schema.media.binary_encoding
+    assert_equal "image/png", schema.media.type
+  end
+
+  it "parses hypermedia pathStart" do
+    pointer("#/definitions/app").merge!(
+      "pathStart" => "/v2"
+    )
+    schema = parse.definitions["app"]
+    assert_equal "/v2", schema.path_start
+  end
+
+  it "parses hypermedia readOnly" do
+    pointer("#/definitions/app").merge!(
+      "readOnly" => true
+    )
+    schema = parse.definitions["app"]
+    assert_equal true, schema.read_only
+  end
+
   it "errors on non-string ids" do
     schema_sample["id"] = 4
     e = assert_raises(RuntimeError) { parse }

@@ -201,7 +201,14 @@ module DataScaffold
           },
           "maxProperties" => 10,
           "minProperties" => 1,
-          "required" => ["name"]
+          "required" => ["name"],
+          "links" => [
+          ],
+          "media" => {
+            "type" => "application/json"
+          },
+          "pathStart" => "/",
+          "readOnly" => false
         }
       },
       "properties" => {
