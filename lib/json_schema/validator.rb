@@ -50,6 +50,7 @@ module JsonSchema
 
       # validation: array
       if data.is_a?(Array)
+        valid = strict_and valid, validate_items(schema, data, errors)
         valid = strict_and valid, validate_max_items(schema, data, errors)
         valid = strict_and valid, validate_min_items(schema, data, errors)
         valid = strict_and valid, validate_unique_items(schema, data, errors)
@@ -164,6 +165,34 @@ module JsonSchema
         message = %{Expected data to be a member of enum #{schema.enum}, value was: #{data}.}
         errors << SchemaError.new(schema, message)
         false
+      end
+    end
+
+    def validate_items(schema, data, error)
+      return true unless schema.items
+      if schema.items.is_a?(Array)
+        if data.size < schema.items.count
+          message = %{Expected array to have at least #{schema.items.count} item(s), had #{data.size} item(s).}
+          errors << SchemaError.new(schema, message)
+          false
+        elsif data.size > schema.items.count && !schema.additional_items
+          message = %{Expected array to have no more than #{schema.items.count} item(s), had #{data.size} item(s).}
+          errors << SchemaError.new(schema, message)
+          false
+        else
+          valid = true
+          schema.items.each_with_index do |subschema, i|
+            valid = strict_and valid,
+              validate_data(subschema, data[i], errors)
+          end
+          valid
+        end
+      else
+        valid = true
+        data.each do |value|
+          valid = strict_and valid, validate_data(schema.items, value, errors)
+        end
+        valid
       end
     end
 
@@ -307,7 +336,7 @@ module JsonSchema
       schema.pattern_properties.each do |pattern, subschema|
         data.each do |key, value|
           if key =~ pattern
-            valid &&= validate_data(subschema, value, errors)
+            valid = strict_and valid, validate_data(subschema, value, errors)
           end
         end
       end
@@ -319,7 +348,7 @@ module JsonSchema
       valid = true
       schema.properties.each do |key, subschema|
         if value = data[key]
-          valid &&= validate_data(subschema, value, errors)
+          valid = strict_and valid, validate_data(subschema, value, errors)
         end
       end
       valid

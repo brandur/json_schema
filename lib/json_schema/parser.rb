@@ -115,6 +115,18 @@ module JsonSchema
       end
     end
 
+    def parse_items(schema)
+      if schema.items
+        # tuple validation: an array of schemas
+        if schema.items.is_a?(Array)
+          schema.items = schema.items.map { |s| parse_data(s, schema) }
+        # list validation: a single schema
+        else
+          schema.items = parse_data(schema.items, schema)
+        end
+      end
+    end
+
     def parse_links(schema)
       if schema.links
         schema.links = schema.links.map { |l|
@@ -187,9 +199,11 @@ module JsonSchema
       validate_known_type!(schema)
 
       # validation: array
-      schema.max_items    = validate_type!(schema, [Integer], "maxItems")
-      schema.min_items    = validate_type!(schema, [Integer], "minItems")
-      schema.unique_items = validate_type!(schema, BOOLEAN, "uniqueItems")
+      schema.additional_items = validate_type!(schema, BOOLEAN, "additionalItems")
+      schema.items            = validate_type!(schema, [Array, Hash], "items")
+      schema.max_items        = validate_type!(schema, [Integer], "maxItems")
+      schema.min_items        = validate_type!(schema, [Integer], "minItems")
+      schema.unique_items     = validate_type!(schema, BOOLEAN, "uniqueItems")
 
       # validation: number/integer
       schema.max           = validate_type!(schema, [Float, Integer], "maximum")
@@ -223,6 +237,7 @@ module JsonSchema
       parse_one_of(schema)
       parse_definitions(schema)
       parse_dependencies(schema)
+      parse_items(schema)
       parse_links(schema)
       parse_not(schema)
       parse_pattern_properties(schema)

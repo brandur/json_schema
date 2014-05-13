@@ -48,9 +48,22 @@ describe JsonSchema::Parser do
 
   it "parses array validations" do
     schema = parse.definitions["app"].definitions["flags"]
+    assert_equal /^[a-z][a-z\-]*[a-z]$/, schema.items.pattern
     assert_equal 1, schema.min_items
     assert_equal 10, schema.max_items
     assert_equal true, schema.unique_items
+  end
+
+  it "parses array items tuple validation" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    schema = parse.definitions["app"].definitions["flags"]
+    assert_equal ["bamboo", "cedar"], schema.items[0].enum
+    assert_equal ["http", "https"], schema.items[1].enum
   end
 
   it "parses integer validations" do
@@ -152,6 +165,10 @@ describe JsonSchema::Parser do
   def parse
     @parser = JsonSchema::Parser.new
     @parser.parse!(schema_sample)
+  end
+
+  def pointer(data, path)
+    JsonPointer.evaluate(data, path)
   end
 
   def schema_sample

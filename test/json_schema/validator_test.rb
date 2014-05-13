@@ -27,6 +27,92 @@ describe JsonSchema::Validator do
       %{Expected data to be of type "object"; value was: 4.}
   end
 
+  it "validates items with list successfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "items" => {
+        "pattern" => "^[a-z][a-z\\-]*[a-z]$"
+      }
+    )
+    data_sample["flags"] = ["websockets"]
+    assert validate
+  end
+
+  it "validates items with list unsuccessfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "items" => {
+        "pattern" => "^[a-z][a-z\\-]*[a-z]$"
+      }
+    )
+    data_sample["flags"] = ["1337"]
+    refute validate
+    assert_includes error_messages,
+      %{Expected string to match pattern "/^[a-z][a-z\\-]*[a-z]$/", value was: 1337.}
+  end
+
+  it "validates items with tuple successfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "https"]
+    assert validate
+  end
+
+  it "validates items with tuple successfully with additionalItems" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => true,
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "https", "websockets"]
+    assert validate
+  end
+
+  it "validates items with tuple unsuccessfully for not enough items" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar"]
+    refute validate
+    assert_includes error_messages,
+      %{Expected array to have at least 2 item(s), had 1 item(s).}
+  end
+
+  it "validates items with tuple unsuccessfully for too many items" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => false,
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "https", "websockets"]
+    refute validate
+    assert_includes error_messages,
+      %{Expected array to have no more than 2 item(s), had 3 item(s).}
+  end
+
+  it "validates items with tuple unsuccessfully for non-conforming items" do
+    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => false,
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "1337"]
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be a member of enum ["http", "https"], value was: 1337.}
+  end
+
   it "validates maxItems" do
     pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
       "maxItems" => 10

@@ -39,6 +39,8 @@ module JsonSchema
     attr_copyable :type
 
     # validation: array
+    attr_copyable :additional_items
+    attr_copyable :items
     attr_copyable :max_items
     attr_copyable :min_items
     attr_copyable :unique_items
@@ -92,6 +94,10 @@ module JsonSchema
       @properties = {}
     end
 
+    def additional_items
+      !@additional_items.nil? ? @additional_items : true
+    end
+
     def additional_properties
       !@additional_properties.nil? ? @additional_properties : true
     end
@@ -113,7 +119,20 @@ module JsonSchema
         definitions.each { |_, s| yielder << s }
         pattern_properties.each { |_, s| yielder << s }
         properties.each { |_, s| yielder << s }
-        yielder << self.not if self.not
+
+        if self.not
+          yielder << self.not
+        end
+
+        # can either be a single schema (list validation) or multiple (tuple
+        # validation)
+        if items
+          if items.is_a?(Array)
+            items.each { |s| yielder << s }
+          else
+            yielder << items
+          end
+        end
 
         # dependencies can either be simple or "schema"; only replace the
         # latter

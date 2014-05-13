@@ -76,6 +76,9 @@ module DataScaffold
             "flags" => {
               "description" => "flags for an app",
               "example" => ["websockets"],
+              "items" => {
+                "pattern" => "^[a-z][a-z\\-]*[a-z]$"
+              },
               "maxItems" => 10,
               "minItems" => 1,
               "readOnly" => false,
