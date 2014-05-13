@@ -130,6 +130,7 @@ module JsonSchema
     EMAIL_PATTERN = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i
     HOSTNAME_PATTERN = /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/
     DATE_TIME_PATTERN = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-2][0-9]:[0-5][0-9]:[0-5][0-9](Z|[\-+][0-9]{2}:[0-5][0-9])$/
+    IPV4_PATTERN = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/
 
     def validate_format(schema, data, errors)
       return true unless schema.format
@@ -141,6 +142,7 @@ module JsonSchema
       when "hostname"
         data =~ HOSTNAME_PATTERN
       when "ipv4"
+        data =~ IPV4_PATTERN
       when "ipv6"
       when "uri"
       when "uuid"
