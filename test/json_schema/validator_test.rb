@@ -408,6 +408,24 @@ describe JsonSchema::Validator do
       %{Expected data to match "uri" format, value was: example.com.}
   end
 
+  it "validates uuid format successfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "uuid"
+    )
+    data_sample["owner"] = "01234567-89ab-cdef-0123-456789abcdef"
+    assert validate
+  end
+
+  it "validates uuid format unsuccessfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "uuid"
+    )
+    data_sample["owner"] = "123"
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to match "uuid" format, value was: 123.}
+  end
+
   it "validates maxLength" do
     pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
       "maxLength" => 3
