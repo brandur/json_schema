@@ -19,3 +19,18 @@ schema.links.each do |link|
   puts "#{link.method} #{link.href}"
 end
 ```
+
+## Development
+
+Run the test suite with:
+
+```
+rake
+```
+
+Or run specific suites or tests with:
+
+```
+ruby -Ilib -Itest test/json_schema/validator_test.rb
+ruby -Ilib -Itest test/json_schema/validator_test.rb -n /anyOf/
+```
