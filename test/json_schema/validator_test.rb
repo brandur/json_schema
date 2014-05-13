@@ -8,7 +8,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates enum" do
-    pointer(schema_sample, "#/definitions/app/definitions/visibility").merge!(
+    pointer("#/definitions/app/definitions/visibility").merge!(
       "enum" => ["private", "public"]
     )
     data_sample["visibility"] = "personal"
@@ -18,7 +18,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates type" do
-    pointer(schema_sample, "#/definitions/app").merge!(
+    pointer("#/definitions/app").merge!(
       "type" => ["object"]
     )
     @data_sample = 4
@@ -28,7 +28,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates items with list successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "items" => {
         "pattern" => "^[a-z][a-z\\-]*[a-z]$"
       }
@@ -38,7 +38,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates items with list unsuccessfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "items" => {
         "pattern" => "^[a-z][a-z\\-]*[a-z]$"
       }
@@ -50,7 +50,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates items with tuple successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "items" => [
         { "enum" => ["bamboo", "cedar"] },
         { "enum" => ["http", "https"] }
@@ -61,7 +61,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates items with tuple successfully with additionalItems" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "additionalItems" => true,
       "items" => [
         { "enum" => ["bamboo", "cedar"] },
@@ -73,7 +73,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates items with tuple unsuccessfully for not enough items" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "items" => [
         { "enum" => ["bamboo", "cedar"] },
         { "enum" => ["http", "https"] }
@@ -86,7 +86,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates items with tuple unsuccessfully for too many items" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "additionalItems" => false,
       "items" => [
         { "enum" => ["bamboo", "cedar"] },
@@ -100,7 +100,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates items with tuple unsuccessfully for non-conforming items" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "additionalItems" => false,
       "items" => [
         { "enum" => ["bamboo", "cedar"] },
@@ -114,7 +114,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates maxItems" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "maxItems" => 10
     )
     data_sample["flags"] = (0...11).to_a
@@ -124,7 +124,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates minItems" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "minItems" => 1
     )
     data_sample["flags"] = []
@@ -134,7 +134,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates uniqueItems" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "uniqueItems" => true
     )
     data_sample["flags"] = [1, 1]
@@ -144,7 +144,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates maximum for an integer with exclusiveMaximum false" do
-    pointer(schema_sample, "#/definitions/app/definitions/id").merge!(
+    pointer("#/definitions/app/definitions/id").merge!(
       "exclusiveMaximum" => false,
       "maximum"          => 10
     )
@@ -155,7 +155,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates maximum for an integer with exclusiveMaximum true" do
-    pointer(schema_sample, "#/definitions/app/definitions/id").merge!(
+    pointer("#/definitions/app/definitions/id").merge!(
       "exclusiveMaximum" => true,
       "maximum"          => 10
     )
@@ -166,7 +166,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates maximum for a number with exclusiveMaximum false" do
-    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+    pointer("#/definitions/app/definitions/cost").merge!(
       "exclusiveMaximum" => false,
       "maximum"          => 10.0
     )
@@ -177,7 +177,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates maximum for a number with exclusiveMaximum true" do
-    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+    pointer("#/definitions/app/definitions/cost").merge!(
       "exclusiveMaximum" => true,
       "maximum"          => 10.0
     )
@@ -188,7 +188,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates minimum for an integer with exclusiveMaximum false" do
-    pointer(schema_sample, "#/definitions/app/definitions/id").merge!(
+    pointer("#/definitions/app/definitions/id").merge!(
       "exclusiveMinimum" => false,
       "minimum"          => 1
     )
@@ -199,7 +199,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates minimum for an integer with exclusiveMaximum true" do
-    pointer(schema_sample, "#/definitions/app/definitions/id").merge!(
+    pointer("#/definitions/app/definitions/id").merge!(
       "exclusiveMinimum" => true,
       "minimum"          => 1
     )
@@ -210,7 +210,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates minimum for a number with exclusiveMaximum false" do
-    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+    pointer("#/definitions/app/definitions/cost").merge!(
       "exclusiveMinimum" => false,
       "minimum"          => 0.0
     )
@@ -221,7 +221,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates minimum for a number with exclusiveMaximum true" do
-    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+    pointer("#/definitions/app/definitions/cost").merge!(
       "exclusiveMinimum" => true,
       "minimum"          => 0.0
     )
@@ -232,7 +232,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates multipleOf for an integer" do
-    pointer(schema_sample, "#/definitions/app/definitions/id").merge!(
+    pointer("#/definitions/app/definitions/id").merge!(
       "multipleOf" => 2
     )
     data_sample["id"] = 1
@@ -242,7 +242,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates multipleOf for a number" do
-    pointer(schema_sample, "#/definitions/app/definitions/cost").merge!(
+    pointer("#/definitions/app/definitions/cost").merge!(
       "multipleOf" => 0.01
     )
     data_sample["cost"] = 0.005
@@ -252,7 +252,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates additionalProperties" do
-    pointer(schema_sample, "#/definitions/app").merge!(
+    pointer("#/definitions/app").merge!(
       "additionalProperties" => false
     )
     data_sample["foo"] = "bar"
@@ -261,7 +261,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates simple dependencies" do
-    pointer(schema_sample, "#/definitions/app/dependencies").merge!(
+    pointer("#/definitions/app/dependencies").merge!(
       "production" => "ssl"
     )
     data_sample["production"] = true
@@ -270,7 +270,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates schema dependencies" do
-    pointer(schema_sample, "#/definitions/app/dependencies").merge!(
+    pointer("#/definitions/app/dependencies").merge!(
       "ssl" => {
         "properties" => {
           "cost" => {
@@ -286,7 +286,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates maxProperties" do
-    pointer(schema_sample, "#/definitions/app").merge!(
+    pointer("#/definitions/app").merge!(
       "maxProperties" => 0
     )
     data_sample["name"] = "cloudnasium"
@@ -295,7 +295,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates minProperties" do
-    pointer(schema_sample, "#/definitions/app").merge!(
+    pointer("#/definitions/app").merge!(
       "minProperties" => 2
     )
     data_sample["name"] = "cloudnasium"
@@ -304,7 +304,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates patternProperties" do
-    pointer(schema_sample, "#/definitions/app/definitions/config_vars").merge!(
+    pointer("#/definitions/app/definitions/config_vars").merge!(
       "patternProperties" => {
         "^\\w+$" => {
           "type" => ["null", "string"]
@@ -321,7 +321,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates required" do
-    pointer(schema_sample, "#/definitions/app/dependencies").merge!(
+    pointer("#/definitions/app/dependencies").merge!(
       "required" => ["name"]
     )
     data_sample.delete("name")
@@ -330,7 +330,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates allOf" do
-    pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
+    pointer("#/definitions/app/definitions/contrived").merge!(
       "allOf" => [
         { "maxLength" => 30 },
         { "minLength" => 3 }
@@ -343,7 +343,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates anyOf" do
-    pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
+    pointer("#/definitions/app/definitions/contrived").merge!(
       "anyOf" => [
         { "minLength" => 5 },
         { "minLength" => 3 }
@@ -356,7 +356,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates oneOf" do
-    pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
+    pointer("#/definitions/app/definitions/contrived").merge!(
       "oneOf" => [
         { "pattern" => "^(foo|aaa)$" },
         { "pattern" => "^(foo|zzz)$" }
@@ -369,7 +369,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates not" do
-    pointer(schema_sample, "#/definitions/app/definitions/contrived").merge!(
+    pointer("#/definitions/app/definitions/contrived").merge!(
       "not" => { "pattern" => "^$" }
     )
     data_sample["contrived"] = ""
@@ -379,7 +379,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates date-time format successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "date-time"
     )
     data_sample["owner"] = "2014-05-13T08:42:40Z"
@@ -387,7 +387,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates date-time format with time zone successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "date-time"
     )
     data_sample["owner"] = "2014-05-13T08:42:40-00:00"
@@ -395,7 +395,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates date-time format unsuccessfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "date-time"
     )
     data_sample["owner"] = "2014-05-13T08:42:40"
@@ -405,7 +405,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates email format successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "email"
     )
     data_sample["owner"] = "dwarf@example.com"
@@ -413,7 +413,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates email format unsuccessfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "email"
     )
     data_sample["owner"] = "@example.com"
@@ -423,7 +423,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates hostname format successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "hostname"
     )
     data_sample["owner"] = "example.com"
@@ -431,7 +431,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates hostname format unsuccessfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "hostname"
     )
     data_sample["owner"] = "@example.com"
@@ -441,7 +441,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates ipv4 format successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "ipv4"
     )
     data_sample["owner"] = "1.2.3.4"
@@ -449,7 +449,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates ipv4 format unsuccessfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "ipv4"
     )
     data_sample["owner"] = "1.2.3.4.5"
@@ -459,7 +459,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates ipv6 format successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "ipv6"
     )
     data_sample["owner"] = "1::3:4:5:6:7:8"
@@ -467,7 +467,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates ipv6 format unsuccessfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "ipv6"
     )
     data_sample["owner"] = "1::3:4:5:6:7:8:9"
@@ -477,7 +477,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates uri format successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uri"
     )
     data_sample["owner"] = "https://example.com"
@@ -485,7 +485,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates uri format unsuccessfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uri"
     )
     data_sample["owner"] = "example.com"
@@ -495,7 +495,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates uuid format successfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uuid"
     )
     data_sample["owner"] = "01234567-89ab-cdef-0123-456789abcdef"
@@ -503,7 +503,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates uuid format unsuccessfully" do
-    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+    pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uuid"
     )
     data_sample["owner"] = "123"
@@ -513,7 +513,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates maxLength" do
-    pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
+    pointer("#/definitions/app/definitions/name").merge!(
       "maxLength" => 3
     )
     data_sample["name"] = "abcd"
@@ -523,7 +523,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates minLength" do
-    pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
+    pointer("#/definitions/app/definitions/name").merge!(
       "minLength" => 3
     )
     data_sample["name"] = "ab"
@@ -533,7 +533,7 @@ describe JsonSchema::Validator do
   end
 
   it "validates pattern" do
-    pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
+    pointer("#/definitions/app/definitions/name").merge!(
       "pattern" => "^[a-z][a-z0-9-]{3,30}$",
     )
     data_sample["name"] = "ab"
@@ -550,8 +550,8 @@ describe JsonSchema::Validator do
     @validator.errors.map { |e| e.message }
   end
 
-  def pointer(data, path)
-    JsonPointer.evaluate(data, path)
+  def pointer(path)
+    JsonPointer.evaluate(schema_sample, path)
   end
 
   def schema_sample

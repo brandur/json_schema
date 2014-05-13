@@ -55,7 +55,7 @@ describe JsonSchema::Parser do
   end
 
   it "parses array items tuple validation" do
-    pointer(schema_sample, "#/definitions/app/definitions/flags").merge!(
+    pointer("#/definitions/app/definitions/flags").merge!(
       "items" => [
         { "enum" => ["bamboo", "cedar"] },
         { "enum" => ["http", "https"] }
@@ -167,8 +167,8 @@ describe JsonSchema::Parser do
     @parser.parse!(schema_sample)
   end
 
-  def pointer(data, path)
-    JsonPointer.evaluate(data, path)
+  def pointer(path)
+    JsonPointer.evaluate(schema_sample, path)
   end
 
   def schema_sample
