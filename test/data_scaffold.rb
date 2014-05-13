@@ -100,11 +100,19 @@ module DataScaffold
               ]
             },
             "name" => {
+              "default" => "hello-world",
               "description" => "unique name of app",
               "example" => "name",
               "maxLength" => 30,
               "minLength" => 3,
               "pattern" => "^[a-z][a-z0-9-]{3,30}$",
+              "readOnly" => false,
+              "type" => ["string"]
+            },
+            "owner" => {
+              "description" => "owner of the app",
+              "format" => "email",
+              "example" => "dwarf@example.com",
               "readOnly" => false,
               "type" => ["string"]
             },
@@ -160,6 +168,9 @@ module DataScaffold
             },
             "name" => {
               "$ref" => "/schemata/app#/definitions/name"
+            },
+            "owner" => {
+              "$ref" => "/schemata/app#/definitions/owner"
             },
             "production" => {
               "$ref" => "/schemata/app#/definitions/production"

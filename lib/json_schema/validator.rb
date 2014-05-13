@@ -73,6 +73,7 @@ module JsonSchema
 
       # validation: string
       if data.is_a?(String)
+        valid = strict_and valid, validate_format(schema, data, errors)
         valid = strict_and valid, validate_max_length(schema, data, errors)
         valid = strict_and valid, validate_min_length(schema, data, errors)
         valid = strict_and valid, validate_pattern(schema, data, errors)
@@ -123,6 +124,29 @@ module JsonSchema
           # if not a schema, value is an array of required fields
           validate_required(schema, data, errors, obj)
         end
+      end
+    end
+
+    RFC_3339_PATTERN = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-2][0-9]:[0-5][0-9]:[0-5][0-9](Z|[\-+][0-9]{2}:[0-5][0-9])$/
+
+    def validate_format(schema, data, errors)
+      return true unless schema.format
+      valid = case schema.format
+      when "date-time"
+        data =~ RFC_3339_PATTERN
+      when "email"
+      when "hostname"
+      when "ipv4"
+      when "ipv6"
+      when "uri"
+      when "uuid"
+      end
+      if valid
+        true
+      else
+        message = %{Expected data to match "#{schema.format}" format, value was: #{data}.}
+        errors << SchemaError.new(schema, message)
+        false
       end
     end
 

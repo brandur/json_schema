@@ -209,6 +209,7 @@ module JsonSchema
       schema.required           = validate_type!(schema, [Array], "required")
 
       # validation: string
+      schema.format     = validate_type!(schema, [String], "format")
       schema.max_length = validate_type!(schema, [Integer], "maxLength")
       schema.min_length = validate_type!(schema, [Integer], "minLength")
       schema.pattern    = validate_type!(schema, [String], "pattern")

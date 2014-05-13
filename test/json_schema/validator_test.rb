@@ -292,6 +292,32 @@ describe JsonSchema::Validator do
       %{Data matched subschema of "not" condition.}
   end
 
+  it "validates date-time format successfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "date-time"
+    )
+    data_sample["owner"] = "2014-05-13T08:42:40Z"
+    assert validate
+  end
+
+  it "validates date-time format with time zone successfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "date-time"
+    )
+    data_sample["owner"] = "2014-05-13T08:42:40-00:00"
+    assert validate
+  end
+
+  it "validates date-time format unsuccessfully" do
+    pointer(schema_sample, "#/definitions/app/definitions/owner").merge!(
+      "format" => "date-time"
+    )
+    data_sample["owner"] = "2014-05-13T08:42:40"
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to match "date-time" format, value was: 2014-05-13T08:42:40.}
+  end
+
   it "validates maxLength" do
     pointer(schema_sample, "#/definitions/app/definitions/name").merge!(
       "maxLength" => 3

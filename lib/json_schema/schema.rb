@@ -27,6 +27,7 @@ module JsonSchema
     attr_copyable :id
     attr_copyable :title
     attr_copyable :description
+    attr_copyable :default
 
     # validation: any
     attr_copyable :all_of
@@ -59,6 +60,7 @@ module JsonSchema
     attr_copyable :required
 
     # validation: string
+    attr_copyable :format
     attr_copyable :max_length
     attr_copyable :min_length
     attr_copyable :pattern
