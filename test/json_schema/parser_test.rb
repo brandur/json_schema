@@ -145,6 +145,7 @@ describe JsonSchema::Parser do
     )
     schema = parse.definitions["app"]
     link = schema.links[0]
+    assert_equal schema, link.parent
     assert_equal "Create a new app.", link.description
     assert_equal "/apps", link.href
     assert_equal :post, link.method

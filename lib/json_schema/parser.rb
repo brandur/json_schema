@@ -136,6 +136,8 @@ module JsonSchema
       if schema.links
         schema.links = schema.links.map { |l|
           link             = Schema::Link.new
+          link.parent      = schema
+
           link.description = l["description"]
           link.href        = l["href"]
           link.method      = l["method"] ? l["method"].downcase.to_sym : nil

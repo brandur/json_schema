@@ -135,6 +135,9 @@ module JsonSchema
 
     # Link subobject for a hyperschema.
     class Link
+      attr_accessor :parent
+
+      # schema attributes
       attr_accessor :description
       attr_accessor :href
       attr_accessor :method
