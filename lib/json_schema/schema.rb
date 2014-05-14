@@ -97,7 +97,6 @@ module JsonSchema
 
     # allow booleans to be access with question mark
     alias :additional_items? :additional_items
-    alias :additional_properties? :additional_properties
     alias :max_exclusive? :max_exclusive
     alias :min_exclusive? :min_exclusive
     alias :read_only? :read_only

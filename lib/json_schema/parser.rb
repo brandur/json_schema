@@ -1,4 +1,4 @@
-require "json_reference"
+require_relative "../json_reference"
 
 module JsonSchema
   class Parser
@@ -59,6 +59,18 @@ module JsonSchema
         # make sure we don't end up with duplicate slashes
         parent_uri = parent_uri.chomp("/")
         parent_uri + "/" + id
+      end
+    end
+
+    def parse_additional_properties(schema)
+      if schema.additional_properties
+        # an object indicates a schema that will be used to parse any
+        # properties not listed in `properties`
+        if schema.additional_properties.is_a?(Hash)
+          schema.additional_properties =
+            parse_data(schema.additional_properties, schema)
+        end
+        # otherwise, leave as boolean
       end
     end
 
@@ -235,7 +247,7 @@ module JsonSchema
 
       # validation: object
       schema.additional_properties =
-        validate_type(schema, BOOLEAN, "additionalProperties")
+        validate_type(schema, BOOLEAN + [Hash], "additionalProperties")
       schema.dependencies       = validate_type(schema, [Hash], "dependencies") || {}
       schema.max_properties     = validate_type(schema, [Integer], "maxProperties")
       schema.min_properties     = validate_type(schema, [Integer], "minProperties")
@@ -256,6 +268,7 @@ module JsonSchema
       schema.path_start = validate_type(schema, [String], "pathStart")
       schema.read_only  = validate_type(schema, BOOLEAN, "readOnly")
 
+      parse_additional_properties(schema)
       parse_all_of(schema)
       parse_any_of(schema)
       parse_one_of(schema)

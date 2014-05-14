@@ -86,10 +86,27 @@ describe JsonSchema::Parser do
 
   it "parses the basic set of object validations" do
     schema = parse.definitions["app"]
-    assert_equal false, schema.additional_properties
     assert_equal 10, schema.max_properties
     assert_equal 1, schema.min_properties
     assert_equal ["name"], schema.required
+  end
+
+  it "parses the additionalProperties object validation as boolean" do
+    pointer("#/definitions/app").merge!(
+      "additionalProperties" => false
+    )
+    schema = parse.definitions["app"]
+    assert_equal false, schema.additional_properties
+  end
+
+  it "parses the additionalProperties object validation as schema" do
+    pointer("#/definitions/app").merge!(
+      "additionalProperties" => {
+        "type" => "boolean"
+      }
+    )
+    schema = parse.definitions["app"].additional_properties
+    assert_equal ["boolean"], schema.type
   end
 
   it "parses the dependencies object validation" do

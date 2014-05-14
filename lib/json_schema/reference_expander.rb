@@ -1,4 +1,3 @@
-require "json_schema/parser"
 require "set"
 
 module JsonSchema

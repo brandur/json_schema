@@ -86,7 +86,7 @@ module JsonSchema
     end
 
     def validate_additional_properties(schema, data, errors)
-      return true if schema.additional_properties?
+      return true if schema.additional_properties
       if (extra = data.keys - schema.properties.keys).empty?
         true
       else
