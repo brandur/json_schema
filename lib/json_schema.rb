@@ -5,7 +5,23 @@ require_relative "json_schema/schema_error"
 require_relative "json_schema/validator"
 
 module JsonSchema
+  def self.parse(data)
+    parser = Parser.new
+    if schema = parser.parse(data)
+      valid, errors = parser.expand_references
+      if valid
+        [schema, nil]
+      else
+        [nil, errors]
+      end
+    else
+      [nil, parser.errors]
+    end
+  end
+
   def self.parse!(data)
-    Parser.new.parse!(data).expand_references!
+    schema = Parser.new.parse!(data)
+    schema.expand_references!
+    schema
   end
 end

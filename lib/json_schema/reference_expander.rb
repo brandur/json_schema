@@ -3,18 +3,15 @@ require "set"
 
 module JsonSchema
   class ReferenceExpander
-    def initialize(schema)
-      @schema = schema
-    end
-
-    def expand
+    def expand(schema)
       @errors = []
+      @schema = schema
       @store = {}
       @unresolved_refs = Set.new
       last_num_unresolved_refs = 0
 
       loop do
-        traverse_schema(@schema)
+        traverse_schema(schema)
 
         # nothing left unresolved, we're done!
         if @unresolved_refs.count == 0
@@ -26,7 +23,7 @@ module JsonSchema
         if @unresolved_refs.count == last_num_unresolved_refs
           refs = @unresolved_refs.to_a.join(", ")
           message = %{Couldn't resolve references (possible circular dependency): #{refs}.}
-          @errors << SchemaError.new(@schema, message)
+          @errors << SchemaError.new(schema, message)
           break
         end
 
@@ -36,10 +33,11 @@ module JsonSchema
       @errors.count == 0
     end
 
-    def expand!
-      if !expand
+    def expand!(schema)
+      if !expand(schema)
         raise SchemaError.aggregate(@errors)
       end
+      true
     end
 
     private

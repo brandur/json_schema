@@ -4,7 +4,8 @@ require "json_schema"
 
 describe JsonSchema::ReferenceExpander do
   it "expands references" do
-    expand
+    assert expand
+
     # this was always a fully-defined property
     referenced = @schema.definitions["app"]
     # this used to be a $ref
@@ -18,21 +19,21 @@ describe JsonSchema::ReferenceExpander do
   end
 
   it "will expand anyOf" do
-    expand
+    assert expand
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal 3, schema.any_of[0].min_length
     assert_equal 5, schema.any_of[1].min_length
   end
 
   it "will expand allOf" do
-    expand
+    assert expand
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal 30, schema.all_of[0].max_length
     assert_equal 3, schema.all_of[1].min_length
   end
 
   it "will expand dependencies" do
-    expand
+    assert expand
     schema = @schema.properties["app"].dependencies["ssl"].properties["name"]
     assert_equal ["string"], schema.type
   end
@@ -43,7 +44,7 @@ describe JsonSchema::ReferenceExpander do
         "$ref" => "#/definitions/app/definitions/name"
       }
     )
-    expand
+    assert expand
     schema = @schema.properties["app"].properties["flags"].items
     assert_equal ["string"], schema.type
   end
@@ -55,7 +56,7 @@ describe JsonSchema::ReferenceExpander do
         { "$ref" => "#/definitions/app/definitions/owner" }
       ]
     )
-    expand
+    assert expand
     schema0 = @schema.properties["app"].properties["flags"].items[0]
     schema1 = @schema.properties["app"].properties["flags"].items[0]
     assert_equal ["string"], schema0.type
@@ -63,20 +64,20 @@ describe JsonSchema::ReferenceExpander do
   end
 
   it "will expand oneOf" do
-    expand
+    assert expand
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal /^(foo|aaa)$/, schema.one_of[0].pattern
     assert_equal /^(foo|zzz)$/, schema.one_of[1].pattern
   end
 
   it "will expand not" do
-    expand
+    assert expand
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal /^$/, schema.not.pattern
   end
 
   it "will expand patternProperties" do
-    expand
+    assert expand
     # value ([1]) of the #first tuple in hash
     schema = @schema.properties["app"].definitions["roles"].
       pattern_properties.first[1]
@@ -84,7 +85,7 @@ describe JsonSchema::ReferenceExpander do
   end
 
   it "will expand hyperschema link schemas" do
-    expand
+    assert expand
     schema = @schema.properties["app"].links[0].schema.properties["name"]
     assert_equal ["string"], schema.type
   end
@@ -98,7 +99,7 @@ describe JsonSchema::ReferenceExpander do
         "$ref" => "#/definitions/app"
       }
     }
-    expand
+    assert expand
   end
 
   it "errors on a JSON Pointer that can't be resolved" do
@@ -137,7 +138,7 @@ describe JsonSchema::ReferenceExpander do
 
   def expand
     @schema = JsonSchema::Parser.new.parse!(schema_sample)
-    @expander = JsonSchema::ReferenceExpander.new(@schema)
-    @expander.expand!
+    @expander = JsonSchema::ReferenceExpander.new
+    @expander.expand!(@schema)
   end
 end

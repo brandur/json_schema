@@ -109,10 +109,24 @@ module JsonSchema
       end
     end
 
+    def expand_references
+      expander = ReferenceExpander.new
+      if expander.expand(self)
+        [true, nil]
+      else
+        [false, expander.errors]
+      end
+    end
+
     def expand_references!
-      ReferenceExpander.new(self).expand!
-      # return self for convenience
-      self
+      ReferenceExpander.new.expand!(self)
+      true
+    end
+
+    def validate(data)
+      validator = Validator.new(self)
+      valid = validator.validate(data)
+      [valid, validator.errors]
     end
 
     def validate!(data)
