@@ -109,7 +109,7 @@ module JsonSchema
     def validate_any_of(schema, data, errors)
       return true if schema.any_of.empty?
       valid = schema.any_of.any? do |subschema|
-        validate_data(subschema, data, {})
+        validate_data(subschema, data, [])
       end
       message = %{Data did not match any subschema of "anyOf" condition.}
       errors << SchemaError.new(schema, message) if !valid
@@ -302,7 +302,7 @@ module JsonSchema
     def validate_one_of(schema, data, errors)
       return true if schema.one_of.empty?
       num_valid = schema.one_of.count do |subschema|
-        validate_data(subschema, data, {})
+        validate_data(subschema, data, [])
       end
       message = %{Data did not match exactly one subschema of "oneOf" condition.}
       errors << SchemaError.new(schema, message) if num_valid != 1
@@ -313,7 +313,7 @@ module JsonSchema
       return true unless schema.not
       # don't bother accumulating these errors, they'll all be worded
       # incorrectly for the inverse condition
-      valid = !validate_data(schema.not, data, {})
+      valid = !validate_data(schema.not, data, [])
       message = %{Data matched subschema of "not" condition.}
       errors << SchemaError.new(schema, message) if !valid
       valid
