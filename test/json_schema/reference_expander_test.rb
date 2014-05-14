@@ -126,7 +126,7 @@ describe JsonSchema::ReferenceExpander do
     }
     refute expand
     assert_includes error_messages,
-      %{Couldn't resolve references (possible circular dependency): #/definitions/app.}
+      %{Couldn't resolve references (possible circular dependency): #/properties/app.}
   end
 
   def error_messages

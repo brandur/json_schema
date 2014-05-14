@@ -2,6 +2,10 @@ require "uri"
 require_relative "json_pointer"
 
 module JsonReference
+  def self.reference(ref)
+    Reference.new(ref)
+  end
+
   class Reference
     attr_accessor :pointer
     attr_accessor :uri
@@ -19,8 +23,9 @@ module JsonReference
         @pointer = ref
       end
 
-      # normalize pointers by prepending "#"
+      # normalize pointers by prepending "#" and stripping trailing "/"
       @pointer = "#" + @pointer
+      @pointer = @pointer.chomp("/")
     end
 
     # Given the document addressed by #uri, resolves the JSON Pointer part of

@@ -7,9 +7,17 @@ module JsonSchema
     def expand(schema)
       @errors = []
       @schema = schema
-      @store = {}
       @unresolved_refs = Set.new
       last_num_unresolved_refs = 0
+
+      # The URI map helps resolve URI-based JSON pointers by storing IDs that
+      # we've seen in the schema.
+      #
+      # Each URI tuple also contains a pointer map that helps speed up
+      # expansions that have already happened and handles cyclic dependencies.
+      # Store a reference to the top-level schema before doing anything else.
+      @uri_map = {}
+      add_uri_reference("/", schema)
 
       loop do
         traverse_schema(schema)
@@ -43,65 +51,104 @@ module JsonSchema
 
     private
 
-    def dereference(schema)
-      ref = schema.reference
+    def add_uri_reference(uri, schema)
+      raise "can't add nil URI" if uri.nil?
+
+      # Children without an ID keep the same URI as their parents. So since we
+      # traverse trees from top to bottom, just keep the first reference.
+      if !@uri_map.key?(uri)
+        @uri_map[uri] = {
+          pointer_map: {
+            JsonReference.reference("#").to_s => schema
+          },
+          schema: schema
+        }
+      end
+    end
+
+    def add_pointer_reference(uri, path, schema)
+      @uri_map[uri][:pointer_map][path] = schema
+    end
+
+    def dereference(ref_schema)
+      ref = ref_schema.reference
       uri = ref.uri
 
       if uri && uri.host
         scheme = uri.scheme || "http"
         message = %{Reference resolution over #{scheme} is not currently supported.}
-        @errors << SchemaError.new(schema, message)
+        @errors << SchemaError.new(ref_schema, message)
       # absolute
       elsif uri && uri.path[0] == "/"
-        resolve(schema, uri.path, ref)
+        resolve(ref_schema, uri.path)
       # relative
       elsif uri
         # build an absolute path using the URI of the current schema
-        schema_uri = schema.uri.chomp("/")
-        resolve(schema, schema_uri + "/" + uri.path, ref)
+        schema_uri = ref_schema.uri.chomp("/")
+        resolve(ref_schema, schema_uri + "/" + uri.path)
       # just a JSON Pointer -- resolve against schema root
       else
-        evaluate(schema, @schema, ref)
+        evaluate(ref_schema, "/", @schema)
       end
     end
 
-    def evaluate(schema, schema_context, ref)
-      data = JsonPointer.evaluate(schema_context.data, ref.pointer)
+    def evaluate(ref_schema, uri_path, resolved_schema)
+      ref = ref_schema.reference
 
-      # couldn't resolve pointer within known schema; that's an error
-      if data.nil?
-        message = %{Couldn't resolve pointer "#{ref.pointer}".}
-        @errors << SchemaError.new(schema_context, message)
-        return
-      end
+      # we've already evaluated this precise URI/pointer combination before
+      if !(new_schema = lookup_pointer(uri_path, ref.pointer.to_s))
+        data = JsonPointer.evaluate(resolved_schema.data, ref.pointer)
 
-      # this counts as a resolution
-      @unresolved_refs.delete(ref.to_s)
+        # couldn't resolve pointer within known schema; that's an error
+        if data.nil?
+          message = %{Couldn't resolve pointer "#{ref.pointer}".}
+          @errors << SchemaError.new(resolved_schema, message)
+          return nil
+        end
 
-      # parse a new schema and use the same parent node
-      new_schema = Parser.new.parse(data, schema.parent)
+        # this counts as a resolution
+        @unresolved_refs.delete(ref.to_s)
 
-      # mark a new unresolved reference if the schema we got back is also a
-      # reference
-      if new_schema.reference
-        @unresolved_refs.add(new_schema.reference.to_s)
+        # parse a new schema and use the same parent node
+        new_schema = Parser.new.parse(data, ref_schema.parent)
+
+        # TODO: recursion ...
+        add_pointer_reference(uri_path, ref.pointer.to_s, new_schema)
+
+        # mark a new unresolved reference if the schema we got back is also a
+        # reference
+        if new_schema.reference
+          @unresolved_refs.add(new_schema.reference.to_s)
+        end
       end
 
       # copy new schema into existing one while preserving parent
-      parent = schema.parent
-      schema.copy_from(new_schema)
-      schema.parent = parent
+      parent = ref_schema.parent
+      ref_schema.copy_from(new_schema)
+      ref_schema.parent = parent
 
-      new_schema
+      nil
     end
 
-    def resolve(schema, uri, ref)
-      if schema_context = @store[uri]
-        evaluate(schema, schema_context, ref)
+    def lookup_pointer(uri, pointer)
+      @uri_map[uri][:pointer_map][pointer]
+    end
+
+    def lookup_uri(uri)
+      if @uri_map[uri]
+        @uri_map[uri][:schema]
+      else
+        nil
+      end
+    end
+
+    def resolve(ref_schema, uri_path)
+      if schema = lookup_uri(uri_path)
+        evaluate(ref_schema, uri_path, schema)
       else
         # couldn't resolve, return original reference
-        @unresolved_refs.add(ref.to_s)
-        schema
+        @unresolved_refs.add(ref_schema.reference.to_s)
+        ref_schema
       end
     end
 
@@ -138,10 +185,8 @@ module JsonSchema
     end
 
     def traverse_schema(schema)
-      # Children without an ID keep the same URI as their parents. So since we
-      # traverse trees from top to bottom, just keep the first reference.
-      if !@store.key?(schema.uri)
-        @store[schema.uri] = schema
+      if !schema.reference
+        add_uri_reference(schema.uri, schema)
       end
 
       schema_children(schema).each do |subschema|
