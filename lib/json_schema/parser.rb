@@ -81,8 +81,14 @@ module JsonSchema
     end
 
     def parse_data(data, parent = nil)
-      if ref = data["$ref"]
-        schema = Schema.new
+      schema = Schema.new
+
+      if !data.is_a?(Hash)
+        # it would be nice to make this message more specific/nicer (at best it
+        # points to the wrong schema)
+        message = %{Expected schema; value was: #{data.inspect}.}
+        @errors << SchemaError.new(parent, message)
+      elsif ref = data["$ref"]
         schema.reference = JsonReference::Reference.new(ref)
       else
         schema = parse_schema(data, parent)

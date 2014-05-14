@@ -5,14 +5,60 @@ require "json_schema"
 describe JsonSchema do
   describe ".parse" do
     it "succeeds" do
-      JsonSchema.parse(schema_sample)
+      schema, errors = JsonSchema.parse(schema_sample)
+      assert schema
+    end
+
+    it "returns errors on a parsing problem" do
+      pointer("#/properties").merge!(
+        "app" => 4
+      )
+      schema, errors = JsonSchema.parse(schema_sample)
+      refute schema
+      assert_includes errors.map { |e| e.message },
+        %{Expected schema; value was: 4.}
+    end
+
+    it "returns errors on a reference expansion problem" do
+      pointer("#/properties").merge!(
+        "app" => { "$ref" => "#/bad-json-reference" }
+      )
+      schema, errors = JsonSchema.parse(schema_sample)
+      refute schema
+      assert_includes errors.map { |e| e.message },
+        %{Couldn't resolve pointer "#/bad-json-reference".}
     end
   end
 
   describe ".parse!" do
     it "succeeds on .parse!" do
-      JsonSchema.parse!(schema_sample)
+      assert JsonSchema.parse!(schema_sample)
     end
+
+    it "returns errors on a parsing problem" do
+      pointer("#/properties").merge!(
+        "app" => 4
+      )
+      e = assert_raises(RuntimeError) do
+        JsonSchema.parse!(schema_sample)
+      end
+      assert_includes e.message, %{Expected schema; value was: 4.}
+    end
+
+    it "returns errors on a reference expansion problem" do
+      pointer("#/properties").merge!(
+        "app" => { "$ref" => "#/bad-json-reference" }
+      )
+      e = assert_raises(RuntimeError) do
+        JsonSchema.parse!(schema_sample)
+      end
+      assert_includes e.message, 
+        %{Couldn't resolve pointer "#/bad-json-reference".}
+    end
+  end
+
+  def pointer(path)
+    JsonPointer.evaluate(schema_sample, path)
   end
 
   def schema_sample
