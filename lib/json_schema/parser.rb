@@ -24,12 +24,17 @@ module JsonSchema
       # object, the @errors array is an instance-wide accumulator
       @errors = []
 
-      parse_data(data, parent)
+      schema = parse_data(data, parent)
+      if @errors.count == 0
+        schema
+      else
+        nil
+      end
     end
 
     def parse!(data, parent = nil)
       schema = parse(data, parent)
-      if @errors.count > 0
+      if !schema
         raise SchemaError.aggregate(@errors)
       end
       schema

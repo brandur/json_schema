@@ -182,42 +182,41 @@ describe JsonSchema::Parser do
 
   it "errors on non-string ids" do
     schema_sample["id"] = 4
-    e = assert_raises(RuntimeError) { parse }
-    assert_equal %{At "/": Expected "id" to be of type "string"; value was: 4.},
-      e.message
+    refute parse
+    assert_includes error_messages, %{Expected "id" to be of type "string"; value was: 4.}
   end
 
   it "errors on non-string titles" do
     schema_sample["title"] = 4
-    e = assert_raises(RuntimeError) { parse }
-    assert_equal %{At "/": Expected "title" to be of type "string"; value was: 4.},
-      e.message
+    refute parse
+    assert_includes error_messages, %{Expected "title" to be of type "string"; value was: 4.}
   end
 
   it "errors on non-string descriptions" do
     schema_sample["description"] = 4
-    e = assert_raises(RuntimeError) { parse }
-    assert_equal %{At "/": Expected "description" to be of type "string"; value was: 4.},
-      e.message
+    refute parse
+    assert_includes error_messages, %{Expected "description" to be of type "string"; value was: 4.}
   end
 
   it "errors on non-array and non-string types" do
     schema_sample["type"] = 4
-    e = assert_raises(RuntimeError) { parse }
-    assert_equal %{At "/": Expected "type" to be of type "array/string"; value was: 4.},
-      e.message
+    refute parse
+    assert_includes error_messages, %{Expected "type" to be of type "array/string"; value was: 4.}
   end
 
   it "errors on unknown types" do
     schema_sample["type"] = ["float", "double"]
-    e = assert_raises(RuntimeError) { parse }
-    assert_equal %{At "/": Unknown types: double, float.},
-      e.message
+    refute parse
+    assert_includes error_messages, %{Unknown types: double, float.}
+  end
+
+  def error_messages
+    @parser.errors.map { |e| e.message }
   end
 
   def parse
     @parser = JsonSchema::Parser.new
-    @parser.parse!(schema_sample)
+    @parser.parse(schema_sample)
   end
 
   def pointer(path)
