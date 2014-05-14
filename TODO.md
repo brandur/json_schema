@@ -1,6 +1,9 @@
 # TODO
 
+* Add option to validating incoming schemas against hyperschema.
+* Go through and make sure that all error messages are consistent.
 * Optimize reference expander for leaf-first expansion (probably more optimal).
+* Figure out how to create a JSON pointer to schemas in errors instead of using suboptimal and less accurate ID.
 
 ## Testing
 
