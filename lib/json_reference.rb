@@ -1,5 +1,5 @@
-require "json_pointer"
 require "uri"
+require_relative "json_pointer"
 
 module JsonReference
   class Reference
@@ -14,6 +14,7 @@ module JsonReference
         if uri && !uri.empty?
           @uri = URI.parse(uri)
         end
+        @pointer ||= ""
       else
         @pointer = ref
       end
