@@ -8,7 +8,7 @@ module JsonSchema
   def self.parse(data)
     parser = Parser.new
     if schema = parser.parse(data)
-      valid, errors = parser.expand_references
+      valid, errors = schema.expand_references
       if valid
         [schema, nil]
       else
