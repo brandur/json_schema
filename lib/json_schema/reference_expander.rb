@@ -19,7 +19,7 @@ module JsonSchema
           break
         end
 
-        # a new traversal pass still hasn't managed to resolved anymore
+        # a new traversal pass still hasn't managed to resolve anymore
         # references; we're out of luck
         if @unresolved_refs.count == last_num_unresolved_refs
           refs = @unresolved_refs.to_a.join(", ")
