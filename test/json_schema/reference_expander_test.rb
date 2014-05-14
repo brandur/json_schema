@@ -106,26 +106,31 @@ describe JsonSchema::ReferenceExpander do
     schema_sample["properties"]["app"] = {
       "$ref" => "#/definitions/nope"
     }
-    e = assert_raises(RuntimeError) { expand }
-    assert_equal %{At "/": Couldn't resolve pointer "#/definitions/nope".},
-      e.message
+    refute expand
+    assert_includes error_messages,
+      %{Couldn't resolve pointer "#/definitions/nope".}
   end
 
   it "errors on a schema that can't be resolved" do
     schema_sample["properties"]["app"] = {
       "$ref" => "/schemata/user#/definitions/name"
     }
-    e = assert_raises(RuntimeError) { expand }
-    assert_equal %{At "/": Couldn't resolve references (possible circular dependency): /schemata/user#/definitions/name.},
-      e.message
+    refute expand
+    assert_includes error_messages,
+      %{Couldn't resolve references (possible circular dependency): /schemata/user#/definitions/name.}
   end
 
   it "errors on a circular reference" do
     schema_sample["definitions"]["app"] = {
       "$ref" => "#/properties/app"
     }
-    e = assert_raises(RuntimeError) { expand }
-    assert_equal %{At "/": Couldn't resolve references (possible circular dependency): #/definitions/app.}, e.message
+    refute expand
+    assert_includes error_messages,
+      %{Couldn't resolve references (possible circular dependency): #/definitions/app.}
+  end
+
+  def error_messages
+    @expander.errors.map { |e| e.message }
   end
 
   def pointer(path)
@@ -139,6 +144,6 @@ describe JsonSchema::ReferenceExpander do
   def expand
     @schema = JsonSchema::Parser.new.parse!(schema_sample)
     @expander = JsonSchema::ReferenceExpander.new
-    @expander.expand!(@schema)
+    @expander.expand(@schema)
   end
 end

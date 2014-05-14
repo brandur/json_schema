@@ -3,6 +3,8 @@ require "set"
 
 module JsonSchema
   class ReferenceExpander
+    attr_accessor :errors
+
     def expand(schema)
       @errors = []
       @schema = schema
