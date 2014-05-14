@@ -308,6 +308,28 @@ describe JsonSchema::Validator do
     assert_includes error_messages, %{Extra keys in object: foo.}
   end
 
+  it "validates additionalProperties schema successfully" do
+    pointer("#/definitions/app").merge!(
+      "additionalProperties" => {
+        "type" => ["boolean"]
+      }
+    )
+    data_sample["foo"] = true
+    assert validate
+  end
+
+  it "validates additionalProperties schema unsuccessfully" do
+    pointer("#/definitions/app").merge!(
+      "additionalProperties" => {
+        "type" => ["boolean"]
+      }
+    )
+    data_sample["foo"] = 4
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to be of type "boolean"; value was: 4.}
+  end
+
   it "validates simple dependencies" do
     pointer("#/definitions/app/dependencies").merge!(
       "production" => "ssl"

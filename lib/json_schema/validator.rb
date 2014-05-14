@@ -86,13 +86,25 @@ module JsonSchema
     end
 
     def validate_additional_properties(schema, data, errors)
-      return true if schema.additional_properties
-      if (extra = data.keys - schema.properties.keys).empty?
-        true
+      return true if schema.additional_properties == true
+
+      extra = data.keys - schema.properties.keys
+
+      # schema indicates that all properties not in `properties` should be
+      # validated according to subschema
+      if schema.additional_properties.is_a?(Schema)
+        extra.each do |key|
+          validate_data(schema.additional_properties, data[key], errors)
+        end
+      # boolean indicates whether additional properties are allowed
       else
-        message = %{Extra keys in object: #{extra.sort.join(", ")}.}
-        errors << SchemaError.new(schema, message)
-        false
+        if extra.empty?
+          true
+        else
+          message = %{Extra keys in object: #{extra.sort.join(", ")}.}
+          errors << SchemaError.new(schema, message)
+          false
+        end
       end
     end
 
