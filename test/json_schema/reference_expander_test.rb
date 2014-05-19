@@ -18,6 +18,12 @@ describe JsonSchema::ReferenceExpander do
     assert_equal referenced.uri, reference.uri
   end
 
+  it "takes a document store" do
+    store = JsonSchema::DocumentStore.new
+    expand(store: store)
+    assert store.lookup_uri("/")
+  end
+
   it "will expand anyOf" do
     assert expand
     schema = @schema.properties["app"].definitions["contrived_plus"]
@@ -157,9 +163,9 @@ describe JsonSchema::ReferenceExpander do
     @schema_sample ||= DataScaffold.schema_sample
   end
 
-  def expand
+  def expand(options = {})
     @schema = JsonSchema::Parser.new.parse!(schema_sample)
     @expander = JsonSchema::ReferenceExpander.new
-    @expander.expand(@schema)
+    @expander.expand(@schema, options)
   end
 end

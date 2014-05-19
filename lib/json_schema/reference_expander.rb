@@ -4,9 +4,10 @@ module JsonSchema
   class ReferenceExpander
     attr_accessor :errors
 
-    def expand(schema)
+    def expand(schema, options = {})
       @errors = []
       @schema = schema
+      @store = options[:store] ||= DocumentStore.new
       last_unresolved_refs = nil
 
       # The URI map helps resolve URI-based JSON pointers by storing IDs that
@@ -15,9 +16,7 @@ module JsonSchema
       # Each URI tuple also contains a pointer map that helps speed up
       # expansions that have already happened and handles cyclic dependencies.
       # Store a reference to the top-level schema before doing anything else.
-      @uri_map = {}
-      add_uri_reference("/", schema)
-      add_uri_reference(schema.uri, schema)
+      @store.add_uri_reference("/", schema)
 
       loop do
         traverse_schema(schema)
@@ -52,27 +51,6 @@ module JsonSchema
 
     private
 
-    def add_uri_reference(uri, schema)
-      raise "can't add nil URI" if uri.nil?
-
-      # Children without an ID keep the same URI as their parents. So since we
-      # traverse trees from top to bottom, just keep the first reference.
-      if !@uri_map.key?(uri)
-        @uri_map[uri] = {
-          pointer_map: {
-            JsonReference.reference("#").to_s => schema
-          },
-          schema: schema
-        }
-      end
-    end
-
-    def add_pointer_reference(uri, path, schema)
-      if !@uri_map[uri][:pointer_map].key?(path)
-        @uri_map[uri][:pointer_map][path] = schema
-      end
-    end
-
     def dereference(ref_schema)
       ref = ref_schema.reference
       uri = ref.uri
@@ -81,7 +59,7 @@ module JsonSchema
         scheme = uri.scheme || "http"
         # allow resolution if something we've already parsed has claimed the
         # full URL
-        if lookup_uri(uri.to_s)
+        if @store.lookup_uri(uri.to_s)
           resolve(ref_schema, uri.to_s)
         else
           message =
@@ -106,7 +84,7 @@ module JsonSchema
       ref = ref_schema.reference
 
       # we've already evaluated this precise URI/pointer combination before
-      if !(new_schema = lookup_pointer(uri_path, ref.pointer.to_s))
+      if !(new_schema = @store.lookup_pointer(uri_path, ref.pointer.to_s))
         data = JsonPointer.evaluate(resolved_schema.data, ref.pointer)
 
         # couldn't resolve pointer within known schema; that's an error
@@ -119,9 +97,9 @@ module JsonSchema
         # parse a new schema and use the same parent node
         new_schema = Parser.new.parse(data, ref_schema.parent)
 
-        # add the reference into our lookup table right away; it will
+        # add the reference into our document store right away; it will
         # eventually be fully expanded
-        add_pointer_reference(uri_path, ref.pointer.to_s, new_schema)
+        @store.add_pointer_reference(uri_path, ref.pointer.to_s, new_schema)
       else
         # insert a clone record so that the expander knows to hydrate it when
         # the schema traversal is finished
@@ -136,20 +114,8 @@ module JsonSchema
       nil
     end
 
-    def lookup_pointer(uri, pointer)
-      @uri_map[uri][:pointer_map][pointer]
-    end
-
-    def lookup_uri(uri)
-      if @uri_map[uri]
-        @uri_map[uri][:schema]
-      else
-        nil
-      end
-    end
-
     def resolve(ref_schema, uri_path)
-      if schema = lookup_uri(uri_path)
+      if schema = @store.lookup_uri(uri_path)
         evaluate(ref_schema, uri_path, schema)
       end
     end
@@ -200,7 +166,7 @@ module JsonSchema
     end
 
     def traverse_schema(schema)
-      add_uri_reference(schema.uri, schema)
+      @store.add_uri_reference(schema.uri, schema)
 
       schema_children(schema).each do |subschema|
         if subschema.reference
