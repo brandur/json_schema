@@ -7,15 +7,9 @@ module JsonSchema
     def expand(schema, options = {})
       @errors = []
       @schema = schema
-      @store = options[:store] ||= DocumentStore.new
+      @store  = options[:store] ||= DocumentStore.new
       last_unresolved_refs = nil
 
-      # The URI map helps resolve URI-based JSON pointers by storing IDs that
-      # we've seen in the schema.
-      #
-      # Each URI tuple also contains a pointer map that helps speed up
-      # expansions that have already happened and handles cyclic dependencies.
-      # Store a reference to the top-level schema before doing anything else.
       @store.add_uri_reference("/", schema)
 
       loop do
