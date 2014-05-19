@@ -32,7 +32,7 @@ module JsonSchema
         # references; we're out of luck
         if @unresolved_refs.count == last_num_unresolved_refs
           refs = @unresolved_refs.to_a.join(", ")
-          message = %{Couldn't resolve references (possible circular dependency): #{refs}.}
+          message = %{Couldn't resolve references: #{refs}.}
           @errors << SchemaError.new(schema, message)
           break
         end

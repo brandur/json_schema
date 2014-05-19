@@ -128,16 +128,16 @@ describe JsonSchema::ReferenceExpander do
     }
     refute expand
     assert_includes error_messages,
-      %{Couldn't resolve references (possible circular dependency): /schemata/user#/definitions/name.}
+      %{Couldn't resolve references: /schemata/user#/definitions/name.}
   end
 
-  it "errors on a circular reference" do
+  it "errors on a self-reference" do
     schema_sample["definitions"]["app"] = {
       "$ref" => "#/properties/app"
     }
     refute expand
     assert_includes error_messages,
-      %{Couldn't resolve references (possible circular dependency): #/properties/app.}
+      %{Couldn't resolve references: #/properties/app.}
   end
 
   def error_messages
