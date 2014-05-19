@@ -203,9 +203,6 @@ module JsonSchema
       add_uri_reference(schema.uri, schema)
 
       schema_children(schema).each do |subschema|
-if subschema.reference.to_s == "#/properties/app2"
-  #require "pry" ; binding.pry
-end
         if subschema.reference
           dereference(subschema)
         end
