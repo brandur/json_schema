@@ -13,6 +13,10 @@ module JsonSchema
       class_eval("def #{attr} ; !@#{attr}.nil? ? @#{attr} : #{default} ; end")
     end
 
+    def initialize
+      @clones = Set.new
+    end
+
     # Rather than a normal schema, the node may be a JSON Reference. In this
     # case, no other attributes will be filled in except for #parent.
     attr_copyable :reference
@@ -21,8 +25,9 @@ module JsonSchema
     # Pointer resolution
     attr_copyable :data
 
-    # parent and children schemas
+    # relations
     attr_copyable :parent
+    attr_copyable :clones
 
     # the normalize URI of this schema
     attr_copyable :uri
@@ -120,6 +125,10 @@ module JsonSchema
     def expand_references!
       ReferenceExpander.new.expand!(self)
       true
+    end
+
+    def original?
+      !clones.include?(self)
     end
 
     def validate(data)

@@ -45,20 +45,26 @@ module JsonSchema
     def build_uri(id, parent_uri)
       # kill any trailing slashes
       if id
-        id = id.chomp("/")
-      end
-
+        # may look like: http://json-schema.org/draft-04/hyper-schema#
+        uri = URI.parse(id)
+        # make sure there is no `#` suffix
+        uri.fragment = nil
+        # if id is defined as absolute, the schema's URI stays absolute
+        if uri.absolute? || uri.path[0] == "/"
+          uri.to_s.chomp("/")
+        # otherwise build it according to the parent's URI
+        elsif parent_uri
+          # make sure we don't end up with duplicate slashes
+          parent_uri = parent_uri.chomp("/")
+          parent_uri + "/" + id
+        else
+          "/"
+        end
       # if id is missing, it's defined as its parent schema's URI
-      if id.nil?
+      elsif parent_uri
         parent_uri
-      # if id is defined as absolute, the schema's URI stays absolute
-      elsif id[0] == "/"
-        id
-      # otherwise build it according to the parent's URI
       else
-        # make sure we don't end up with duplicate slashes
-        parent_uri = parent_uri.chomp("/")
-        parent_uri + "/" + id
+        "/"
       end
     end
 
@@ -214,7 +220,7 @@ module JsonSchema
       schema.id          = validate_type(schema, [String], "id")
 
       # build URI early so we can reference it in errors
-      schema.uri = parent ?  build_uri(schema.id, parent.uri) : "/"
+      schema.uri         = build_uri(schema.id, parent ? parent.uri : nil)
 
       schema.title       = validate_type(schema, [String], "title")
       schema.description = validate_type(schema, [String], "description")

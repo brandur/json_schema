@@ -18,6 +18,7 @@ module JsonSchema
       # Store a reference to the top-level schema before doing anything else.
       @uri_map = {}
       add_uri_reference("/", schema)
+      add_uri_reference(schema.uri, schema)
 
       loop do
         traverse_schema(schema)
@@ -67,7 +68,9 @@ module JsonSchema
     end
 
     def add_pointer_reference(uri, path, schema)
-      @uri_map[uri][:pointer_map][path] = schema
+      if !@uri_map[uri][:pointer_map].key?(path)
+        @uri_map[uri][:pointer_map][path] = schema
+      end
     end
 
     def dereference(ref_schema)
@@ -76,8 +79,16 @@ module JsonSchema
 
       if uri && uri.host
         scheme = uri.scheme || "http"
-        message = %{Reference resolution over #{scheme} is not currently supported.}
-        @errors << SchemaError.new(ref_schema, message)
+        # allow resolution if something we've already parsed has claimed the
+        # full URL
+        if lookup_uri(uri.to_s)
+          resolve(ref_schema, uri.to_s)
+        else
+          message =
+            %{Reference resolution over #{scheme} is not currently supported.}
+          @errors << SchemaError.new(ref_schema, message)
+          @unresolved_refs.add(ref.to_s)
+        end
       # absolute
       elsif uri && uri.path[0] == "/"
         resolve(ref_schema, uri.path)
@@ -103,7 +114,8 @@ module JsonSchema
         if data.nil?
           message = %{Couldn't resolve pointer "#{ref.pointer}".}
           @errors << SchemaError.new(resolved_schema, message)
-          return nil
+          @unresolved_refs.add(ref.to_s)
+          return
         end
 
         # this counts as a resolution
@@ -112,7 +124,8 @@ module JsonSchema
         # parse a new schema and use the same parent node
         new_schema = Parser.new.parse(data, ref_schema.parent)
 
-        # TODO: recursion ...
+        # add the reference into our lookup table right away; it will
+        # eventually be fully expanded
         add_pointer_reference(uri_path, ref.pointer.to_s, new_schema)
 
         # mark a new unresolved reference if the schema we got back is also a
@@ -120,6 +133,10 @@ module JsonSchema
         if new_schema.reference
           @unresolved_refs.add(new_schema.reference.to_s)
         end
+      else
+        # insert a clone record so that the expander knows to hydrate it when
+        # the schema traversal is finished
+        new_schema.clones << ref_schema
       end
 
       # copy new schema into existing one while preserving parent
@@ -185,15 +202,26 @@ module JsonSchema
     end
 
     def traverse_schema(schema)
-      if !schema.reference
-        add_uri_reference(schema.uri, schema)
-      end
+      add_uri_reference(schema.uri, schema)
 
       schema_children(schema).each do |subschema|
         if subschema.reference
           dereference(subschema)
         end
-        traverse_schema(subschema)
+
+        # traverse child schemas only if we don't have any clones
+        if !subschema.reference && subschema.original?
+          traverse_schema(subschema)
+        end
+      end
+
+      # after finishing a schema traversal, find all clones and re-hydrate them
+      if schema.original?
+        schema.clones.each do |clone_schema|
+          parent = clone_schema.parent
+          clone_schema.copy_from(schema)
+          clone_schema.parent = parent
+        end
       end
     end
   end
