@@ -102,6 +102,17 @@ describe JsonSchema::ReferenceExpander do
     assert expand
   end
 
+  it "will resolve circular references" do
+    schema_sample["properties"] = {
+      "app" => {
+        "$ref" => "#"
+      }
+    }
+    assert expand
+    schema = @schema.properties["app"]
+    assert_equal ["object"], schema.type
+  end
+
   it "errors on a JSON Pointer that can't be resolved" do
     schema_sample["properties"]["app"] = {
       "$ref" => "#/definitions/nope"
