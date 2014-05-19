@@ -9,5 +9,6 @@ Gem::Specification.new do |s|
   s.homepage      = "https://github.com/brandur/json_schema"
   s.license       = "MIT"
 
-  s.files         = Dir["README.md", "{lib,test}/**/*.rb"]
+  s.executables   = ["validate-schema"]
+  s.files         = Dir["README.md", "bin/*", "{lib,test}/**/*.rb"]
 end
