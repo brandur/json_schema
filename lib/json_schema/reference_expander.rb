@@ -7,8 +7,7 @@ module JsonSchema
     def expand(schema)
       @errors = []
       @schema = schema
-      @unresolved_refs = Set.new
-      last_num_unresolved_refs = 0
+      last_unresolved_refs = nil
 
       # The URI map helps resolve URI-based JSON pointers by storing IDs that
       # we've seen in the schema.
@@ -23,21 +22,22 @@ module JsonSchema
       loop do
         traverse_schema(schema)
 
+        refs = unresolved_refs(schema).sort_by { |r| r.to_s }
+
         # nothing left unresolved, we're done!
-        if @unresolved_refs.count == 0
+        if refs.count == 0
           break
         end
 
         # a new traversal pass still hasn't managed to resolve anymore
         # references; we're out of luck
-        if @unresolved_refs.count == last_num_unresolved_refs
-          refs = @unresolved_refs.to_a.join(", ")
-          message = %{Couldn't resolve references: #{refs}.}
+        if refs == last_unresolved_refs
+          message = %{Couldn't resolve references: #{refs.to_a.join(", ")}.}
           @errors << SchemaError.new(schema, message)
           break
         end
 
-        last_num_unresolved_refs = @unresolved_refs.count
+        last_unresolved_refs = refs
       end
 
       @errors.count == 0
@@ -87,7 +87,6 @@ module JsonSchema
           message =
             %{Reference resolution over #{scheme} is not currently supported.}
           @errors << SchemaError.new(ref_schema, message)
-          @unresolved_refs.add(ref.to_s)
         end
       # absolute
       elsif uri && uri.path[0] == "/"
@@ -114,12 +113,8 @@ module JsonSchema
         if data.nil?
           message = %{Couldn't resolve pointer "#{ref.pointer}".}
           @errors << SchemaError.new(resolved_schema, message)
-          @unresolved_refs.add(ref.to_s)
           return
         end
-
-        # this counts as a resolution
-        @unresolved_refs.delete(ref.to_s)
 
         # parse a new schema and use the same parent node
         new_schema = Parser.new.parse(data, ref_schema.parent)
@@ -127,12 +122,6 @@ module JsonSchema
         # add the reference into our lookup table right away; it will
         # eventually be fully expanded
         add_pointer_reference(uri_path, ref.pointer.to_s, new_schema)
-
-        # mark a new unresolved reference if the schema we got back is also a
-        # reference
-        if new_schema.reference
-          @unresolved_refs.add(new_schema.reference.to_s)
-        end
       else
         # insert a clone record so that the expander knows to hydrate it when
         # the schema traversal is finished
@@ -162,10 +151,6 @@ module JsonSchema
     def resolve(ref_schema, uri_path)
       if schema = lookup_uri(uri_path)
         evaluate(ref_schema, uri_path, schema)
-      else
-        # couldn't resolve, return original reference
-        @unresolved_refs.add(ref_schema.reference.to_s)
-        ref_schema
       end
     end
 
@@ -201,10 +186,26 @@ module JsonSchema
       end
     end
 
+    def unresolved_refs(schema)
+      # prevent endless recursion
+      return [] unless schema.original?
+
+      schema_children(schema).reduce([]) do |arr, subschema|
+        if subschema.reference
+          arr += [subschema.reference]
+        else
+          arr += unresolved_refs(subschema)
+        end
+      end
+    end
+
     def traverse_schema(schema)
       add_uri_reference(schema.uri, schema)
 
       schema_children(schema).each do |subschema|
+if subschema.reference.to_s == "#/properties/app2"
+  #require "pry" ; binding.pry
+end
         if subschema.reference
           dereference(subschema)
         end

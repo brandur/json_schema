@@ -92,14 +92,19 @@ describe JsonSchema::ReferenceExpander do
 
   it "will perform multiple passes to resolve all references" do
     schema_sample["properties"] = {
-      "app" => {
-        "$ref" => "#/properties/my-app"
+      "app1" => {
+        "$ref" => "#/properties/app2"
       },
-      "my-app" => {
+      "app2" => {
+        "$ref" => "#/properties/app3"
+      },
+      "app3" => {
         "$ref" => "#/definitions/app"
       }
     }
     assert expand
+    schema = @schema.properties["app1"]
+    assert_equal ["object"], schema.type
   end
 
   it "will resolve circular references" do
@@ -137,7 +142,7 @@ describe JsonSchema::ReferenceExpander do
     }
     refute expand
     assert_includes error_messages,
-      %{Couldn't resolve references: #/properties/app.}
+      %{Couldn't resolve references: #/definitions/app, #/properties/app.}
   end
 
   def error_messages
