@@ -21,30 +21,106 @@ module JsonSchema
     # case, no other attributes will be filled in except for #parent.
     attr_copyable :reference
 
-    # the schema keeps a reference to the data it was initialized from for JSON
-    # Pointer resolution
+    # A reference to the data which the Schema was initialized from. Used for
+    # resolving JSON Pointer references.
+    #
+    # Type: Hash
     attr_copyable :data
 
-    # relations
+    #
+    # Relations
+    #
+
+    # Parent Schema object. Child may come from any of `definitions`,
+    # `properties`, `anyOf`, etc.
+    #
+    # Type: Schema
     attr_copyable :parent
+
+    # Collection of clones of this schema object, meaning all Schemas that were
+    # initialized after the original. Used for JSON Reference expansion. The
+    # only copy not present in this set is the original Schema object.
+    #
+    # Type: Set[Schema]
     attr_copyable :clones
 
-    # the normalize URI of this schema
+    # The normalized URI of this schema. Note that child schemas inherit a URI
+    # from their parent unless they have one explicitly defined, so this is
+    # likely not a unique value in any given schema hierarchy.
+    #
+    # Type: String
     attr_copyable :uri
 
-    # basic descriptors
+    #
+    # Metadata
+    #
+
+    # Alters resolution scope. This value is used along with the parent scope's
+    # URI to build a new address for this schema. Relative ID's will append to
+    # the parent, and absolute URI's will replace it.
+    #
+    # Type: String
     attr_copyable :id
+
+    # Short title of the schema.
+    #
+    # Type: String
     attr_copyable :title
+
+    # More detailed description of the schema.
+    #
+    # Type: String
     attr_copyable :description
+
+    # Default JSON value for this particular schema
+    #
+    # Type: [any]
     attr_copyable :default
 
-    # validation: any
+    #
+    # Validation: Any
+    #
+
+    # A collection of subschemas of which data must validate against the full
+    # set of to be valid.
+    #
+    # Type: Array[Schema]
     attr_copyable :all_of
+
+    # A collection of subschemas of which data must validate against any schema
+    # in the set to be be valid.
+    #
+    # Type: Array[Schema]
     attr_copyable :any_of
+
+    # A collection of inlined subschemas. Standard convention is to subschemas
+    # here and reference them from elsewhere.
+    #
+    # Type: Hash[String => Schema]
     attr_copyable :definitions
+
+    # A collection of objects that must include the data for it to be valid.
+    #
+    # Type: Array
     attr_copyable :enum
+
+    # A collection of subschemas of which data must validate against exactly
+    # one of to be valid.
+    #
+    # Type: Array[Schema]
     attr_copyable :one_of
+
+
+    # A subschema which data must not validate against to be valid.
+    #
+    # Type: Schema
     attr_copyable :not
+
+    # An array of types that data is allowed to be. The spec allows this to be
+    # a string as well, but the parser will always normalize this to an array
+    # of strings.
+    #
+    # Type: Array[String]
     attr_copyable :type
 
     # validation: array
@@ -125,6 +201,48 @@ module JsonSchema
     def expand_references!
       ReferenceExpander.new.expand!(self)
       true
+    end
+
+    def inspect
+      str = inspect_schema
+      str = JSON.pretty_generate(str) if str.is_a?(Hash)
+      "\#<JsonSchema::Schema #{str}>"
+    end
+
+    def inspect_schema
+      if reference
+        reference.inspect
+      elsif !original?
+        "[CLONE]"
+      else
+        hash = {}
+        @@copyable.each do |copyable|
+          next if [:@clones, :@data, :@parent, :@uri].include?(copyable)
+          if value = instance_variable_get(copyable)
+            if value.is_a?(Array)
+              if !value.empty?
+                hash[copyable] = value.map { |v| inspect_value(v) }
+              end
+            elsif value.is_a?(Hash)
+              if !value.empty?
+                hash[copyable] =
+                  Hash[*value.map { |k, v| [k, inspect_value(v)] }.flatten]
+              end
+            else
+              hash[copyable] = inspect_value(value)
+            end
+          end
+        end
+        hash
+      end
+    end
+
+    def inspect_value(value)
+      if value.is_a?(Schema)
+        value.inspect_schema
+      else
+        value.inspect
+      end
     end
 
     def original?
