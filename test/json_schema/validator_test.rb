@@ -564,7 +564,7 @@ describe JsonSchema::Validator do
       %{Expected data to match "regex" format, value was: ^owner($.}
   end
 
-  it "validates uri format successfully" do
+  it "validates absolute uri format successfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uri"
     )
@@ -572,14 +572,22 @@ describe JsonSchema::Validator do
     assert validate
   end
 
+  it "validates relative uri format successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "uri"
+    )
+    data_sample["owner"] = "schemata/app"
+    assert validate
+  end
+
   it "validates uri format unsuccessfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uri"
     )
-    data_sample["owner"] = "example.com"
+    data_sample["owner"] = "http://"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "uri" format, value was: example.com.}
+      %{Expected data to match "uri" format, value was: http://.}
   end
 
   it "validates uuid format successfully" do

@@ -158,7 +158,7 @@ module JsonSchema
       when "regex"
         Regexp.new(data) rescue false
       when "uri"
-        data =~ URI.regexp
+        URI.parse(data) rescue false
       when "uuid"
         data =~ UUID_PATTERN
       end
