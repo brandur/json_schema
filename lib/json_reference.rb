@@ -28,6 +28,10 @@ module JsonReference
       @pointer = @pointer.chomp("/")
     end
 
+    def inspect
+      "\#<JsonReference::Reference #{to_s}>"
+    end
+
     # Given the document addressed by #uri, resolves the JSON Pointer part of
     # the reference.
     def resolve_pointer(data)
