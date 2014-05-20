@@ -124,17 +124,23 @@ module JsonSchema
         schema.pattern_properties.each { |_, s| yielder << s }
         schema.properties.each { |_, s| yielder << s }
 
+        if additional = schema.additional_properties
+          if additional.is_a?(Schema)
+            yielder << additional
+          end
+        end
+
         if schema.not
           yielder << schema.not
         end
 
         # can either be a single schema (list validation) or multiple (tuple
         # validation)
-        if schema.items
-          if schema.items.is_a?(Array)
-            schema.items.each { |s| yielder << s }
+        if items = schema.items
+          if items.is_a?(Array)
+            items.each { |s| yielder << s }
           else
-            yielder << schema.items
+            yielder << items
           end
         end
 

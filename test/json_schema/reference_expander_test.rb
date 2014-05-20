@@ -82,6 +82,15 @@ describe JsonSchema::ReferenceExpander do
     assert_equal /^$/, schema.not.pattern
   end
 
+  it "will expand additionalProperties" do
+    pointer("#").merge!(
+      "additionalProperties" => { "$ref" => "#" }
+    )
+    assert expand
+    schema = @schema.additional_properties
+    assert_equal ["object"], schema.type
+  end
+
   it "will expand patternProperties" do
     assert expand
     # value ([1]) of the #first tuple in hash
