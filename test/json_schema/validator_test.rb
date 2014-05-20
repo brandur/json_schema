@@ -546,6 +546,24 @@ describe JsonSchema::Validator do
       %{Expected data to match "ipv6" format, value was: 1::3:4:5:6:7:8:9.}
   end
 
+  it "validates regex format successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "regex"
+    )
+    data_sample["owner"] = "^owner@heroku\.com$"
+    assert validate
+  end
+
+  it "validates regex format successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "regex"
+    )
+    data_sample["owner"] = "^owner($"
+    refute validate
+    assert_includes error_messages,
+      %{Expected data to match "regex" format, value was: ^owner($.}
+  end
+
   it "validates uri format successfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uri"

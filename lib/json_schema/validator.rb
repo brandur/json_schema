@@ -155,6 +155,8 @@ module JsonSchema
         data =~ IPV4_PATTERN
       when "ipv6"
         data =~ IPV6_PATTERN
+      when "regex"
+        Regexp.new(data) rescue false
       when "uri"
         data =~ URI.regexp
       when "uuid"
@@ -359,6 +361,7 @@ module JsonSchema
       return true if schema.properties.empty?
       valid = true
       schema.properties.each do |key, subschema|
+
         if value = data[key]
           valid = strict_and valid, validate_data(subschema, value, errors)
         end
