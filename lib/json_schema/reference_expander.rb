@@ -33,7 +33,6 @@ module JsonSchema
 
     def dereference(ref_schema, ref_stack)
       ref = ref_schema.reference
-      uri = ref.uri
 
       # detects a reference cycle
       if ref_stack.include?(ref)
@@ -42,52 +41,26 @@ module JsonSchema
         return false
       end
 
-      new_schema = if uri && uri.host
-        scheme = uri.scheme || "http"
-        # allow resolution if something we've already parsed has claimed the
-        # full URL
-        if @store.lookup_uri(uri.to_s)
-          resolve(ref_schema, uri.to_s)
-        else
-          message =
-            %{Reference resolution over #{scheme} is not currently supported.}
-          @errors << SchemaError.new(ref_schema, message)
-          nil
-        end
-      # absolute
-      elsif uri && uri.path[0] == "/"
-        resolve(ref_schema, uri.path)
-      # relative
-      elsif uri
-        # build an absolute path using the URI of the current schema
-        schema_uri = ref_schema.uri.chomp("/")
-        resolve(ref_schema, schema_uri + "/" + uri.path)
-      # just a JSON Pointer -- resolve against schema root
-      else
-        evaluate(ref_schema, "/", @schema)
+      new_schema = resolve_reference(ref_schema)
+      return false unless new_schema
+
+      # if the reference resolved to a new reference we need to continue
+      # dereferencing until we either hit a non-reference schema, or a
+      # reference which is already resolved
+      if new_schema.reference && !new_schema.expanded?
+        success = dereference(new_schema, ref_stack + [ref])
+        return false unless success
       end
 
-      if new_schema
-        # if the reference resolved to a new reference we need to continue
-        # dereferencing until we either hit a non-reference schema, or a
-        # reference which is already resolved
-        if new_schema.reference && !new_schema.expanded?
-          success = dereference(new_schema, ref_stack + [ref])
-          return false unless success
-        end
+      # copy new schema into existing one while preserving parent
+      parent = ref_schema.parent
+      ref_schema.copy_from(new_schema)
+      ref_schema.parent = parent
 
-        # copy new schema into existing one while preserving parent
-        parent = ref_schema.parent
-        ref_schema.copy_from(new_schema)
-        ref_schema.parent = parent
-
-        true
-      else
-        false
-      end
+      true
     end
 
-    def evaluate(ref_schema, uri_path, resolved_schema)
+    def resolve_pointer(ref_schema, uri_path, resolved_schema)
       ref = ref_schema.reference
 
       # we've already evaluated this precise URI/pointer combination before
@@ -116,9 +89,39 @@ module JsonSchema
       new_schema
     end
 
-    def resolve(ref_schema, uri_path)
+    def resolve_reference(ref_schema)
+      ref = ref_schema.reference
+      uri = ref.uri
+
+      if uri && uri.host
+        scheme = uri.scheme || "http"
+        # allow resolution if something we've already parsed has claimed the
+        # full URL
+        if @store.lookup_uri(uri.to_s)
+          resolve_uri(ref_schema, uri.to_s)
+        else
+          message =
+            %{Reference resolution over #{scheme} is not currently supported.}
+          @errors << SchemaError.new(ref_schema, message)
+          nil
+        end
+      # absolute
+      elsif uri && uri.path[0] == "/"
+        resolve_uri(ref_schema, uri.path)
+      # relative
+      elsif uri
+        # build an absolute path using the URI of the current schema
+        schema_uri = ref_schema.uri.chomp("/")
+        resolve_uri(ref_schema, schema_uri + "/" + uri.path)
+      # just a JSON Pointer -- resolve against schema root
+      else
+        resolve_pointer(ref_schema, "/", @schema)
+      end
+    end
+
+    def resolve_uri(ref_schema, uri_path)
       if schema = @store.lookup_uri(uri_path)
-        evaluate(ref_schema, uri_path, schema)
+        resolve_pointer(ref_schema, uri_path, schema)
       else
         message = %{Couldn't resolve URI: #{uri_path}.}
         @errors << SchemaError.new(ref_schema, message)
