@@ -117,29 +117,21 @@ describe JsonSchema::ReferenceExpander do
   end
 
   it "will perform multiple passes to resolve all references" do
-    schema_sample["properties"] = {
-      "app1" => {
-        "$ref" => "#/properties/app2"
-      },
-      "app2" => {
-        "$ref" => "#/properties/app3"
-      },
-      "app3" => {
-        "$ref" => "#/definitions/app"
-      }
-    }
+    pointer("#/properties").merge!(
+      "app0" => { "$ref" => "#/properties/app1" },
+      "app1" => { "$ref" => "#/properties/app2" },
+      "app2" => { "$ref" => "#/definitions/app" },
+    )
     expand
     assert_equal [], errors
-    schema = @schema.properties["app1"]
+    schema = @schema.properties["app0"]
     assert_equal ["object"], schema.type
   end
 
   it "will resolve circular dependencies" do
-    schema_sample["properties"] = {
-      "app" => {
-        "$ref" => "#"
-      }
-    }
+    pointer("#/properties").merge!(
+      "app" => { "$ref" => "#" }
+    )
     expand
     assert_equal [], errors
     schema = @schema.properties["app"]
@@ -147,9 +139,9 @@ describe JsonSchema::ReferenceExpander do
   end
 
   it "errors on a JSON Pointer that can't be resolved" do
-    schema_sample["properties"]["app"] = {
-      "$ref" => "#/definitions/nope"
-    }
+    pointer("#/properties").merge!(
+      "app" => { "$ref" => "#/definitions/nope" }
+    )
     refute expand
     assert_includes errors,
       %{Couldn't resolve pointer "#/definitions/nope".}
@@ -158,9 +150,9 @@ describe JsonSchema::ReferenceExpander do
   end
 
   it "errors on a URI that can't be resolved" do
-    schema_sample["properties"]["app"] = {
-      "$ref" => "/schemata/user#/definitions/name"
-    }
+    pointer("#/properties").merge!(
+      "app" => { "$ref" => "/schemata/user#/definitions/name" }
+    )
     refute expand
     assert_includes errors,
       %{Couldn't resolve references: /schemata/user#/definitions/name.}
