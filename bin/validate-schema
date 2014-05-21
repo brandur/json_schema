@@ -2,77 +2,36 @@
 
 require "json"
 require "optparse"
-require_relative "../lib/json_schema"
-
-def check_file!(file)
-  if !File.exists?(file)
-    $stderr.puts "validate-schema: #{file}: No such file or directory"
-  end
-end
-
-def parse!(file)
-  parser = JsonSchema::Parser.new
-  if !(schema = parser.parse(JSON.parse(File.read(file))))
-    $stderr.puts "Schema is invalid."
-    print_errors!(file, errors)
-  end
-  schema
-end
-
-def print_errors!(file, errors)
-  errors.each do |e|
-    if e.schema
-      $stdout.puts "#{file}: #{e.message}"
-    else
-      $stdout.puts e.message
-    end
-  end
-  exit(1)
-end
+require_relative "../lib/commands/validate_schema"
 
 def print_usage!
-  $stderr.puts "Usage: validate-schema <schema> <data>"
-  exit(1)
+  $stderr.puts "Usage: validate-schema <schema> <data>, ..."
+  $stderr.puts "       validate-schema -d <data>, ..."
 end
 
-extra_schemas = []
+command = Commands::ValidateSchema.new
+
 OptionParser.new { |opts|
+  opts.on("-d", "--detect", "Detect schema from $schema") do
+    command.detect = true
+
+    # mix in common schemas for convenience
+    command.extra_schemas += ["schema.json", "hyper-schema.json"].
+      map { |f| File.expand_path(f, __FILE__ + "/../../schemas") }
+  end
   opts.on("-s", "--schema SCHEMA", "Additional schema to use for references") do |s|
-    extra_schemas << s
+    command.extra_schemas << s
   end
 }.parse!
 
-if !(schema_file = ARGV.shift)
-  print_usage!
-end
+success = command.run(ARGV.dup)
 
-if !(data_file = ARGV.shift)
-  print_usage!
-end
-
-check_file!(schema_file)
-check_file!(data_file)
-
-schema = parse!(schema_file)
-
-store = JsonSchema::DocumentStore.new
-extra_schemas.each do |extra_schema|
-  extra_schema = parse!(extra_schema)
-  store.add_uri_reference(extra_schema.uri, extra_schema)
-end
-
-expander = JsonSchema::ReferenceExpander.new
-if !expander.expand(schema, store: store)
-  $stderr.puts "Could not expand schema references."
-  print_errors!(schema_file, expander.errors)
-end
-
-data = JSON.parse(File.read(data_file))
-valid, errors = schema.validate(data)
-
-if valid
-  $stdout.puts "Schema and data are valid."
+if success
+  command.messages.each { |m| $stdout.puts(m) }
+elsif !command.errors.empty?
+  command.errors.each { |e| $stderr.puts(File.basename(__FILE__) + ": " + e) }
+  exit(1)
 else
-  $stderr.puts "Data is invalid."
-  print_errors!(data_file, errors)
+  print_usage!
+  exit(1)
 end
