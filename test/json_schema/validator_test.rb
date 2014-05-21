@@ -336,7 +336,8 @@ describe JsonSchema::Validator do
     )
     data_sample["production"] = true
     refute validate
-    assert_includes error_messages, %{Missing required keys in object: ssl.}
+    assert_includes error_messages,
+      %{Missing required keys "ssl" in object; keys are "name, production".}
   end
 
   it "validates schema dependencies" do
@@ -396,7 +397,8 @@ describe JsonSchema::Validator do
     )
     data_sample.delete("name")
     refute validate
-    assert_includes error_messages, %{Missing required keys in object: name.}
+    assert_includes error_messages,
+      %{Missing required keys "name" in object; keys are "".}
   end
 
   it "validates allOf" do
