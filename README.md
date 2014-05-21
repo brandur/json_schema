@@ -2,6 +2,15 @@
 
 A JSON Schema V4 and Hyperschema V4 parser and validator.
 
+Validate some data based on a JSON Schema:
+
+```
+gem install json_schema
+validate-schema schema.json data.json
+```
+
+## Programmatic
+
 ``` ruby
 require "json"
 require "json_schema"
