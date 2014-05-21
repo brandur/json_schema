@@ -123,8 +123,10 @@ module JsonSchema
       valid = schema.any_of.any? do |subschema|
         validate_data(subschema, data, [])
       end
-      message = %{Data did not match any subschema of "anyOf" condition.}
-      errors << SchemaError.new(schema, message) if !valid
+      if !valid
+        message = %{Data did not match any subschema of "anyOf" condition.}
+        errors << SchemaError.new(schema, message)
+      end
       valid
     end
 
@@ -361,7 +363,6 @@ module JsonSchema
       return true if schema.properties.empty?
       valid = true
       schema.properties.each do |key, subschema|
-
         if value = data[key]
           valid = strict_and valid, validate_data(subschema, value, errors)
         end
@@ -374,7 +375,7 @@ module JsonSchema
       if (missing = required - data.keys).empty?
         true
       else
-        message = %{Missing required keys in object: #{missing.sort.join(", ")}.}
+        message = %{Missing required keys "#{missing.sort.join(", ")}" in object; keys are "#{data.keys.sort.join(", ")}".}
         errors << SchemaError.new(schema, message)
         false
       end
