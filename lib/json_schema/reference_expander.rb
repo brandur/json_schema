@@ -8,29 +8,15 @@ module JsonSchema
       @errors = []
       @schema = schema
       @store  = options[:store] ||= DocumentStore.new
-      last_unresolved_refs = nil
 
       @store.add_uri_reference("/", schema)
 
-      loop do
-        traverse_schema(schema)
+      traverse_schema(schema)
 
-        refs = unresolved_refs(schema).sort
-
-        # nothing left unresolved, we're done!
-        if refs.count == 0
-          break
-        end
-
-        # a new traversal pass still hasn't managed to resolve anymore
-        # references; we're out of luck
-        if refs == last_unresolved_refs
-          message = %{Couldn't resolve references: #{refs.to_a.join(", ")}.}
-          @errors << SchemaError.new(schema, message)
-          break
-        end
-
-        last_unresolved_refs = refs
+      refs = unresolved_refs(schema).sort
+      if refs.count > 0
+        message = %{Couldn't resolve references: #{refs.to_a.join(", ")}.}
+        @errors << SchemaError.new(schema, message)
       end
 
       @errors.count == 0
