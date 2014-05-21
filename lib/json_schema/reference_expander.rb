@@ -15,7 +15,7 @@ module JsonSchema
       loop do
         traverse_schema(schema)
 
-        refs = unresolved_refs(schema).sort_by { |r| r.to_s }
+        refs = unresolved_refs(schema).sort
 
         # nothing left unresolved, we're done!
         if refs.count == 0
@@ -45,11 +45,18 @@ module JsonSchema
 
     private
 
-    def dereference(ref_schema)
+    def dereference(ref_schema, ref_stack)
       ref = ref_schema.reference
       uri = ref.uri
 
-      if uri && uri.host
+      # detects a reference cycle
+      if ref_stack.include?(ref)
+        message = %{Reference cycle detected: #{ref_stack.sort.join(", ")}.}
+        @errors << SchemaError.new(ref_schema, message)
+        return false
+      end
+
+      new_schema = if uri && uri.host
         scheme = uri.scheme || "http"
         # allow resolution if something we've already parsed has claimed the
         # full URL
@@ -59,6 +66,7 @@ module JsonSchema
           message =
             %{Reference resolution over #{scheme} is not currently supported.}
           @errors << SchemaError.new(ref_schema, message)
+          nil
         end
       # absolute
       elsif uri && uri.path[0] == "/"
@@ -71,6 +79,25 @@ module JsonSchema
       # just a JSON Pointer -- resolve against schema root
       else
         evaluate(ref_schema, "/", @schema)
+      end
+
+      if new_schema
+        # if the reference resolved to a new reference we need to continue
+        # dereferencing until we either hit a non-reference schema, or a
+        # reference which is already resolved
+        if new_schema.reference && !new_schema.expanded?
+          success = dereference(new_schema, ref_stack + [ref])
+          return false unless success
+        end
+
+        # copy new schema into existing one while preserving parent
+        parent = ref_schema.parent
+        ref_schema.copy_from(new_schema)
+        ref_schema.parent = parent
+
+        true
+      else
+        false
       end
     end
 
@@ -95,22 +122,21 @@ module JsonSchema
         # eventually be fully expanded
         @store.add_pointer_reference(uri_path, ref.pointer.to_s, new_schema)
       else
-        # insert a clone record so that the expander knows to hydrate it when
+        # insert a clone record so that the expander knows to expand it when
         # the schema traversal is finished
         new_schema.clones << ref_schema
       end
 
-      # copy new schema into existing one while preserving parent
-      parent = ref_schema.parent
-      ref_schema.copy_from(new_schema)
-      ref_schema.parent = parent
-
-      nil
+      new_schema
     end
 
     def resolve(ref_schema, uri_path)
       if schema = @store.lookup_uri(uri_path)
         evaluate(ref_schema, uri_path, schema)
+      else
+        message = %{Could resolve URI: #{uri_path}.}
+        @errors << SchemaError.new(ref_schema, message)
+        nil
       end
     end
 
@@ -157,7 +183,7 @@ module JsonSchema
       return [] unless schema.original?
 
       schema_children(schema).reduce([]) do |arr, subschema|
-        if subschema.reference
+        if !subschema.expanded?
           arr += [subschema.reference]
         else
           arr += unresolved_refs(subschema)
@@ -169,12 +195,12 @@ module JsonSchema
       @store.add_uri_reference(schema.uri, schema)
 
       schema_children(schema).each do |subschema|
-        if subschema.reference
-          dereference(subschema)
+        if subschema.reference && !subschema.expanded?
+          dereference(subschema, [])
         end
 
-        # traverse child schemas only if we don't have any clones
-        if !subschema.reference && subschema.original?
+        # traverse child schemas only if they're the original copy
+        if subschema.expanded? && subschema.original?
           traverse_schema(subschema)
         end
       end

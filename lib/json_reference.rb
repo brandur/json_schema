@@ -7,6 +7,8 @@ module JsonReference
   end
 
   class Reference
+    include Comparable
+
     attr_accessor :pointer
     attr_accessor :uri
 
@@ -26,6 +28,10 @@ module JsonReference
       # normalize pointers by prepending "#" and stripping trailing "/"
       @pointer = "#" + @pointer
       @pointer = @pointer.chomp("/")
+    end
+
+    def <=>(other)
+      to_s <=> other.to_s
     end
 
     def inspect

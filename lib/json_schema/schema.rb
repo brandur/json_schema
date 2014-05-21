@@ -1,3 +1,5 @@
+require "json"
+
 module JsonSchema
   class Schema
     @@copyable = []
@@ -19,7 +21,9 @@ module JsonSchema
 
     # Rather than a normal schema, the node may be a JSON Reference. In this
     # case, no other attributes will be filled in except for #parent.
-    attr_copyable :reference
+    attr_accessor :reference
+
+    attr_copyable :expanded
 
     # A reference to the data which the Schema was initialized from. Used for
     # resolving JSON Pointer references.
@@ -178,6 +182,7 @@ module JsonSchema
 
     # allow booleans to be access with question mark
     alias :additional_items? :additional_items
+    alias :expanded? :expanded
     alias :max_exclusive? :max_exclusive
     alias :min_exclusive? :min_exclusive
     alias :read_only? :read_only
@@ -205,15 +210,16 @@ module JsonSchema
 
     def inspect
       str = inspect_schema
-      str = JSON.pretty_generate(str) if str.is_a?(Hash)
+      str = JSON.pretty_generate(str).gsub(/\\?"/, '') if str.is_a?(Hash)
       "\#<JsonSchema::Schema #{str}>"
     end
 
     def inspect_schema
       if reference
-        reference.inspect
-      elsif !original?
-        "[CLONE]"
+        str = reference.to_s
+        str += " [EXPANDED]" if expanded?
+        str += " [CLONE]" if !original?
+        str
       else
         hash = {}
         @@copyable.each do |copyable|

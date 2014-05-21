@@ -219,6 +219,9 @@ module JsonSchema
       schema.data        = data
       schema.id          = validate_type(schema, [String], "id")
 
+      # any parsed schema is automatically expanded
+      schema.expanded    = true
+
       # build URI early so we can reference it in errors
       schema.uri         = build_uri(schema.id, parent ? parent.uri : nil)
 
