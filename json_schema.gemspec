@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = "json_schema"
-  s.version       = "0.0.8"
+  s.version       = "0.0.9"
 
   s.summary       = "A JSON Schema V4 and Hyperschema V4 parser and validator."
 
@@ -10,5 +10,5 @@ Gem::Specification.new do |s|
   s.license       = "MIT"
 
   s.executables   = ["validate-schema"]
-  s.files         = Dir["README.md", "bin/*", "{lib,test}/**/*.rb"]
+  s.files         = Dir["README.md", "bin/*", "schemas/*", "{lib,test}/**/*.rb"]
 end
