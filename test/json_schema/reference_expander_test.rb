@@ -165,14 +165,15 @@ describe JsonSchema::ReferenceExpander do
   end
 
   it "errors on a reference cycle" do
-    schema_sample["definitions"]["app"] = {
-      "$ref" => "#/properties/app"
-    }
+    pointer("#/properties").merge!(
+      "app0" => { "$ref" => "#/properties/app2" },
+      "app1" => { "$ref" => "#/properties/app0" },
+      "app2" => { "$ref" => "#/properties/app1" },
+    )
     refute expand
-    assert_includes errors,
-      %{Reference cycle detected: #/definitions/app, #/properties/app.}
-    assert_includes errors,
-      %{Couldn't resolve references: #/definitions/app, #/properties/app.}
+    properties = "#/properties/app0, #/properties/app1, #/properties/app2"
+    assert_includes errors, %{Reference cycle detected: #{properties}.}
+    assert_includes errors, %{Couldn't resolve references: #{properties}.}
   end
 
   def errors
