@@ -120,7 +120,7 @@ module JsonSchema
       if schema = @store.lookup_uri(uri_path)
         evaluate(ref_schema, uri_path, schema)
       else
-        message = %{Could resolve URI: #{uri_path}.}
+        message = %{Couldn't resolve URI: #{uri_path}.}
         @errors << SchemaError.new(ref_schema, message)
         nil
       end

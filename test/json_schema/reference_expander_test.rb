@@ -153,15 +153,18 @@ describe JsonSchema::ReferenceExpander do
     refute expand
     assert_includes errors,
       %{Couldn't resolve pointer "#/definitions/nope".}
+    assert_includes errors,
+      %{Couldn't resolve references: #/definitions/nope.}
   end
 
-  it "errors on a schema that can't be resolved" do
+  it "errors on a URI that can't be resolved" do
     schema_sample["properties"]["app"] = {
       "$ref" => "/schemata/user#/definitions/name"
     }
     refute expand
     assert_includes errors,
       %{Couldn't resolve references: /schemata/user#/definitions/name.}
+    assert_includes errors, %{Couldn't resolve URI: /schemata/user.}
   end
 
   it "errors on a reference cycle" do
