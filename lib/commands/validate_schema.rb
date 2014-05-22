@@ -48,8 +48,7 @@ module Commands
         if valid
           @messages += ["#{data_file} is valid."]
         else
-          @errors = ["#{data_file}: Invalid."] +
-            map_schema_errors(data_file, errors)
+          @errors = map_schema_errors(data_file, errors)
         end
       end
 
@@ -94,15 +93,13 @@ module Commands
 
       parser = JsonSchema::Parser.new
       if !(schema = parser.parse(JSON.parse(File.read(file))))
-        @errors = ["#{file}: Schema is invalid."] + 
-          map_schema_errors(file, parser.errors)
+        @errors = map_schema_errors(file, parser.errors)
         return nil
       end
 
       expander = JsonSchema::ReferenceExpander.new
       if !expander.expand(schema, store: @store)
-        @errors = ["#{file}: Could not expand schema references."] +
-          map_schema_errors(file, expander.errors)
+        @errors = map_schema_errors(file, expander.errors)
         return nil
       end
 
