@@ -24,7 +24,7 @@ module JsonSchema
       # object, the @errors array is an instance-wide accumulator
       @errors = []
 
-      schema = parse_data(data, parent)
+      schema = parse_data(data, parent, "#")
       if @errors.count == 0
         schema
       else
@@ -73,43 +73,49 @@ module JsonSchema
         # an object indicates a schema that will be used to parse any
         # properties not listed in `properties`
         if schema.additional_properties.is_a?(Hash)
-          schema.additional_properties =
-            parse_data(schema.additional_properties, schema)
+          schema.additional_properties = parse_data(
+            schema.additional_properties,
+            schema,
+            "additionalProperties"
+          )
         end
         # otherwise, leave as boolean
       end
     end
 
     def parse_all_of(schema)
-      if schema.all_of && schema.all_of.is_a?(Array)
-        schema.all_of = schema.all_of.map { |s| parse_data(s, schema) }
+      if schema.all_of
+        schema.all_of = schema.all_of.each_with_index.
+          map { |s, i| parse_data(s, schema, "allOf/#{i}") }
       end
     end
 
     def parse_any_of(schema)
-      if schema.any_of && schema.any_of.is_a?(Array)
-        schema.any_of = schema.any_of.map { |s| parse_data(s, schema) }
+      if schema.any_of
+        schema.any_of = schema.any_of.each_with_index.
+          map { |s, i| parse_data(s, schema, "anyOf/#{i}") }
       end
     end
 
     def parse_one_of(schema)
-      if schema.one_of && schema.one_of.is_a?(Array)
-        schema.one_of = schema.one_of.map { |s| parse_data(s, schema) }
+      if schema.one_of
+        schema.one_of = schema.one_of.each_with_index.
+          map { |s, i| parse_data(s, schema, "oneOf/#{i}") }
       end
     end
 
-    def parse_data(data, parent = nil)
-      schema = Schema.new
-
+    def parse_data(data, parent, fragment)
       if !data.is_a?(Hash)
         # it would be nice to make this message more specific/nicer (at best it
         # points to the wrong schema)
         message = %{Expected schema; value was: #{data.inspect}.}
         @errors << SchemaError.new(parent, message)
       elsif ref = data["$ref"]
+        schema = Schema.new
+        schema.fragment = fragment
         schema.reference = JsonReference::Reference.new(ref)
       else
-        schema = parse_schema(data, parent)
+        schema = parse_schema(data, parent, fragment)
       end
 
       schema.parent = parent
@@ -117,25 +123,25 @@ module JsonSchema
     end
 
     def parse_definitions(schema)
-      if schema.definitions && schema.definitions.is_a?(Hash)
+      if schema.definitions
         # leave the original data reference intact
         schema.definitions = schema.definitions.dup
         schema.definitions.each do |key, definition|
-          subschema = parse_data(definition, schema)
+          subschema = parse_data(definition, schema, "definitions/#{key}")
           schema.definitions[key] = subschema
         end
       end
     end
 
     def parse_dependencies(schema)
-      if schema.dependencies && schema.dependencies.is_a?(Hash)
+      if schema.dependencies
         # leave the original data reference intact
         schema.dependencies = schema.dependencies.dup
         schema.dependencies.each do |k, s|
           # may be Array, String (simple dependencies), or Hash (schema
           # dependency)
           if s.is_a?(Hash)
-            schema.dependencies[k] = parse_data(s, schema)
+            schema.dependencies[k] = parse_data(s, schema, "dependencies")
           elsif s.is_a?(String)
             # just normalize all simple dependencies to arrays
             schema.dependencies[k] = [s]
@@ -148,17 +154,18 @@ module JsonSchema
       if schema.items
         # tuple validation: an array of schemas
         if schema.items.is_a?(Array)
-          schema.items = schema.items.map { |s| parse_data(s, schema) }
+          schema.items = schema.items.each_with_index.
+            map { |s, i| parse_data(s, schema, "items/#{i}") }
         # list validation: a single schema
         else
-          schema.items = parse_data(schema.items, schema)
+          schema.items = parse_data(schema.items, schema, "items")
         end
       end
     end
 
     def parse_links(schema)
       if schema.links
-        schema.links = schema.links.map { |l|
+        schema.links = schema.links.each_with_index.map { |l, i|
           link             = Schema::Link.new
           link.parent      = schema
 
@@ -169,7 +176,7 @@ module JsonSchema
           link.title       = l["title"]
 
           if l["schema"]
-            link.schema = parse_data(l["schema"], schema)
+            link.schema = parse_data(l["schema"], schema, "links/#{i}/schema")
           end
 
           link
@@ -186,17 +193,17 @@ module JsonSchema
     end
 
     def parse_not(schema)
-      if schema.not && schema.not.is_a?(Hash)
-        schema.not = parse_data(schema.not, schema)
+      if schema.not
+        schema.not = parse_data(schema.not, schema, "not")
       end
     end
 
     def parse_pattern_properties(schema)
-      if schema.pattern_properties && schema.pattern_properties.is_a?(Hash)
+      if schema.pattern_properties
         # leave the original data reference intact
         properties = schema.pattern_properties.dup
         properties = properties.map do |k, s|
-          [Regexp.new(k), parse_data(s, schema)]
+          [Regexp.new(k), parse_data(s, schema, "patternProperties/#{k}")]
         end
         schema.pattern_properties = Hash[*properties.flatten]
       end
@@ -207,14 +214,15 @@ module JsonSchema
       schema.properties = schema.properties.dup
       if schema.properties && schema.properties.is_a?(Hash)
         schema.properties.each do |key, definition|
-          subschema = parse_data(definition, schema)
+          subschema = parse_data(definition, schema, "properties/#{key}")
           schema.properties[key] = subschema
         end
       end
     end
 
-    def parse_schema(data, parent = nil)
+    def parse_schema(data, parent, fragment)
       schema = Schema.new
+      schema.fragment = fragment
 
       schema.data        = data
       schema.id          = validate_type(schema, [String], "id")

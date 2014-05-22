@@ -19,6 +19,10 @@ module JsonSchema
       @clones = Set.new
     end
 
+    # Fragment of a JSON Pointer that can help us build a pointer back to this
+    # schema for debugging.
+    attr_accessor :fragment
+
     # Rather than a normal schema, the node may be a JSON Reference. In this
     # case, no other attributes will be filled in except for #parent.
     attr_accessor :reference
@@ -253,6 +257,14 @@ module JsonSchema
 
     def original?
       !clones.include?(self)
+    end
+
+    def pointer
+      if parent
+        parent.fragment + "/" + fragment
+      else
+        fragment
+      end
     end
 
     def validate(data)

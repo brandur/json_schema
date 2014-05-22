@@ -232,6 +232,12 @@ describe JsonSchema::Parser do
     assert_includes errors, %{Unknown types: double, float.}
   end
 
+  it "creates an appropriate JSON Pointer on an error" do
+    schema_sample["definitions"]["app"]["type"] = ["float", "double"]
+    refute parse
+    assert_equal "#/definitions/app", @parser.errors[0].schema.pointer
+  end
+
   def errors
     @parser.errors.map { |e| e.message }
   end
