@@ -10,7 +10,7 @@ module JsonSchema
       # for now.
       errors.map { |e|
         if e.schema
-          %{At "#{e.schema.uri}": #{e.message}}
+          %{#{e.schema.pointer}: #{e.message}}
         else
           e.message
         end
@@ -20,6 +20,19 @@ module JsonSchema
     def initialize(schema, message)
       @schema = schema
       @message = message
+    end
+  end
+
+  class ValidationError < SchemaError
+    attr_accessor :path
+
+    def initialize(schema, path, message)
+      super(schema, message)
+      @path = path
+    end
+
+    def pointer
+      path.join("/")
     end
   end
 end

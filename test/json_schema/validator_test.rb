@@ -640,6 +640,15 @@ describe JsonSchema::Validator do
       %{Expected string to match pattern "/^[a-z][a-z0-9-]{3,30}$/", value was: ab.}
   end
 
+  it "builds appropriate JSON Pointers to bad data" do
+    pointer("#/definitions/app/definitions/visibility").merge!(
+      "enum" => ["private", "public"]
+    )
+    data_sample["visibility"] = "personal"
+    refute validate
+    assert_equal "#/visibility", @validator.errors[0].pointer
+  end
+
   def data_sample
     @data_sample ||= DataScaffold.data_sample
   end
