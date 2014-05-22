@@ -79,13 +79,7 @@ module Commands
 
     # Builds a JSON Reference + message like "/path/to/file#/path/to/data".
     def map_schema_errors(file, errors)
-      errors.map { |e|
-        if e.is_a?(JsonSchema::ValidationError)
-          "#{file}#{e.pointer}: failed schema #{e.schema.pointer}: #{e.message}"
-        else
-          "#{file}#{e.schema.pointer}: #{e.message}"
-        end
-      }
+      JsonSchema::SchemaError.aggregate(errors).map { |m| "#{file}#{m}" }
     end
 
     def parse(file)

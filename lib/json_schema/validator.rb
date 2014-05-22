@@ -26,7 +26,7 @@ module JsonSchema
 
     def validate!(data)
       if !validate(data)
-        raise SchemaError.aggregate(@errors)
+        raise SchemaError.aggregate(@errors).join(" ")
       end
     end
 

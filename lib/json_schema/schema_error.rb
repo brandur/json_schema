@@ -5,12 +5,12 @@ module JsonSchema
 
     def self.aggregate(errors)
       errors.map { |e|
-        if e.schema
-          %{#{e.schema.pointer}: #{e.message}}
+        if e.is_a?(ValidationError)
+          "#{e.pointer}: failed schema #{e.schema.pointer}: #{e.message}"
         else
-          e.message
+          "#{e.schema.pointer}: #{e.message}"
         end
-      }.join(" ")
+      }
     end
 
     def initialize(schema, message)
