@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require "json"
 require "optparse"
 require_relative "../lib/commands/validate_schema"
 

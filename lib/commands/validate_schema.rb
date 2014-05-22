@@ -1,3 +1,5 @@
+require "json"
+require "yaml"
 require_relative "../json_schema"
 
 module Commands
@@ -28,8 +30,9 @@ module Commands
       return false if argv.count < 1
 
       argv.each do |data_file|
-        return false if !check_file(data_file)
-        data = JSON.parse(File.read(data_file))
+        if !(data = read_file(data_file))
+          return false
+        end
 
         if detect
           if !(schema_uri = data["$schema"])
@@ -57,15 +60,6 @@ module Commands
 
     private
 
-    def check_file(file)
-      if !File.exists?(file)
-        @errors = ["#{file}: No such file or directory."]
-        false
-      else
-        true
-      end
-    end
-
     def initialize_store
       @store = JsonSchema::DocumentStore.new
       extra_schemas.each do |extra_schema|
@@ -83,10 +77,12 @@ module Commands
     end
 
     def parse(file)
-      return nil if !check_file(file)
+      if !(schema_data = read_file(file))
+        return nil
+      end
 
       parser = JsonSchema::Parser.new
-      if !(schema = parser.parse(JSON.parse(File.read(file))))
+      if !(schema = parser.parse(schema_data))
         @errors = map_schema_errors(file, parser.errors)
         return nil
       end
@@ -98,6 +94,26 @@ module Commands
       end
 
       schema
+    end
+
+    def read_file(file)
+      contents = File.read(file)
+      if File.extname(file) == ".yaml"
+        YAML.load(contents)
+      else
+        JSON.load(contents)
+      end
+    rescue Errno::ENOENT
+      @errors = ["#{file}: No such file or directory."]
+      nil
+    rescue JSON::ParserError
+      # Ruby's parsing exceptions aren't too helpful, just point user to
+      # a better tool
+      @errors = ["#{file}: Invalid JSON. Try to validate using `jsonlint`."]
+      nil
+    rescue Psych::SyntaxError
+      @errors = ["#{file}: Invalid YAML."]
+      nil
     end
   end
 end
