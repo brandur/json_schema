@@ -52,10 +52,19 @@ module JsonSchema
         return false unless success
       end
 
-      # copy new schema into existing one while preserving parent
+      # copy new schema into existing one while preserving parent, fragment,
+      # and reference
       parent = ref_schema.parent
       ref_schema.copy_from(new_schema)
       ref_schema.parent = parent
+
+      # correct all parent references to point back to ref_schema instead of
+      # new_schema
+      if ref_schema.original?
+        schema_children(ref_schema).each do |schema|
+          schema.parent = ref_schema
+        end
+      end
 
       true
     end

@@ -138,6 +138,36 @@ describe JsonSchema::ReferenceExpander do
     assert_equal ["object"], schema.type
   end
 
+  it "builds appropriate JSON Pointers for expanded references" do
+    expand
+    assert_equal [], errors
+
+    # the *referenced* schema should still have a proper pointer
+    schema = @schema.definitions["app"].definitions["name"]
+    assert_equal "#/definitions/app/definitions/name", schema.pointer
+
+    # the *reference* schema should have expanded a pointer
+    schema = @schema.properties["app"].properties["name"]
+    assert_equal "#/properties/app/properties/name", schema.pointer
+  end
+
+  # clones are special in that they retain their original pointer despite where
+  # they've been nested
+  it "builds appropriate JSON Pointers for circular dependencies" do
+    pointer("#/properties").merge!(
+      "app" => { "$ref" => "#" }
+    )
+    expand
+
+    # the first self reference has the standard pointer as expected
+    schema = @schema.properties["app"]
+    assert_equal "#/properties/app", schema.pointer
+
+    # but diving deeper results in the same pointer again
+    schema = schema.properties["app"]
+    assert_equal "#/properties/app", schema.pointer
+  end
+
   it "errors on a JSON Pointer that can't be resolved" do
     pointer("#/properties").merge!(
       "app" => { "$ref" => "#/definitions/nope" }

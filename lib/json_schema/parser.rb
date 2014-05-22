@@ -113,12 +113,12 @@ module JsonSchema
       elsif ref = data["$ref"]
         schema = Schema.new
         schema.fragment = fragment
+        schema.parent = parent
         schema.reference = JsonReference::Reference.new(ref)
       else
         schema = parse_schema(data, parent, fragment)
       end
 
-      schema.parent = parent
       schema
     end
 
@@ -223,6 +223,7 @@ module JsonSchema
     def parse_schema(data, parent, fragment)
       schema = Schema.new
       schema.fragment = fragment
+      schema.parent   = parent
 
       schema.data        = data
       schema.id          = validate_type(schema, [String], "id")
