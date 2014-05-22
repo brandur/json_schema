@@ -48,8 +48,8 @@ module Commands
         if valid
           @messages += ["#{data_file} is valid."]
         else
-          errors = ["Invalid."] + map_schema_errors(errors)
-          @errors += errors.map { |e| "#{data_file}: #{e}" }
+          @errors = ["#{data_file}: Invalid."] +
+            map_schema_errors(data_file, errors)
         end
       end
 
@@ -78,8 +78,9 @@ module Commands
       true
     end
 
-    def map_schema_errors(errors)
-      errors.map { |e| "#{e.schema.pointer}: #{e.message}" }
+    # Builds a JSON Reference + message like "/path/to/file#/path/to/data".
+    def map_schema_errors(file, errors)
+      errors.map { |e| "#{file}#{e.schema.pointer}: #{e.message}" }
     end
 
     def parse(file)
@@ -87,16 +88,15 @@ module Commands
 
       parser = JsonSchema::Parser.new
       if !(schema = parser.parse(JSON.parse(File.read(file))))
-        @errors = ["Schema is invalid."] + map_schema_errors(parser.errors)
-        @errors.map! { |e| "#{file}: #{e}" }
+        @errors = ["#{file}: Schema is invalid."] + 
+          map_schema_errors(file, parser.errors)
         return nil
       end
 
       expander = JsonSchema::ReferenceExpander.new
       if !expander.expand(schema, store: @store)
-        @errors = ["Could not expand schema references."] +
-          map_schema_errors(expander.errors)
-        @errors.map! { |e| "#{file}: #{e}" }
+        @errors = ["#{file}: Could not expand schema references."] +
+          map_schema_errors(file, expander.errors)
         return nil
       end
 
