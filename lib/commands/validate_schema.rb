@@ -81,7 +81,7 @@ module Commands
     def map_schema_errors(file, errors)
       errors.map { |e|
         if e.is_a?(JsonSchema::ValidationError)
-          "#{file}#{e.pointer}: failed #{e.schema.pointer}: #{e.message}"
+          "#{file}#{e.pointer}: failed schema #{e.schema.pointer}: #{e.message}"
         else
           "#{file}#{e.schema.pointer}: #{e.message}"
         end
