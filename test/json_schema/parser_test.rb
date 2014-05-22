@@ -201,34 +201,38 @@ describe JsonSchema::Parser do
   it "errors on non-string ids" do
     schema_sample["id"] = 4
     refute parse
-    assert_includes error_messages, %{Expected "id" to be of type "string"; value was: 4.}
+    assert_includes errors,
+      %{Expected "id" to be of type "string"; value was: 4.}
   end
 
   it "errors on non-string titles" do
     schema_sample["title"] = 4
     refute parse
-    assert_includes error_messages, %{Expected "title" to be of type "string"; value was: 4.}
+    assert_includes errors,
+      %{Expected "title" to be of type "string"; value was: 4.}
   end
 
   it "errors on non-string descriptions" do
     schema_sample["description"] = 4
     refute parse
-    assert_includes error_messages, %{Expected "description" to be of type "string"; value was: 4.}
+    assert_includes errors,
+      %{Expected "description" to be of type "string"; value was: 4.}
   end
 
   it "errors on non-array and non-string types" do
     schema_sample["type"] = 4
     refute parse
-    assert_includes error_messages, %{Expected "type" to be of type "array/string"; value was: 4.}
+    assert_includes errors,
+      %{Expected "type" to be of type "array/string"; value was: 4.}
   end
 
   it "errors on unknown types" do
     schema_sample["type"] = ["float", "double"]
     refute parse
-    assert_includes error_messages, %{Unknown types: double, float.}
+    assert_includes errors, %{Unknown types: double, float.}
   end
 
-  def error_messages
+  def errors
     @parser.errors.map { |e| e.message }
   end
 
