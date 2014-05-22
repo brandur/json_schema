@@ -198,6 +198,11 @@ describe JsonSchema::Parser do
     assert_equal true, schema.read_only
   end
 
+  it "builds appropriate JSON Pointers" do
+    schema = parse.definitions["app"].definitions["name"]
+    assert_equal "#/definitions/app/definitions/name", schema.pointer
+  end
+
   it "errors on non-string ids" do
     schema_sample["id"] = 4
     refute parse
@@ -230,12 +235,6 @@ describe JsonSchema::Parser do
     schema_sample["type"] = ["float", "double"]
     refute parse
     assert_includes errors, %{Unknown types: double, float.}
-  end
-
-  it "creates an appropriate JSON Pointer on an error" do
-    schema_sample["definitions"]["app"]["type"] = ["float", "double"]
-    refute parse
-    assert_equal "#/definitions/app", @parser.errors[0].schema.pointer
   end
 
   def errors
