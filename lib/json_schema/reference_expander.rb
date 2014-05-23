@@ -144,7 +144,6 @@ module JsonSchema
         schema.any_of.each { |s| yielder << s }
         schema.one_of.each { |s| yielder << s }
         schema.definitions.each { |_, s| yielder << s }
-        schema.links.map { |l| l.schema }.compact.each { |s| yielder << s }
         schema.pattern_properties.each { |_, s| yielder << s }
         schema.properties.each { |_, s| yielder << s }
 
@@ -172,6 +171,12 @@ module JsonSchema
         # latter
         schema.dependencies.values.
           select { |s| s.is_a?(Schema) }.
+          each { |s| yielder << s }
+
+        # schemas contained inside hyper-schema links objects
+        schema.links.map { |l| [l.schema, l.target_schema] }.
+          flatten.
+          compact.
           each { |s| yielder << s }
       end
     end

@@ -213,6 +213,9 @@ module DataScaffold
                   "$ref" => "#/definitions/app/definitions/name"
                 },
               }
+            },
+            "targetSchema" => {
+              "$ref" => "#/definitions/app"
             }
           ],
           "media" => {

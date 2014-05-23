@@ -170,6 +170,7 @@ module JsonSchema
           link.parent      = schema
 
           link.description = l["description"]
+          link.enc_type    = l["encType"]
           link.href        = l["href"]
           link.method      = l["method"] ? l["method"].downcase.to_sym : nil
           link.rel         = l["rel"]
@@ -177,6 +178,11 @@ module JsonSchema
 
           if l["schema"]
             link.schema = parse_data(l["schema"], schema, "links/#{i}/schema")
+          end
+
+          if l["targetSchema"]
+            link.target_schema =
+              parse_data(l["schema"], schema, "links/#{i}/targetSchema")
           end
 
           link

@@ -148,6 +148,7 @@ describe JsonSchema::Parser do
     pointer("#/definitions/app").merge!(
       "links" => [
         "description" => "Create a new app.",
+        "encType"    => "application/x-www-form-urlencoded",
         "href" => "/apps",
         "method" => "POST",
         "rel" => "create",
@@ -157,6 +158,9 @@ describe JsonSchema::Parser do
               "$ref" => "#/definitions/app/definitions/name"
             },
           }
+        },
+        "targetSchema" => {
+          "$ref" => "#/definitions/app"
         }
       ]
     )
@@ -164,6 +168,7 @@ describe JsonSchema::Parser do
     link = schema.links[0]
     assert_equal schema, link.parent
     assert_equal "Create a new app.", link.description
+    assert_equal "application/x-www-form-urlencoded", link.enc_type
     assert_equal "/apps", link.href
     assert_equal :post, link.method
     assert_equal "create", link.rel
