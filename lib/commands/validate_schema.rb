@@ -40,7 +40,7 @@ module Commands
             return false
           end
 
-          if !(schema = @store.lookup_uri(schema_uri))
+          if !(schema = @store.lookup_schema(schema_uri))
             @errors = ["#{data_file}: Unknown $schema, try specifying one with -s."]
             return false
           end
@@ -66,7 +66,7 @@ module Commands
         if !(extra_schema = parse(extra_schema))
           return false
         end
-        @store.add_uri_reference(extra_schema.uri, extra_schema)
+        @store.add_schema(extra_schema)
       end
       true
     end

@@ -43,9 +43,9 @@ module JsonSchema
     def add_reference(schema)
       uri = URI.parse(schema.uri)
       if uri.absolute?
-        @store.add_uri_reference(schema.uri, schema)
+        @store.add_schema(schema)
       else
-        @local_store.add_uri_reference(schema.uri, schema)
+        @local_store.add_schema(schema)
       end
     end
 
@@ -113,9 +113,9 @@ module JsonSchema
 
     def lookup_reference(uri)
       if uri.absolute?
-        @store.lookup_uri(uri.to_s)
+        @store.lookup_schema(uri.to_s)
       else
-        @local_store.lookup_uri(uri.to_s)
+        @local_store.lookup_schema(uri.to_s)
       end
     end
 
@@ -154,7 +154,7 @@ module JsonSchema
         scheme = uri.scheme || "http"
         # allow resolution if something we've already parsed has claimed the
         # full URL
-        if @store.lookup_uri(uri.to_s)
+        if @store.lookup_schema(uri.to_s)
           resolve_uri(ref_schema, uri)
         else
           message =

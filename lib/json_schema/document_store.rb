@@ -10,16 +10,16 @@ module JsonSchema
       @schema_map = {}
     end
 
-    def add_uri_reference(uri, schema)
-      raise "can't add nil URI" if uri.nil?
-      @schema_map[uri] = schema
+    def add_schema(schema)
+      raise "can't add nil URI" if schema.uri.nil?
+      @schema_map[schema.uri] = schema
     end
 
     def each
       @schema_map.each { |k, v| yield(k, v) }
     end
 
-    def lookup_uri(uri)
+    def lookup_schema(uri)
       @schema_map[uri]
     end
   end
