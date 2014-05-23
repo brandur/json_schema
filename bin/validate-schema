@@ -28,7 +28,7 @@ success = command.run(ARGV.dup)
 if success
   command.messages.each { |m| $stdout.puts(m) }
 elsif !command.errors.empty?
-  command.errors.each { |e| $stderr.puts(File.basename(__FILE__) + ": " + e) }
+  command.errors.each { |e| $stderr.puts(e) }
   exit(1)
 else
   print_usage!
