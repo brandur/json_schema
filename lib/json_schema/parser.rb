@@ -182,7 +182,7 @@ module JsonSchema
 
           if l["targetSchema"]
             link.target_schema =
-              parse_data(l["schema"], schema, "links/#{i}/targetSchema")
+              parse_data(l["targetSchema"], schema, "links/#{i}/targetSchema")
           end
 
           link

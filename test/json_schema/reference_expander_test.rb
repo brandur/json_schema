@@ -22,7 +22,7 @@ describe JsonSchema::ReferenceExpander do
   it "takes a document store" do
     store = JsonSchema::DocumentStore.new
     expand(store: store)
-    assert store.lookup_uri("/")
+    assert_equal store, @expander.store
   end
 
   it "will expand anyOf" do
@@ -155,7 +155,7 @@ describe JsonSchema::ReferenceExpander do
 
     # the *reference* schema should have expanded a pointer
     schema = @schema.properties["app"].properties["name"]
-    assert_equal "#/properties/app/properties/name", schema.pointer
+    assert_equal "#/definitions/app/properties/name", schema.pointer
   end
 
   # clones are special in that they retain their original pointer despite where

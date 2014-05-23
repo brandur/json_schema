@@ -3,13 +3,22 @@ require "set"
 module JsonSchema
   class ReferenceExpander
     attr_accessor :errors
+    attr_accessor :store
 
     def expand(schema, options = {})
-      @errors = []
-      @schema = schema
-      @store  = options[:store] ||= DocumentStore.new
+      @errors       = []
+      @local_store  = DocumentStore.new
+      @schema       = schema
+      @schema_paths = {}
+      @store        = options[:store] || DocumentStore.new
+      @uri          = URI.parse(schema.uri)
 
-      @store.add_uri_reference("/", schema)
+      @store.each do |uri, store_schema|
+        build_schema_paths(uri, store_schema)
+      end
+
+      # we run #to_s on lookup for URIs; the #to_s of nil is ""
+      build_schema_paths("", schema)
 
       traverse_schema(schema)
 
@@ -30,6 +39,34 @@ module JsonSchema
     end
 
     private
+
+    def add_reference(schema)
+      uri = URI.parse(schema.uri)
+      if uri.absolute?
+        @store.add_uri_reference(schema.uri, schema)
+      else
+        @local_store.add_uri_reference(schema.uri, schema)
+      end
+    end
+
+    def build_schema_paths(uri, schema)
+      return if schema.reference
+
+      paths = @schema_paths[uri] ||= {}
+      paths[schema.pointer] = schema
+
+      schema_children(schema).each do |subschema|
+        build_schema_paths(uri, subschema)
+      end
+
+      # Also insert alternate tree for schema's custom URI. O(crazy).
+      if schema.uri != uri
+        fragment, parent = schema.fragment, schema.parent
+        schema.fragment, schema.parent = "#", nil
+        build_schema_paths(schema.uri, schema)
+        schema.fragment, schema.parent = fragment, parent
+      end
+    end
 
     def dereference(ref_schema, ref_stack)
       ref = ref_schema.reference
@@ -69,11 +106,23 @@ module JsonSchema
       true
     end
 
-    def resolve_pointer(ref_schema, uri_path, resolved_schema)
+    def lookup_pointer(uri, pointer)
+      paths = @schema_paths[uri.to_s] ||= {}
+      paths[pointer]
+    end
+
+    def lookup_reference(uri)
+      if uri.absolute?
+        @store.lookup_uri(uri.to_s)
+      else
+        @local_store.lookup_uri(uri.to_s)
+      end
+    end
+
+    def resolve_pointer(ref_schema, resolved_schema)
       ref = ref_schema.reference
 
-      # we've already evaluated this precise URI/pointer combination before
-      if !(new_schema = @store.lookup_pointer(uri_path, ref.pointer.to_s))
+      if !(new_schema = lookup_pointer(ref.uri, ref.pointer))
         data = JsonPointer.evaluate(resolved_schema.data, ref.pointer)
 
         # couldn't resolve pointer within known schema; that's an error
@@ -83,18 +132,17 @@ module JsonSchema
           return
         end
 
-        # parse a new schema and use the same parent node
+        # Parse a new schema and use the same parent node. Basically this is
+        # exclusively for the case of a reference that needs to be
+        # de-referenced again to be resolved.
+        # TODO: Fix to never parse.
         new_schema = Parser.new.parse(data, ref_schema.parent)
-
-        # add the reference into our document store right away; it will
-        # eventually be fully expanded
-        @store.add_pointer_reference(uri_path, ref.pointer.to_s, new_schema)
+        build_schema_paths(ref.uri, resolved_schema)
       else
         # insert a clone record so that the expander knows to expand it when
         # the schema traversal is finished
         new_schema.clones << ref_schema
       end
-
       new_schema
     end
 
@@ -107,7 +155,7 @@ module JsonSchema
         # allow resolution if something we've already parsed has claimed the
         # full URL
         if @store.lookup_uri(uri.to_s)
-          resolve_uri(ref_schema, uri.to_s)
+          resolve_uri(ref_schema, uri)
         else
           message =
             %{Reference resolution over #{scheme} is not currently supported.}
@@ -116,23 +164,24 @@ module JsonSchema
         end
       # absolute
       elsif uri && uri.path[0] == "/"
-        resolve_uri(ref_schema, uri.path)
+        resolve_uri(ref_schema, uri)
       # relative
       elsif uri
         # build an absolute path using the URI of the current schema
+        # TODO: fix this. References don't get URIs which might be an error.
         schema_uri = ref_schema.uri.chomp("/")
-        resolve_uri(ref_schema, schema_uri + "/" + uri.path)
+        resolve_uri(ref_schema, URI.parse(schema_uri + "/" + uri.path))
       # just a JSON Pointer -- resolve against schema root
       else
-        resolve_pointer(ref_schema, "/", @schema)
+        resolve_pointer(ref_schema, @schema)
       end
     end
 
-    def resolve_uri(ref_schema, uri_path)
-      if schema = @store.lookup_uri(uri_path)
-        resolve_pointer(ref_schema, uri_path, schema)
+    def resolve_uri(ref_schema, uri)
+      if schema = lookup_reference(uri)
+        resolve_pointer(ref_schema, schema)
       else
-        message = %{Couldn't resolve URI: #{uri_path}.}
+        message = %{Couldn't resolve URI: #{uri.to_s}.}
         @errors << SchemaError.new(ref_schema, message)
         nil
       end
@@ -195,15 +244,14 @@ module JsonSchema
     end
 
     def traverse_schema(schema)
-      @store.add_uri_reference(schema.uri, schema)
+      add_reference(schema)
 
       schema_children(schema).each do |subschema|
         if subschema.reference && !subschema.expanded?
           dereference(subschema, [])
         end
 
-        # traverse child schemas only if they're the original copy
-        if subschema.expanded? && subschema.original?
+        if !subschema.reference
           traverse_schema(subschema)
         end
       end

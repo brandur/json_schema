@@ -7,42 +7,20 @@ module JsonSchema
   # reference to the top-level schema before doing anything else.
   class DocumentStore
     def initialize
-      @uri_map = {}
-    end
-
-    def add_pointer_reference(uri, path, schema)
-      raise "can't add nil URI" if uri.nil?
-
-      if !@uri_map[uri][:pointer_map].key?(path)
-        @uri_map[uri][:pointer_map][path] = schema
-      end
+      @schema_map = {}
     end
 
     def add_uri_reference(uri, schema)
       raise "can't add nil URI" if uri.nil?
-
-      # Children without an ID keep the same URI as their parents. So since we
-      # traverse trees from top to bottom, just keep the first reference.
-      if !@uri_map.key?(uri)
-        @uri_map[uri] = {
-          pointer_map: {
-            JsonReference.reference("#").to_s => schema
-          },
-          schema: schema
-        }
-      end
+      @schema_map[uri] = schema
     end
 
-    def lookup_pointer(uri, pointer)
-      @uri_map[uri][:pointer_map][pointer]
+    def each
+      @schema_map.each { |k, v| yield(k, v) }
     end
 
     def lookup_uri(uri)
-      if @uri_map[uri]
-        @uri_map[uri][:schema]
-      else
-        nil
-      end
+      @schema_map[uri]
     end
   end
 end
