@@ -198,17 +198,17 @@ module JsonSchema
       end
     end
 
-    def expand_references
+    def expand_references(options = {})
       expander = ReferenceExpander.new
-      if expander.expand(self)
+      if expander.expand(self, options)
         [true, nil]
       else
         [false, expander.errors]
       end
     end
 
-    def expand_references!
-      ReferenceExpander.new.expand!(self)
+    def expand_references!(options = {})
+      ReferenceExpander.new.expand!(self, options)
       true
     end
 
