@@ -666,7 +666,9 @@ describe JsonSchema::Validator do
   end
 
   def validate
-    @schema = JsonSchema.parse!(schema_sample).definitions["app"]
+    @schema = JsonSchema.parse!(schema_sample)
+    @schema.expand_references!
+    @schema = @schema.definitions["app"]
     @validator = JsonSchema::Validator.new(@schema)
     @validator.validate(data_sample)
   end

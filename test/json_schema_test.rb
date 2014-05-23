@@ -18,16 +18,6 @@ describe JsonSchema do
       assert_includes errors.map { |e| e.message },
         %{Expected schema; value was: 4.}
     end
-
-    it "returns errors on a reference expansion problem" do
-      pointer("#/properties").merge!(
-        "app" => { "$ref" => "#/bad-json-reference" }
-      )
-      schema, errors = JsonSchema.parse(schema_sample)
-      refute schema
-      assert_includes errors.map { |e| e.message },
-        %{Couldn't resolve pointer "#/bad-json-reference".}
-    end
   end
 
   describe ".parse!" do
@@ -43,17 +33,6 @@ describe JsonSchema do
         JsonSchema.parse!(schema_sample)
       end
       assert_includes e.message, %{Expected schema; value was: 4.}
-    end
-
-    it "returns errors on a reference expansion problem" do
-      pointer("#/properties").merge!(
-        "app" => { "$ref" => "#/bad-json-reference" }
-      )
-      e = assert_raises(RuntimeError) do
-        JsonSchema.parse!(schema_sample)
-      end
-      assert_includes e.message, 
-        %{Couldn't resolve pointer "#/bad-json-reference".}
     end
   end
 

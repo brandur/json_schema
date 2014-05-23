@@ -9,20 +9,13 @@ module JsonSchema
   def self.parse(data)
     parser = Parser.new
     if schema = parser.parse(data)
-      valid, errors = schema.expand_references
-      if valid
-        [schema, nil]
-      else
-        [nil, errors]
-      end
+      [schema, nil]
     else
       [nil, parser.errors]
     end
   end
 
   def self.parse!(data)
-    schema = Parser.new.parse!(data)
-    schema.expand_references!
-    schema
+    Parser.new.parse!(data)
   end
 end
