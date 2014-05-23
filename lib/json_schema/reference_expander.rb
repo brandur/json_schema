@@ -31,8 +31,8 @@ module JsonSchema
       @errors.count == 0
     end
 
-    def expand!(schema)
-      if !expand(schema)
+    def expand!(schema, options = {})
+      if !expand(schema, options)
         raise SchemaError.aggregate(@errors).join(" ")
       end
       true
