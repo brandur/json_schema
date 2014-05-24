@@ -221,8 +221,8 @@ module JsonSchema
     def inspect_schema
       if reference
         str = reference.to_s
-        str += " [EXPANDED]" if expanded?
-        str += " [CLONE]" if !original?
+        str += expanded? ? " [EXPANDED]" : " [COLLAPSED]"
+        str += original? ? " [ORIGINAL]" : " [CLONE]"
         str
       else
         hash = {}
