@@ -278,6 +278,7 @@ module JsonSchema
       schema.pattern_properties = validate_type(schema, [Hash], "patternProperties") || {}
       schema.properties         = validate_type(schema, [Hash], "properties") || {}
       schema.required           = validate_type(schema, [Array], "required")
+      schema.strict_properties  = validate_type(schema, BOOLEAN, "strictProperties")
 
       # validation: string
       schema.format     = validate_type(schema, [String], "format")

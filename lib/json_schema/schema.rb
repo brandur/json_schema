@@ -153,6 +153,8 @@ module JsonSchema
     attr_copyable :pattern_properties
     attr_copyable :properties
     attr_copyable :required
+    # warning: strictProperties is technically V5 spec (but I needed it now)
+    attr_copyable :strict_properties
 
     # validation: string
     attr_copyable :format
@@ -182,6 +184,7 @@ module JsonSchema
     attr_reader_default :min_exclusive, false
     attr_reader_default :pattern_properties, {}
     attr_reader_default :properties, {}
+    attr_reader_default :strict_properties, false
     attr_reader_default :type, []
 
     # allow booleans to be access with question mark
