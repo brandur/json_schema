@@ -122,6 +122,14 @@ describe JsonSchema::Parser do
     assert_equal ["null", "string"], property[1].type
   end
 
+  it "parses the strictProperties object validation" do
+    pointer("#/definitions/app").merge!(
+      "strictProperties" => true
+    )
+    schema = parse.definitions["app"]
+    assert_equal true, schema.strict_properties
+  end
+
   # couldn't think of any non-contrived examples to work with here
   it "parses the basic set of schema validations" do
     schema = parse.definitions["app"].definitions["contrived"]

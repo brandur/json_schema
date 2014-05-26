@@ -401,6 +401,23 @@ describe JsonSchema::Validator do
       %{Missing required keys "name" in object; keys are "".}
   end
 
+  it "validates strictProperties successfully" do
+    pointer("#/definitions/app").merge!(
+      "strictProperties" => false
+    )
+    assert validate
+  end
+
+  it "validates strictProperties unsuccessfully" do
+    pointer("#/definitions/app").merge!(
+      "strictProperties" => true
+    )
+    refute validate
+    missing = @schema.properties.keys.sort - ["name"]
+    assert_includes error_messages,
+      %{Missing required keys "#{missing.join(", ")}" in object; keys are "name".}
+  end
+
   it "validates allOf" do
     pointer("#/definitions/app/definitions/contrived").merge!(
       "allOf" => [

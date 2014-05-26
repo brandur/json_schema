@@ -72,6 +72,7 @@ module JsonSchema
         valid = strict_and valid, validate_pattern_properties(schema, data, errors, path)
         valid = strict_and valid, validate_properties(schema, data, errors, path)
         valid = strict_and valid, validate_required(schema, data, errors, path, schema.required)
+        valid = strict_and valid, validate_strict_properties(schema, data, errors, path)
       end
 
       # validation: string
@@ -380,6 +381,19 @@ module JsonSchema
     def validate_required(schema, data, errors, path, required)
       return true if !required || required.empty?
       if (missing = required - data.keys).empty?
+        true
+      else
+        message = %{Missing required keys "#{missing.sort.join(", ")}" in object; keys are "#{data.keys.sort.join(", ")}".}
+        errors << ValidationError.new(schema, path, message)
+        false
+      end
+    end
+
+    def validate_strict_properties(schema, data, errors, path)
+      return true if !schema.strict_properties
+
+      missing = schema.properties.keys - data.keys
+      if missing.empty?
         true
       else
         message = %{Missing required keys "#{missing.sort.join(", ")}" in object; keys are "#{data.keys.sort.join(", ")}".}
