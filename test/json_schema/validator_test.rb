@@ -307,7 +307,7 @@ describe JsonSchema::Validator do
       }
     )
     data_sample["foo"] = "bar"
-    data_sample["matches-pattern"] = "yes!"
+    data_sample["matches_pattern"] = "yes!"
     refute validate
     assert_includes error_messages, %{Extra keys in object: foo.}
   end
@@ -332,7 +332,7 @@ describe JsonSchema::Validator do
       }
     )
     data_sample["foo"] = 4
-    data_sample["matches-pattern"] = "yes!"
+    data_sample["matches_pattern"] = "yes!"
     refute validate
     assert_includes error_messages,
       %{Expected data to be of type "boolean"; value was: 4.}
@@ -418,12 +418,18 @@ describe JsonSchema::Validator do
 
   it "validates strictProperties unsuccessfully" do
     pointer("#/definitions/app").merge!(
+      "patternProperties" => {
+        "^matches" => {}
+      },
       "strictProperties" => true
     )
+    data_sample["extra_key"] = "value"
+    data_sample["matches_pattern"] = "yes!"
     refute validate
     missing = @schema.properties.keys.sort - ["name"]
     assert_includes error_messages,
-      %{Missing required keys "#{missing.join(", ")}" in object; keys are "name".}
+      %{Missing required keys "#{missing.join(", ")}" in object; keys are "extra_key, matches_pattern, name".}
+    assert_includes error_messages, %{Extra keys in object: extra_key.}
   end
 
   it "validates allOf" do

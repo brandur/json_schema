@@ -32,6 +32,19 @@ module JsonSchema
 
     private
 
+    # for use with additionalProperties and strictProperties
+    def get_extra_keys(schema, data)
+      extra = data.keys - schema.properties.keys
+
+      if schema.pattern_properties
+        schema.pattern_properties.keys.each do |pattern|
+          extra -= extra.select { |k| k =~ pattern }
+        end
+      end
+
+      extra
+    end
+
     # works around &&'s "lazy" behavior
     def strict_and(valid_old, valid_new)
       valid_old && valid_new
@@ -89,29 +102,16 @@ module JsonSchema
     def validate_additional_properties(schema, data, errors, path)
       return true if schema.additional_properties == true
 
-      extra = data.keys - schema.properties.keys
-
-      if schema.pattern_properties
-        schema.pattern_properties.keys.each do |pattern|
-          extra -= extra.select { |k| k =~ pattern }
-        end
-      end
-
       # schema indicates that all properties not in `properties` should be
       # validated according to subschema
       if schema.additional_properties.is_a?(Schema)
+        extra = get_extra_keys(schema, data)
         extra.each do |key|
           validate_data(schema.additional_properties, data[key], errors, path + [key])
         end
       # boolean indicates whether additional properties are allowed
       else
-        if extra.empty?
-          true
-        else
-          message = %{Extra keys in object: #{extra.sort.join(", ")}.}
-          errors << ValidationError.new(schema, path, message)
-          false
-        end
+        validate_extra(schema, data, errors, path)
       end
     end
 
@@ -186,6 +186,17 @@ module JsonSchema
         true
       else
         message = %{Expected data to be a member of enum #{schema.enum}, value was: #{data}.}
+        errors << ValidationError.new(schema, path, message)
+        false
+      end
+    end
+
+    def validate_extra(schema, data, errors, path)
+      extra = get_extra_keys(schema, data)
+      if extra.empty?
+        true
+      else
+        message = %{Extra keys in object: #{extra.sort.join(", ")}.}
         errors << ValidationError.new(schema, path, message)
         false
       end
@@ -398,14 +409,8 @@ module JsonSchema
     def validate_strict_properties(schema, data, errors, path)
       return true if !schema.strict_properties
 
-      missing = schema.properties.keys - data.keys
-      if missing.empty?
-        true
-      else
-        message = %{Missing required keys "#{missing.sort.join(", ")}" in object; keys are "#{data.keys.sort.join(", ")}".}
-        errors << ValidationError.new(schema, path, message)
-        false
-      end
+      strict_and validate_extra(schema, data, errors, path),
+        validate_required(schema, data, errors, path, schema.properties.keys)
     end
 
     def validate_type(schema, data, errors, path)
