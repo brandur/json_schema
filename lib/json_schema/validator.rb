@@ -91,6 +91,12 @@ module JsonSchema
 
       extra = data.keys - schema.properties.keys
 
+      if schema.pattern_properties
+        schema.pattern_properties.keys.each do |pattern|
+          extra -= extra.select { |k| k =~ pattern }
+        end
+      end
+
       # schema indicates that all properties not in `properties` should be
       # validated according to subschema
       if schema.additional_properties.is_a?(Schema)

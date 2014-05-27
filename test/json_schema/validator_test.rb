@@ -301,9 +301,13 @@ describe JsonSchema::Validator do
 
   it "validates additionalProperties boolean unsuccessfully" do
     pointer("#/definitions/app").merge!(
-      "additionalProperties" => false
+      "additionalProperties" => false,
+      "patternProperties" => {
+        "^matches" => {}
+      }
     )
     data_sample["foo"] = "bar"
+    data_sample["matches-pattern"] = "yes!"
     refute validate
     assert_includes error_messages, %{Extra keys in object: foo.}
   end
@@ -322,9 +326,13 @@ describe JsonSchema::Validator do
     pointer("#/definitions/app").merge!(
       "additionalProperties" => {
         "type" => ["boolean"]
+      },
+      "patternProperties" => {
+        "^matches" => {}
       }
     )
     data_sample["foo"] = 4
+    data_sample["matches-pattern"] = "yes!"
     refute validate
     assert_includes error_messages,
       %{Expected data to be of type "boolean"; value was: 4.}
