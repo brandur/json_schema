@@ -20,6 +20,7 @@ module JsonSchema
 
     def validate(data)
       @errors = []
+      @visited_paths = {}
       validate_data(@schema, data, @errors, ['#'])
       @errors.size == 0
     end
@@ -31,6 +32,19 @@ module JsonSchema
     end
 
     private
+
+    def first_pass(schema, errors, path)
+      path = path.join("/")
+      if !@visited_paths.key?(schema.pointer) || !@visited_paths[schema.pointer].key?(path)
+        @visited_paths[schema.pointer] ||= {}
+        @visited_paths[schema.pointer][path] = true
+        true
+      else
+        message = %{Validation loop detected.}
+        errors << ValidationError.new(schema, path, message)
+        false
+      end
+    end
 
     # for use with additionalProperties and strictProperties
     def get_extra_keys(schema, data)
@@ -52,6 +66,10 @@ module JsonSchema
 
     def validate_data(schema, data, errors, path)
       valid = true
+
+      if !first_pass(schema, errors, path)
+        return false
+      end
 
       # validation: any
       valid = strict_and valid, validate_all_of(schema, data, errors, path)
