@@ -20,7 +20,7 @@ module JsonSchema
 
     def validate(data)
       @errors = []
-      @visited_paths = {}
+      @visits = {}
       validate_data(@schema, data, @errors, ['#'])
       @errors.size == 0
     end
@@ -33,11 +33,11 @@ module JsonSchema
 
     private
 
-    def first_pass(schema, errors, path)
-      path = path.join("/")
-      if !@visited_paths.key?(schema.pointer) || !@visited_paths[schema.pointer].key?(path)
-        @visited_paths[schema.pointer] ||= {}
-        @visited_paths[schema.pointer][path] = true
+    def first_visit(schema, errors, path)
+      pointer = schema.pointer
+      if !@visits.key?(pointer) || !@visits[pointer].key?(path.join("/"))
+        @visits[pointer] ||= {}
+        @visits[pointer][path] = true
         true
       else
         message = %{Validation loop detected.}
@@ -67,7 +67,8 @@ module JsonSchema
     def validate_data(schema, data, errors, path)
       valid = true
 
-      if !first_pass(schema, errors, path)
+      # detect a validation loop
+      if !first_visit(schema, errors, path)
         return false
       end
 
