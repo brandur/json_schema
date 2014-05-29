@@ -406,9 +406,9 @@ module JsonSchema
       return true if schema.properties.empty?
       valid = true
       schema.properties.each do |key, subschema|
-        if value = data[key]
+        if data.key?(key)
           valid = strict_and valid,
-            validate_data(subschema, value, errors, path + [key])
+            validate_data(subschema, data[key], errors, path + [key])
         end
       end
       valid
