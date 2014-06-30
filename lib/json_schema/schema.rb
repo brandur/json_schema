@@ -118,7 +118,6 @@ module JsonSchema
     # Type: Array[Schema]
     attr_copyable :one_of
 
-
     # A subschema which data must not validate against to be valid.
     #
     # Type: Schema
