@@ -34,8 +34,9 @@ module JsonSchema
     private
 
     def first_visit(schema, errors, path)
+      path = path.join("/")
       pointer = schema.pointer
-      if !@visits.key?(pointer) || !@visits[pointer].key?(path.join("/"))
+      if !@visits.key?(pointer) || !@visits[pointer].key?(path)
         @visits[pointer] ||= {}
         @visits[pointer][path] = true
         true
