@@ -1,0 +1,6 @@
+cache: bundler
+
+script: bundle exec rake
+
+notifications:
+  email: false
