@@ -34,11 +34,11 @@ module JsonSchema
     private
 
     def first_visit(schema, errors, path)
-      path = path.join("/")
+      path_string = path.join("/")
       pointer = schema.pointer
-      if !@visits.key?(pointer) || !@visits[pointer].key?(path)
+      if !@visits.key?(pointer) || !@visits[pointer].key?(path_string)
         @visits[pointer] ||= {}
-        @visits[pointer][path] = true
+        @visits[pointer][path_string] = true
         true
       else
         message = %{Validation loop detected.}
