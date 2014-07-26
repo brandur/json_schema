@@ -34,13 +34,9 @@ module JsonSchema
     private
 
     def first_visit(schema, errors, path)
-      path_string = path.join("/")
-      pointer = schema.pointer
-      if !@visits.key?(schema) || !@visits[schema].key?(pointer) ||
-        !@visits[schema][pointer].key?(path_string)
-        @visits[schema] ||= {}
-        @visits[schema][pointer] ||= {}
-        @visits[schema][pointer][path_string] = true
+      key = "#{schema.object_id}-#{schema.pointer}-#{path.join("/")}"
+      if !@visits.key?(key)
+        @visits[key] = true
         true
       else
         message = %{Validation loop detected.}
