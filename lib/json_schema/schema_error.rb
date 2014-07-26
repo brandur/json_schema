@@ -4,18 +4,16 @@ module JsonSchema
     attr_accessor :schema
 
     def self.aggregate(errors)
-      errors.map { |e|
-        if e.is_a?(ValidationError)
-          "#{e.pointer}: failed schema #{e.schema.pointer}: #{e.message}"
-        else
-          "#{e.schema.pointer}: #{e.message}"
-        end
-      }
+      errors.map(&:to_s)
     end
 
     def initialize(schema, message)
       @schema = schema
       @message = message
+    end
+
+    def to_s
+      "#{schema.pointer}: #{message}"
     end
   end
 
@@ -29,6 +27,10 @@ module JsonSchema
 
     def pointer
       path.join("/")
+    end
+
+    def to_s
+      "#{pointer}: failed schema #{schema.pointer}: #{message}"
     end
   end
 end

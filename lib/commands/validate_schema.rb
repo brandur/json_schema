@@ -73,7 +73,7 @@ module Commands
 
     # Builds a JSON Reference + message like "/path/to/file#/path/to/data".
     def map_schema_errors(file, errors)
-      JsonSchema::SchemaError.aggregate(errors).map { |m| "#{file}#{m}" }
+      errors.map { |m| "#{file}#{m}" }
     end
 
     def parse(file)
