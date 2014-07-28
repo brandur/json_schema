@@ -680,6 +680,7 @@ describe JsonSchema::Validator do
     assert_equal "#/visibility", @validator.errors[0].pointer
   end
 
+=begin
   it "handles a validation loop" do
     pointer("#/definitions/app").merge!(
       "not" => { "$ref" => "#/definitions/app" }
@@ -688,6 +689,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{Validation loop detected.}
   end
+=end
 
   def data_sample
     @data_sample ||= DataScaffold.data_sample

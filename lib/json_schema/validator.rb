@@ -34,6 +34,11 @@ module JsonSchema
     private
 
     def first_visit(schema, errors, path)
+      true
+# removed until more comprehensive testing can be performed .. this is
+# currently causing validation loop detections to go off on all non-trivial
+# schemas
+=begin
       key = "#{schema.object_id}-#{schema.pointer}-#{path.join("/")}"
       if !@visits.key?(key)
         @visits[key] = true
@@ -43,6 +48,7 @@ module JsonSchema
         errors << ValidationError.new(schema, path, message)
         false
       end
+=end
     end
 
     # for use with additionalProperties and strictProperties
