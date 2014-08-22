@@ -175,6 +175,7 @@ module JsonSchema
           link.method      = l["method"] ? l["method"].downcase.to_sym : nil
           link.rel         = l["rel"]
           link.title       = l["title"]
+          link.media_type  = l["mediaType"]
 
           if l["schema"]
             link.schema = parse_data(l["schema"], schema, "links/#{i}/schema")
