@@ -160,6 +160,7 @@ describe JsonSchema::Parser do
         "href" => "/apps",
         "method" => "POST",
         "rel" => "create",
+        "mediaType" => "application/json",
         "schema" => {
           "properties" => {
             "name" => {
@@ -180,6 +181,7 @@ describe JsonSchema::Parser do
     assert_equal "/apps", link.href
     assert_equal :post, link.method
     assert_equal "create", link.rel
+    assert_equal "application/json", link.media_type
     assert_equal "#/definitions/app/definitions/name",
       link.schema.properties["name"].reference.pointer
   end

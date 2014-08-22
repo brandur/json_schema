@@ -289,12 +289,17 @@ module JsonSchema
       attr_accessor :href
       attr_accessor :method
       attr_accessor :rel
+      attr_accessor :media_type
       attr_accessor :schema
       attr_accessor :target_schema
       attr_accessor :title
 
       def enc_type
         @enc_type || "application/json"
+      end
+
+      def media_type
+        @media_type || "application/json"
       end
     end
 
