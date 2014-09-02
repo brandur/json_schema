@@ -1,15 +1,15 @@
 module JsonSchema
   class SchemaError
-    attr_accessor :message
-    attr_accessor :schema
+    attr_accessor :message, :schema, :type
 
     def self.aggregate(errors)
       errors.map(&:to_s)
     end
 
-    def initialize(schema, message)
+    def initialize(schema, message, type)
       @schema = schema
       @message = message
+      @type = type
     end
 
     def to_s
@@ -20,8 +20,8 @@ module JsonSchema
   class ValidationError < SchemaError
     attr_accessor :path
 
-    def initialize(schema, path, message)
-      super(schema, message)
+    def initialize(schema, path, message, type)
+      super(schema, message, type)
       @path = path
     end
 

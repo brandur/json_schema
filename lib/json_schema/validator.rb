@@ -45,7 +45,7 @@ module JsonSchema
         true
       else
         message = %{Validation loop detected.}
-        errors << ValidationError.new(schema, path, message)
+        errors << ValidationError.new(schema, path, message, :loop_detected)
         false
       end
 =end
@@ -143,8 +143,8 @@ module JsonSchema
       valid = schema.all_of.all? do |subschema|
         validate_data(subschema, data, errors, path)
       end
-      message = %{Data did not match all subschemas of "allOf" condition.}
-      errors << ValidationError.new(schema, path, message) if !valid
+      message = %{Not all subschemas of "allOf" matched.}
+      errors << ValidationError.new(schema, path, message, :all_of_failed) if !valid
       valid
     end
 
@@ -154,8 +154,8 @@ module JsonSchema
         validate_data(subschema, data, [], path)
       end
       if !valid
-        message = %{Data did not match any subschema of "anyOf" condition.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{No subschema in "anyOf" matched.}
+        errors << ValidationError.new(schema, path, message, :any_of_failed)
       end
       valid
     end
@@ -197,8 +197,8 @@ module JsonSchema
       if valid
         true
       else
-        message = %{Expected data to match "#{schema.format}" format, value was: #{data}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{#{data} is not a valid #{schema.format}.}
+        errors << ValidationError.new(schema, path, message, :invalid_format)
         false
       end
     end
@@ -208,8 +208,8 @@ module JsonSchema
       if schema.enum.include?(data)
         true
       else
-        message = %{Expected data to be a member of enum #{schema.enum}, value was: #{data}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{#{data} is not a member of #{schema.enum}.}
+        errors << ValidationError.new(schema, path, message, :invalid_type)
         false
       end
     end
@@ -219,8 +219,12 @@ module JsonSchema
       if extra.empty?
         true
       else
-        message = %{Extra keys in object: #{extra.sort.join(", ")}.}
-        errors << ValidationError.new(schema, path, message)
+
+        message = %{"#{extra.sort.join('", "')}" } +
+          (extra.length == 1 ? "is not a" : "are not") +
+          %{ permitted key} +
+          (extra.length == 1 ? "." : "s.")
+        errors << ValidationError.new(schema, path, message, :invalid_keys)
         false
       end
     end
@@ -229,12 +233,20 @@ module JsonSchema
       return true unless schema.items
       if schema.items.is_a?(Array)
         if data.size < schema.items.count
-          message = %{Expected array to have at least #{schema.items.count} item(s), had #{data.size} item(s).}
-          errors << ValidationError.new(schema, path, message)
+          message = %{#{schema.items.count} item} +
+            (schema.items.count == 1 ? "" : "s") +
+            %{ required; only #{data.size} } +
+            (data.size == 1 ? "was" : "were") +
+            %{ supplied.}
+          errors << ValidationError.new(schema, path, message, :min_items_failed)
           false
         elsif data.size > schema.items.count && !schema.additional_items?
-          message = %{Expected array to have no more than #{schema.items.count} item(s), had #{data.size} item(s).}
-          errors << ValidationError.new(schema, path, message)
+          message = %{No more than #{schema.items.count} item} +
+            (schema.items.count == 1 ? " is" : "s are") +
+            %{ allowed; #{data.size} } +
+            (data.size > 1 ? "were" : "was") +
+            %{ supplied.}
+          errors << ValidationError.new(schema, path, message, :max_items_failed)
           false
         else
           valid = true
@@ -261,8 +273,10 @@ module JsonSchema
       elsif !schema.max_exclusive? && data <= schema.max
         true
       else
-        message = %{Expected data to be smaller than maximum #{schema.max} (exclusive: #{schema.max_exclusive?}), value was: #{data}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{#{data} must be less than} +
+          (schema.max_exclusive? ? "" : " or equal to") +
+          %{ #{schema.max}.}
+        errors << ValidationError.new(schema, path, message, :max_failed)
         false
       end
     end
@@ -272,8 +286,12 @@ module JsonSchema
       if data.size <= schema.max_items
         true
       else
-        message = %{Expected array to have no more than #{schema.max_items} item(s), had #{data.size} item(s).}
-        errors << ValidationError.new(schema, path, message)
+        message = %{No more than #{schema.max_items} item} +
+          (schema.max_items == 1 ? " is" : "s are") +
+          %{ allowed; #{data.size} } +
+          (data.size == 1 ? "was" : "were")+
+          %{ supplied.}
+        errors << ValidationError.new(schema, path, message, :max_items_failed)
         false
       end
     end
@@ -283,8 +301,12 @@ module JsonSchema
       if data.length <= schema.max_length
         true
       else
-        message = %{Expected string to have a maximum length of #{schema.max_length}, was #{data.length} character(s) long.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{Only #{schema.max_length} character} +
+          (schema.max_length == 1 ? " is" : "s are") +
+          %{ allowed; #{data.length} } +
+          (data.length == 1 ? "was" : "were") +
+          %{ supplied.}
+        errors << ValidationError.new(schema, path, message, :max_length_failed)
         false
       end
     end
@@ -294,8 +316,12 @@ module JsonSchema
       if data.keys.size <= schema.max_properties
         true
       else
-        message = %{Expected object to have a maximum of #{schema.max_properties} property/ies; it had #{data.keys.size}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{No more than #{schema.max_properties} propert} +
+          (schema.max_properties == 1 ? "y is" : "ies are") +
+          %{ allowed; #{data.keys.size} } +
+          (data.keys.size == 1 ? "was" : "were") +
+          %{ supplied.}
+        errors << ValidationError.new(schema, path, message, :max_properties_failed)
         false
       end
     end
@@ -307,8 +333,10 @@ module JsonSchema
       elsif !schema.min_exclusive? && data >= schema.min
         true
       else
-        message = %{Expected data to be larger than minimum #{schema.min} (exclusive: #{schema.min_exclusive?}), value was: #{data}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{#{data} must be greater than} +
+          (schema.min_exclusive? ? "" : " or equal to") +
+          %{ #{schema.min}.}
+        errors << ValidationError.new(schema, path, message, :min_failed)
         false
       end
     end
@@ -318,8 +346,12 @@ module JsonSchema
       if data.size >= schema.min_items
         true
       else
-        message = %{Expected array to have at least #{schema.min_items} item(s), had #{data.size} item(s).}
-        errors << ValidationError.new(schema, path, message)
+        message = %{#{schema.min_items} item} +
+          (schema.min_items == 1 ? "" : "s") +
+          %{ required; only #{data.size} } +
+          (data.size == 1 ? "was" : "were") +
+          %{ supplied.}
+        errors << ValidationError.new(schema, path, message, :min_items_failed)
         false
       end
     end
@@ -329,8 +361,12 @@ module JsonSchema
       if data.length >= schema.min_length
         true
       else
-        message = %{Expected string to have a minimum length of #{schema.min_length}, was #{data.length} character(s) long.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{At least #{schema.min_length} character} +
+          (schema.min_length == 1 ? " is" : "s are") +
+          %{ required; only #{data.length} } +
+          (data.length == 1 ? "was" : "were") +
+          %{ supplied.}
+        errors << ValidationError.new(schema, path, message, :min_length_failed)
         false
       end
     end
@@ -340,8 +376,12 @@ module JsonSchema
       if data.keys.size >= schema.min_properties
         true
       else
-        message = %{Expected object to have a minimum of #{schema.min_properties} property/ies; it had #{data.keys.size}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{At least #{schema.max_properties} propert}+
+          (schema.max_properties == 1 ? "y is" : "ies are") +
+          %{ required; #{data.keys.size} }+
+          (data.keys.size == 1 ? "was" : "were") +
+          %{ supplied.}
+        errors << ValidationError.new(schema, path, message, :min_properties_failed)
         false
       end
     end
@@ -351,8 +391,8 @@ module JsonSchema
       if data % schema.multiple_of == 0
         true
       else
-        message = %{Expected data to be a multiple of #{schema.multiple_of}, value was: #{data}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{#{data} is not a multiple of #{schema.multiple_of}.}
+        errors << ValidationError.new(schema, path, message, :multiple_of_failed)
         false
       end
     end
@@ -363,8 +403,13 @@ module JsonSchema
         validate_data(subschema, data, [], path)
       end
       if num_valid != 1
-        message = %{Data did not match exactly one subschema of "oneOf" condition.}
-        errors << ValidationError.new(schema, path, message)
+        message =
+          if num_valid == 0
+            %{No subschema in "oneOf" matched.}
+          else
+            %{More than one subschema in "oneOf" matched.}
+          end
+        errors << ValidationError.new(schema, path, message, :one_of_failed)
       end
       num_valid == 1
     end
@@ -375,8 +420,8 @@ module JsonSchema
       # incorrectly for the inverse condition
       valid = !validate_data(schema.not, data, [], path)
       if !valid
-        message = %{Data matched subschema of "not" condition.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{Matched "not" subschema.}
+        errors << ValidationError.new(schema, path, message, :not_failed)
       end
       valid
     end
@@ -386,8 +431,8 @@ module JsonSchema
       if data =~ schema.pattern
         true
       else
-        message = %{Expected string to match pattern "#{schema.pattern.inspect}", value was: #{data}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{#{data} does not match #{schema.pattern.inspect}.}
+        errors << ValidationError.new(schema, path, message, :pattern_failed)
         false
       end
     end
@@ -423,8 +468,10 @@ module JsonSchema
       if (missing = required - data.keys).empty?
         true
       else
-        message = %{Missing required keys "#{missing.sort.join(", ")}" in object; keys are "#{data.keys.sort.join(", ")}".}
-        errors << ValidationError.new(schema, path, message)
+        message = %{"#{missing.sort.join('", "')}" } +
+          (missing.length == 1 ? "wasn't" : "weren't") +
+          %{ supplied.}
+        errors << ValidationError.new(schema, path, message, :required_failed)
         false
       end
     end
@@ -442,8 +489,8 @@ module JsonSchema
       if valid_types.any? { |t| data.is_a?(t) }
         true
       else
-        message = %{Expected data to be of type "#{schema.type.join("/")}"; value was: #{data.inspect}.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{#{data.inspect} is not a #{schema.type.join("/")}.}
+        errors << ValidationError.new(schema, path, message, :invalid_type)
         false
       end
     end
@@ -453,8 +500,8 @@ module JsonSchema
       if data.size == data.uniq.size
         true
       else
-        message = %{Expected array items to be unique, but duplicate items were found.}
-        errors << ValidationError.new(schema, path, message)
+        message = %{Duplicate items are not allowed.}
+        errors << ValidationError.new(schema, path, message, :unique_items_failed)
         false
       end
     end
