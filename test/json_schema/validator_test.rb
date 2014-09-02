@@ -189,7 +189,7 @@ describe JsonSchema::Validator do
     )
     data_sample["id"] = 11
     refute validate
-    assert_includes error_messages, %{11 > 10.}
+    assert_includes error_messages, %{11 must be less than or equal to 10.}
   end
 
   it "validates maximum for an integer with exclusiveMaximum true" do
@@ -199,7 +199,7 @@ describe JsonSchema::Validator do
     )
     data_sample["id"] = 10
     refute validate
-    assert_includes error_messages, %{10 >= 10.}
+    assert_includes error_messages, %{10 must be less than 10.}
   end
 
   it "validates maximum for a number with exclusiveMaximum false" do
@@ -209,7 +209,7 @@ describe JsonSchema::Validator do
     )
     data_sample["cost"] = 10.1
     refute validate
-    assert_includes error_messages, %{10.1 > 10.0.}
+    assert_includes error_messages, %{10.1 must be less than or equal to 10.0.}
   end
 
   it "validates maximum for a number with exclusiveMaximum true" do
@@ -220,7 +220,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = 10.0
     refute validate
     assert_includes error_messages,
-      %{10.0 >= 10.0.}
+      %{10.0 must be less than 10.0.}
   end
 
   it "validates minimum for an integer with exclusiveMaximum false" do
@@ -231,7 +231,7 @@ describe JsonSchema::Validator do
     data_sample["id"] = 0
     refute validate
     assert_includes error_messages,
-      %{0 < 1.}
+      %{0 must be greater than or equal to 1.}
   end
 
   it "validates minimum for an integer with exclusiveMaximum true" do
@@ -242,7 +242,7 @@ describe JsonSchema::Validator do
     data_sample["id"] = 1
     refute validate
     assert_includes error_messages,
-      %{1 <= 1.}
+      %{1 must be greater than 1.}
   end
 
   it "validates minimum for a number with exclusiveMaximum false" do
@@ -253,7 +253,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = -0.01
     refute validate
     assert_includes error_messages,
-      %{-0.01 < 0.0.}
+      %{-0.01 must be greater than or equal to 0.0.}
   end
 
   it "validates minimum for a number with exclusiveMaximum true" do
@@ -264,7 +264,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = 0.0
     refute validate
     assert_includes error_messages,
-      %{0.0 <= 0.0.}
+      %{0.0 must be greater than 0.0.}
   end
 
   it "validates multipleOf for an integer" do
@@ -371,7 +371,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = 10.0
     data_sample["ssl"] = true
     refute validate
-    assert_includes error_messages, %{10.0 < 20.0.}
+    assert_includes error_messages, %{10.0 must be greater than or equal to 20.0.}
   end
 
   it "validates maxProperties" do

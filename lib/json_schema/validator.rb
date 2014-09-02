@@ -273,7 +273,9 @@ module JsonSchema
       elsif !schema.max_exclusive? && data <= schema.max
         true
       else
-        message = %{#{data} >#{'=' if schema.max_exclusive?} #{schema.max}.}
+        message = %{#{data} must be less than} +
+          (schema.max_exclusive? ? "" : " or equal to") +
+          %{ #{schema.max}.}
         errors << ValidationError.new(schema, path, message, :max_failed)
         false
       end
@@ -331,7 +333,9 @@ module JsonSchema
       elsif !schema.min_exclusive? && data >= schema.min
         true
       else
-        message = %{#{data} <#{ '=' if schema.min_exclusive? } #{schema.min}.}
+        message = %{#{data} must be greater than} +
+          (schema.min_exclusive? ? "" : " or equal to") +
+          %{ #{schema.min}.}
         errors << ValidationError.new(schema, path, message, :min_failed)
         false
       end
