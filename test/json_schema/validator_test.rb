@@ -22,7 +22,7 @@ describe JsonSchema::Validator do
     data_sample["visibility"] = "personal"
     refute validate
     assert_includes error_messages,
-      %{Expected data to be a member of enum ["private", "public"], value was: personal.}
+      %{personal is not a member of ["private", "public"].}
   end
 
   it "validates type successfully" do
@@ -40,7 +40,7 @@ describe JsonSchema::Validator do
     @data_sample = 4
     refute validate
     assert_includes error_messages,
-      %{Expected data to be of type "object"; value was: 4.}
+      %{4 is not a object.}
   end
 
   it "validates items with list successfully" do
@@ -62,7 +62,7 @@ describe JsonSchema::Validator do
     data_sample["flags"] = ["1337"]
     refute validate
     assert_includes error_messages,
-      %{Expected string to match pattern "/^[a-z][a-z\\-]*[a-z]$/", value was: 1337.}
+      %{1337 does not match /^[a-z][a-z\\-]*[a-z]$/.}
   end
 
   it "validates items with tuple successfully" do
@@ -98,7 +98,7 @@ describe JsonSchema::Validator do
     data_sample["flags"] = ["cedar"]
     refute validate
     assert_includes error_messages,
-      %{Expected array to have at least 2 item(s), had 1 item(s).}
+      %{2 items required; only 1 was supplied.}
   end
 
   it "validates items with tuple unsuccessfully for too many items" do
@@ -112,7 +112,7 @@ describe JsonSchema::Validator do
     data_sample["flags"] = ["cedar", "https", "websockets"]
     refute validate
     assert_includes error_messages,
-      %{Expected array to have no more than 2 item(s), had 3 item(s).}
+      %{No more than 2 items are allowed; 3 were supplied.}
   end
 
   it "validates items with tuple unsuccessfully for non-conforming items" do
@@ -126,7 +126,7 @@ describe JsonSchema::Validator do
     data_sample["flags"] = ["cedar", "1337"]
     refute validate
     assert_includes error_messages,
-      %{Expected data to be a member of enum ["http", "https"], value was: 1337.}
+      %{1337 is not a member of ["http", "https"].}
   end
 
   it "validates maxItems successfully" do
@@ -144,7 +144,7 @@ describe JsonSchema::Validator do
     data_sample["flags"] = (0...11).to_a
     refute validate
     assert_includes error_messages,
-      %{Expected array to have no more than 10 item(s), had 11 item(s).}
+      %{No more than 10 items are allowed; 11 were supplied.}
   end
 
   it "validates minItems successfully" do
@@ -162,7 +162,7 @@ describe JsonSchema::Validator do
     data_sample["flags"] = []
     refute validate
     assert_includes error_messages,
-      %{Expected array to have at least 1 item(s), had 0 item(s).}
+      %{1 item required; only 0 were supplied.}
   end
 
   it "validates uniqueItems successfully" do
@@ -179,8 +179,7 @@ describe JsonSchema::Validator do
     )
     data_sample["flags"] = ["websockets", "websockets"]
     refute validate
-    assert_includes error_messages,
-      %{Expected array items to be unique, but duplicate items were found.}
+    assert_includes error_messages, %{Duplicate items are not allowed.}
   end
 
   it "validates maximum for an integer with exclusiveMaximum false" do
@@ -190,8 +189,7 @@ describe JsonSchema::Validator do
     )
     data_sample["id"] = 11
     refute validate
-    assert_includes error_messages,
-      %{Expected data to be smaller than maximum 10 (exclusive: false), value was: 11.}
+    assert_includes error_messages, %{11 > 10.}
   end
 
   it "validates maximum for an integer with exclusiveMaximum true" do
@@ -201,8 +199,7 @@ describe JsonSchema::Validator do
     )
     data_sample["id"] = 10
     refute validate
-    assert_includes error_messages,
-      %{Expected data to be smaller than maximum 10 (exclusive: true), value was: 10.}
+    assert_includes error_messages, %{10 >= 10.}
   end
 
   it "validates maximum for a number with exclusiveMaximum false" do
@@ -212,8 +209,7 @@ describe JsonSchema::Validator do
     )
     data_sample["cost"] = 10.1
     refute validate
-    assert_includes error_messages,
-      %{Expected data to be smaller than maximum 10.0 (exclusive: false), value was: 10.1.}
+    assert_includes error_messages, %{10.1 > 10.0.}
   end
 
   it "validates maximum for a number with exclusiveMaximum true" do
@@ -224,7 +220,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = 10.0
     refute validate
     assert_includes error_messages,
-      %{Expected data to be smaller than maximum 10.0 (exclusive: true), value was: 10.0.}
+      %{10.0 >= 10.0.}
   end
 
   it "validates minimum for an integer with exclusiveMaximum false" do
@@ -235,7 +231,7 @@ describe JsonSchema::Validator do
     data_sample["id"] = 0
     refute validate
     assert_includes error_messages,
-      %{Expected data to be larger than minimum 1 (exclusive: false), value was: 0.}
+      %{0 < 1.}
   end
 
   it "validates minimum for an integer with exclusiveMaximum true" do
@@ -246,7 +242,7 @@ describe JsonSchema::Validator do
     data_sample["id"] = 1
     refute validate
     assert_includes error_messages,
-      %{Expected data to be larger than minimum 1 (exclusive: true), value was: 1.}
+      %{1 <= 1.}
   end
 
   it "validates minimum for a number with exclusiveMaximum false" do
@@ -257,7 +253,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = -0.01
     refute validate
     assert_includes error_messages,
-      %{Expected data to be larger than minimum 0.0 (exclusive: false), value was: -0.01.}
+      %{-0.01 < 0.0.}
   end
 
   it "validates minimum for a number with exclusiveMaximum true" do
@@ -268,7 +264,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = 0.0
     refute validate
     assert_includes error_messages,
-      %{Expected data to be larger than minimum 0.0 (exclusive: true), value was: 0.0.}
+      %{0.0 <= 0.0.}
   end
 
   it "validates multipleOf for an integer" do
@@ -278,7 +274,7 @@ describe JsonSchema::Validator do
     data_sample["id"] = 1
     refute validate
     assert_includes error_messages,
-      %{Expected data to be a multiple of 2, value was: 1.}
+      %{1 is not a multiple of 2.}
   end
 
   it "validates multipleOf for a number" do
@@ -288,7 +284,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = 0.005
     refute validate
     assert_includes error_messages,
-      %{Expected data to be a multiple of 0.01, value was: 0.005.}
+      %{0.005 is not a multiple of 0.01.}
   end
 
   it "validates additionalProperties boolean successfully" do
@@ -309,7 +305,21 @@ describe JsonSchema::Validator do
     data_sample["foo"] = "bar"
     data_sample["matches_pattern"] = "yes!"
     refute validate
-    assert_includes error_messages, %{Extra keys in object: foo.}
+    assert_includes error_messages, %{"foo" is not a permitted key.}
+  end
+
+  it "validates additionalProperties boolean unsuccessfully with multiple failures" do
+    pointer("#/definitions/app").merge!(
+      "additionalProperties" => false,
+      "patternProperties" => {
+        "^matches" => {}
+      }
+    )
+    data_sample["foo"] = "bar"
+    data_sample["baz"] = "blah"
+    data_sample["matches_pattern"] = "yes!"
+    refute validate
+    assert_includes error_messages, %{"baz", "foo" are not permitted keys.}
   end
 
   it "validates additionalProperties schema successfully" do
@@ -335,7 +345,7 @@ describe JsonSchema::Validator do
     data_sample["matches_pattern"] = "yes!"
     refute validate
     assert_includes error_messages,
-      %{Expected data to be of type "boolean"; value was: 4.}
+      %{4 is not a boolean.}
   end
 
   it "validates simple dependencies" do
@@ -345,7 +355,7 @@ describe JsonSchema::Validator do
     data_sample["production"] = true
     refute validate
     assert_includes error_messages,
-      %{Missing required keys "ssl" in object; keys are "name, production".}
+      %{"ssl" wasn't supplied.}
   end
 
   it "validates schema dependencies" do
@@ -361,7 +371,7 @@ describe JsonSchema::Validator do
     data_sample["cost"] = 10.0
     data_sample["ssl"] = true
     refute validate
-    assert_includes error_messages, %{Expected data to be larger than minimum 20.0 (exclusive: false), value was: 10.0.}
+    assert_includes error_messages, %{10.0 < 20.0.}
   end
 
   it "validates maxProperties" do
@@ -370,7 +380,7 @@ describe JsonSchema::Validator do
     )
     data_sample["name"] = "cloudnasium"
     refute validate
-    assert_includes error_messages, %{Expected object to have a maximum of 0 property/ies; it had 1.}
+    assert_includes error_messages, %{No more than 0 properties are allowed; 1 was supplied.}
   end
 
   it "validates minProperties" do
@@ -379,7 +389,7 @@ describe JsonSchema::Validator do
     )
     data_sample["name"] = "cloudnasium"
     refute validate
-    assert_includes error_messages, %{Expected object to have a minimum of 2 property/ies; it had 1.}
+    assert_includes error_messages, %{At least 10 properties are required; 1 was supplied.}
   end
 
   it "validates patternProperties" do
@@ -396,7 +406,7 @@ describe JsonSchema::Validator do
     }
     refute validate
     assert_includes error_messages,
-      %{Expected data to be of type "null/string"; value was: 456.}
+      %{456 is not a null/string.}
   end
 
   it "validates required" do
@@ -406,7 +416,7 @@ describe JsonSchema::Validator do
     data_sample.delete("name")
     refute validate
     assert_includes error_messages,
-      %{Missing required keys "name" in object; keys are "".}
+      %{"name" wasn't supplied.}
   end
 
   it "validates strictProperties successfully" do
@@ -428,8 +438,8 @@ describe JsonSchema::Validator do
     refute validate
     missing = @schema.properties.keys.sort - ["name"]
     assert_includes error_messages,
-      %{Missing required keys "#{missing.join(", ")}" in object; keys are "extra_key, matches_pattern, name".}
-    assert_includes error_messages, %{Extra keys in object: extra_key.}
+      %{"#{missing.join('", "')}" weren't supplied.}
+    assert_includes error_messages, %{"extra_key" is not a permitted key.}
   end
 
   it "validates allOf" do
@@ -442,7 +452,7 @@ describe JsonSchema::Validator do
     data_sample["contrived"] = "ab"
     refute validate
     assert_includes error_messages,
-      %{Expected string to have a minimum length of 3, was 2 character(s) long.}
+      %{At least 3 characters are required; only 2 were supplied.}
   end
 
   it "validates anyOf" do
@@ -455,7 +465,7 @@ describe JsonSchema::Validator do
     data_sample["contrived"] = "ab"
     refute validate
     assert_includes error_messages,
-      %{Data did not match any subschema of "anyOf" condition.}
+      %{No subschema in "anyOf" matched.}
   end
 
   it "validates oneOf" do
@@ -468,7 +478,7 @@ describe JsonSchema::Validator do
     data_sample["contrived"] = "foo"
     refute validate
     assert_includes error_messages,
-      %{Data did not match exactly one subschema of "oneOf" condition.}
+      %{More than one subschema in "oneOf" matched.}
   end
 
   it "validates not" do
@@ -478,7 +488,7 @@ describe JsonSchema::Validator do
     data_sample["contrived"] = ""
     refute validate
     assert_includes error_messages,
-      %{Data matched subschema of "not" condition.}
+      %{Matched "not" subschema.}
   end
 
   it "validates date-time format successfully" do
@@ -504,7 +514,7 @@ describe JsonSchema::Validator do
     data_sample["owner"] = "2014-05-13T08:42:40"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "date-time" format, value was: 2014-05-13T08:42:40.}
+      %{2014-05-13T08:42:40 is not a valid date-time.}
   end
 
   it "validates email format successfully" do
@@ -522,7 +532,7 @@ describe JsonSchema::Validator do
     data_sample["owner"] = "@example.com"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "email" format, value was: @example.com.}
+      %{@example.com is not a valid email.}
   end
 
   it "validates hostname format successfully" do
@@ -540,7 +550,7 @@ describe JsonSchema::Validator do
     data_sample["owner"] = "@example.com"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "hostname" format, value was: @example.com.}
+      %{@example.com is not a valid hostname.}
   end
 
   it "validates ipv4 format successfully" do
@@ -558,7 +568,7 @@ describe JsonSchema::Validator do
     data_sample["owner"] = "1.2.3.4.5"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "ipv4" format, value was: 1.2.3.4.5.}
+      %{1.2.3.4.5 is not a valid ipv4.}
   end
 
   it "validates ipv6 format successfully" do
@@ -576,7 +586,7 @@ describe JsonSchema::Validator do
     data_sample["owner"] = "1::3:4:5:6:7:8:9"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "ipv6" format, value was: 1::3:4:5:6:7:8:9.}
+      %{1::3:4:5:6:7:8:9 is not a valid ipv6.}
   end
 
   it "validates regex format successfully" do
@@ -594,7 +604,7 @@ describe JsonSchema::Validator do
     data_sample["owner"] = "^owner($"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "regex" format, value was: ^owner($.}
+      %{^owner($ is not a valid regex.}
   end
 
   it "validates absolute uri format successfully" do
@@ -620,7 +630,7 @@ describe JsonSchema::Validator do
     data_sample["owner"] = "http://"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "uri" format, value was: http://.}
+      %{http:// is not a valid uri.}
   end
 
   it "validates uuid format successfully" do
@@ -638,7 +648,7 @@ describe JsonSchema::Validator do
     data_sample["owner"] = "123"
     refute validate
     assert_includes error_messages,
-      %{Expected data to match "uuid" format, value was: 123.}
+      %{123 is not a valid uuid.}
   end
 
   it "validates maxLength" do
@@ -648,7 +658,7 @@ describe JsonSchema::Validator do
     data_sample["name"] = "abcd"
     refute validate
     assert_includes error_messages,
-      %{Expected string to have a maximum length of 3, was 4 character(s) long.}
+      %{Only 3 characters are allowed; 4 were supplied.}
   end
 
   it "validates minLength" do
@@ -658,7 +668,7 @@ describe JsonSchema::Validator do
     data_sample["name"] = "ab"
     refute validate
     assert_includes error_messages,
-      %{Expected string to have a minimum length of 3, was 2 character(s) long.}
+      %{At least 3 characters are required; only 2 were supplied.}
   end
 
   it "validates pattern" do
@@ -668,7 +678,7 @@ describe JsonSchema::Validator do
     data_sample["name"] = "ab"
     refute validate
     assert_includes error_messages,
-      %{Expected string to match pattern "/^[a-z][a-z0-9-]{3,30}$/", value was: ab.}
+      %{ab does not match /^[a-z][a-z0-9-]{3,30}$/.}
   end
 
   it "builds appropriate JSON Pointers to bad data" do

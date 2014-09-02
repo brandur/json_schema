@@ -16,7 +16,7 @@ describe JsonSchema do
       schema, errors = JsonSchema.parse(schema_sample)
       refute schema
       assert_includes errors.map { |e| e.message },
-        %{Expected schema; value was: 4.}
+        %{Schema not found!}
     end
   end
 
@@ -32,7 +32,7 @@ describe JsonSchema do
       e = assert_raises(RuntimeError) do
         JsonSchema.parse!(schema_sample)
       end
-      assert_includes e.message, %{Expected schema; value was: 4.}
+      assert_includes e.message, %{Schema not found!}
     end
   end
 

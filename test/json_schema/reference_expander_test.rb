@@ -204,7 +204,7 @@ describe JsonSchema::ReferenceExpander do
     )
     refute expand
     properties = "#/properties/app0, #/properties/app1, #/properties/app2"
-    assert_includes errors, %{Reference cycle detected: #{properties}.}
+    assert_includes errors, %{Reference loop detected: #{properties}.}
     assert_includes errors, %{Couldn't resolve references: #{properties}.}
   end
 

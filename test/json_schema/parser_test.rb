@@ -222,28 +222,28 @@ describe JsonSchema::Parser do
     schema_sample["id"] = 4
     refute parse
     assert_includes errors,
-      %{Expected "id" to be of type "string"; value was: 4.}
+      %{4 is not a valid "id", must be a string.}
   end
 
   it "errors on non-string titles" do
     schema_sample["title"] = 4
     refute parse
     assert_includes errors,
-      %{Expected "title" to be of type "string"; value was: 4.}
+      %{4 is not a valid "title", must be a string.}
   end
 
   it "errors on non-string descriptions" do
     schema_sample["description"] = 4
     refute parse
     assert_includes errors,
-      %{Expected "description" to be of type "string"; value was: 4.}
+      %{4 is not a valid "description", must be a string.}
   end
 
   it "errors on non-array and non-string types" do
     schema_sample["type"] = 4
     refute parse
     assert_includes errors,
-      %{Expected "type" to be of type "array/string"; value was: 4.}
+      %{4 is not a valid "type", must be a array/string.}
   end
 
   it "errors on unknown types" do
