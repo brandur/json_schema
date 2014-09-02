@@ -221,39 +221,48 @@ describe JsonSchema::Parser do
   it "errors on non-string ids" do
     schema_sample["id"] = 4
     refute parse
-    assert_includes errors,
+    assert_includes error_messages,
       %{4 is not a valid "id", must be a string.}
+    assert_includes error_types, :invalid_type
   end
 
   it "errors on non-string titles" do
     schema_sample["title"] = 4
     refute parse
-    assert_includes errors,
+    assert_includes error_messages,
       %{4 is not a valid "title", must be a string.}
+    assert_includes error_types, :invalid_type
   end
 
   it "errors on non-string descriptions" do
     schema_sample["description"] = 4
     refute parse
-    assert_includes errors,
+    assert_includes error_messages,
       %{4 is not a valid "description", must be a string.}
+    assert_includes error_types, :invalid_type
   end
 
   it "errors on non-array and non-string types" do
     schema_sample["type"] = 4
     refute parse
-    assert_includes errors,
+    assert_includes error_messages,
       %{4 is not a valid "type", must be a array/string.}
+    assert_includes error_types, :invalid_type
   end
 
   it "errors on unknown types" do
     schema_sample["type"] = ["float", "double"]
     refute parse
-    assert_includes errors, %{Unknown types: double, float.}
+    assert_includes error_messages, %{Unknown types: double, float.}
+    assert_includes error_types, :unknown_type
   end
 
-  def errors
+  def error_messages
     @parser.errors.map { |e| e.message }
+  end
+
+  def error_types
+    @parser.errors.map { |e| e.type }
   end
 
   def parse

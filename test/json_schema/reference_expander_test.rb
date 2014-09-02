@@ -5,7 +5,7 @@ require "json_schema"
 describe JsonSchema::ReferenceExpander do
   it "expands references" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
 
     # this was always a fully-defined property
     referenced = @schema.definitions["app"]
@@ -27,7 +27,7 @@ describe JsonSchema::ReferenceExpander do
 
   it "will expand anyOf" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal 3, schema.any_of[0].min_length
     assert_equal 5, schema.any_of[1].min_length
@@ -35,7 +35,7 @@ describe JsonSchema::ReferenceExpander do
 
   it "will expand allOf" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal 30, schema.all_of[0].max_length
     assert_equal 3, schema.all_of[1].min_length
@@ -43,7 +43,7 @@ describe JsonSchema::ReferenceExpander do
 
   it "will expand dependencies" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"].dependencies["ssl"].properties["name"]
     assert_equal ["string"], schema.type
   end
@@ -55,7 +55,7 @@ describe JsonSchema::ReferenceExpander do
       }
     )
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"].properties["flags"].items
     assert_equal ["string"], schema.type
   end
@@ -68,7 +68,7 @@ describe JsonSchema::ReferenceExpander do
       ]
     )
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema0 = @schema.properties["app"].properties["flags"].items[0]
     schema1 = @schema.properties["app"].properties["flags"].items[0]
     assert_equal ["string"], schema0.type
@@ -77,7 +77,7 @@ describe JsonSchema::ReferenceExpander do
 
   it "will expand oneOf" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal /^(foo|aaa)$/, schema.one_of[0].pattern
     assert_equal /^(foo|zzz)$/, schema.one_of[1].pattern
@@ -85,7 +85,7 @@ describe JsonSchema::ReferenceExpander do
 
   it "will expand not" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"].definitions["contrived_plus"]
     assert_equal /^$/, schema.not.pattern
   end
@@ -95,14 +95,14 @@ describe JsonSchema::ReferenceExpander do
       "additionalProperties" => { "$ref" => "#" }
     )
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.additional_properties
     assert_equal ["object"], schema.type
   end
 
   it "will expand patternProperties" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     # value ([1]) of the #first tuple in hash
     schema = @schema.properties["app"].definitions["roles"].
       pattern_properties.first[1]
@@ -111,14 +111,14 @@ describe JsonSchema::ReferenceExpander do
 
   it "will expand hyperschema link schemas" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"].links[0].schema.properties["name"]
     assert_equal ["string"], schema.type
   end
 
   it "will expand hyperschema link targetSchemas" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"].links[0].target_schema.properties["name"]
     assert_equal ["string"], schema.type
   end
@@ -130,7 +130,7 @@ describe JsonSchema::ReferenceExpander do
       "app2" => { "$ref" => "#/definitions/app" },
     )
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app0"]
     assert_equal ["object"], schema.type
   end
@@ -140,14 +140,14 @@ describe JsonSchema::ReferenceExpander do
       "app" => { "$ref" => "#" }
     )
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
     schema = @schema.properties["app"]
     assert_equal ["object"], schema.type
   end
 
   it "builds appropriate JSON Pointers for expanded references" do
     expand
-    assert_equal [], errors
+    assert_equal [], error_messages
 
     # the *referenced* schema should still have a proper pointer
     schema = @schema.definitions["app"].definitions["name"]
@@ -180,10 +180,10 @@ describe JsonSchema::ReferenceExpander do
       "app" => { "$ref" => "#/definitions/nope" }
     )
     refute expand
-    assert_includes errors,
-      %{Couldn't resolve pointer "#/definitions/nope".}
-    assert_includes errors,
-      %{Couldn't resolve references: #/definitions/nope.}
+    assert_includes error_messages, %{Couldn't resolve pointer "#/definitions/nope".}
+    assert_includes error_types, :unresolved_pointer
+    assert_includes error_messages, %{Couldn't resolve references: #/definitions/nope.}
+    assert_includes error_types, :unresolved_references
   end
 
   it "errors on a URI that can't be resolved" do
@@ -191,9 +191,11 @@ describe JsonSchema::ReferenceExpander do
       "app" => { "$ref" => "/schemata/user#/definitions/name" }
     )
     refute expand
-    assert_includes errors,
+    assert_includes error_messages,
       %{Couldn't resolve references: /schemata/user#/definitions/name.}
-    assert_includes errors, %{Couldn't resolve URI: /schemata/user.}
+      assert_includes error_types, :unresolved_references
+    assert_includes error_messages, %{Couldn't resolve URI: /schemata/user.}
+    assert_includes error_types, :unresolved_pointer
   end
 
   it "errors on a reference cycle" do
@@ -204,12 +206,18 @@ describe JsonSchema::ReferenceExpander do
     )
     refute expand
     properties = "#/properties/app0, #/properties/app1, #/properties/app2"
-    assert_includes errors, %{Reference loop detected: #{properties}.}
-    assert_includes errors, %{Couldn't resolve references: #{properties}.}
+    assert_includes error_messages, %{Reference loop detected: #{properties}.}
+    assert_includes error_types, :loop_detected
+    assert_includes error_messages, %{Couldn't resolve references: #{properties}.}
+    assert_includes error_types, :unresolved_references
   end
 
-  def errors
+  def error_messages
     @expander.errors.map { |e| e.message }
+  end
+
+  def error_types
+    @expander.errors.map { |e| e.type }
   end
 
   def pointer(path)
