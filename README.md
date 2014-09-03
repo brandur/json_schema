@@ -31,8 +31,8 @@ end
 
 Errors have a `message` (for humans), and `type` (for machines).
 `ValidationError`s also include a `path`, a JSON pointer to the location in
-the supplied document which violated the schema. See docs/errors.md for more
-info.
+the supplied document which violated the schema. See [errors](docs/errors.md)
+for more info.
 
 Non-bang methods return a two-element array, with `true`/`false` at index 0
 to indicate pass/fail, and an array of errors at index 1 (if any).
