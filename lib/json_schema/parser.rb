@@ -108,7 +108,7 @@ module JsonSchema
       if !data.is_a?(Hash)
         # it would be nice to make this message more specific/nicer (at best it
         # points to the wrong schema)
-        message = %{Schema not found!}
+        message = %{#{data.inspect} is not a valid schema.}
         @errors << SchemaError.new(parent, message, :schema_not_found)
       elsif ref = data["$ref"]
         schema = Schema.new

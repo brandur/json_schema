@@ -31,7 +31,7 @@ describe JsonSchema do
       e = assert_raises(RuntimeError) do
         JsonSchema.parse!(schema_sample)
       end
-      assert_includes e.message, %{Schema not found}
+      assert_includes e.message, %{4 is not a valid schema.}
     end
   end
 
