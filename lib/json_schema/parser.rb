@@ -108,8 +108,8 @@ module JsonSchema
       if !data.is_a?(Hash)
         # it would be nice to make this message more specific/nicer (at best it
         # points to the wrong schema)
-        message = %{Expected schema; value was: #{data.inspect}.}
-        @errors << SchemaError.new(parent, message)
+        message = %{Schema not found!}
+        @errors << SchemaError.new(parent, message, :schema_not_found)
       elsif ref = data["$ref"]
         schema = Schema.new
         schema.fragment = fragment
@@ -314,7 +314,7 @@ module JsonSchema
       if schema.type
         if !(bad_types = schema.type - ALLOWED_TYPES).empty?
           message = %{Unknown types: #{bad_types.sort.join(", ")}.}
-          @errors << SchemaError.new(schema, message)
+          @errors << SchemaError.new(schema, message, :unknown_type)
         end
       end
     end
@@ -324,8 +324,8 @@ module JsonSchema
         types.map { |t| FRIENDLY_TYPES[t] || t }.sort.uniq.join("/")
       value = schema.data[field]
       if !value.nil? && !types.any? { |t| value.is_a?(t) }
-        message = %{Expected "#{field}" to be of type "#{friendly_types}"; value was: #{value.inspect}.}
-        @errors << SchemaError.new(schema, message)
+        message = %{#{value.inspect} is not a valid "#{field}", must be a #{friendly_types}.}
+        @errors << SchemaError.new(schema, message, :invalid_type)
         nil
       else
         value
