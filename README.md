@@ -51,7 +51,7 @@ ruby -Ilib -Itest test/json_schema/validator_test.rb -n /anyOf/
 which is human-readable and contains information for the developer, and a
 `type`, which is one of the following:
 
-#### Schema errors
+### Schema errors
 
 * `schema_not_found`: `$schema` specified was not found
 * `unknown_type`: type specified in the schema is not known
@@ -61,7 +61,7 @@ which is human-readable and contains information for the developer, and a
 * `scheme_not_supported`: lookup of reference over scheme specified isn't supported
 * `invalid_type`: the schema being parsed is not a valid JSON schema, because a value is the wrong type
 
-#### Validation errors
+### Validation errors
 
 * `loop_detected`: validation loop detected - currently this loop detection is disabled as it's too aggressive
 * `invalid_type`: type supplied is not allowed by the schema
