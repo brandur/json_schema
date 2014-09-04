@@ -25,7 +25,7 @@ module JsonSchema
       refs = unresolved_refs(schema).sort
       if refs.count > 0
         message = %{Couldn't resolve references: #{refs.to_a.join(", ")}.}
-        @errors << SchemaError.new(schema, message)
+        @errors << SchemaError.new(schema, message, :unresolved_references)
       end
 
       @errors.count == 0
@@ -73,8 +73,8 @@ module JsonSchema
 
       # detects a reference cycle
       if ref_stack.include?(ref)
-        message = %{Reference cycle detected: #{ref_stack.sort.join(", ")}.}
-        @errors << SchemaError.new(ref_schema, message)
+        message = %{Reference loop detected: #{ref_stack.sort.join(", ")}.}
+        @errors << SchemaError.new(ref_schema, message, :loop_detected)
         return false
       end
 
@@ -128,7 +128,7 @@ module JsonSchema
         # couldn't resolve pointer within known schema; that's an error
         if data.nil?
           message = %{Couldn't resolve pointer "#{ref.pointer}".}
-          @errors << SchemaError.new(resolved_schema, message)
+          @errors << SchemaError.new(resolved_schema, message, :unresolved_pointer)
           return
         end
 
@@ -159,7 +159,7 @@ module JsonSchema
         else
           message =
             %{Reference resolution over #{scheme} is not currently supported.}
-          @errors << SchemaError.new(ref_schema, message)
+          @errors << SchemaError.new(ref_schema, message, :scheme_not_supported)
           nil
         end
       # absolute
@@ -182,7 +182,7 @@ module JsonSchema
         resolve_pointer(ref_schema, schema)
       else
         message = %{Couldn't resolve URI: #{uri.to_s}.}
-        @errors << SchemaError.new(ref_schema, message)
+        @errors << SchemaError.new(ref_schema, message, :unresolved_pointer)
         nil
       end
     end

@@ -15,11 +15,11 @@ validate-schema schema.json data.json
 require "json"
 require "json_schema"
 
-# parse the schema
+# parse the schema - raise SchemaError if it's invalid
 schema_data = JSON.parse(File.read("schema.json"))
 schema = JsonSchema.parse!(schema_data)
 
-# validate some data
+# validate some data - raise ValidationError if it doesn't conform
 data = JSON.parse(File.read("data.json"))
 schema.validate!(data)
 
@@ -28,6 +28,14 @@ schema.links.each do |link|
   puts "#{link.method} #{link.href}"
 end
 ```
+
+Errors have a `message` (for humans), and `type` (for machines).
+`ValidationError`s also include a `path`, a JSON pointer to the location in
+the supplied document which violated the schema. See [errors](docs/errors.md)
+for more info.
+
+Non-bang methods return a two-element array, with `true`/`false` at index 0
+to indicate pass/fail, and an array of errors at index 1 (if any).
 
 ## Development
 
