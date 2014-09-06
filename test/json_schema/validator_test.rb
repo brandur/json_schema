@@ -522,6 +522,14 @@ describe JsonSchema::Validator do
     assert validate
   end
 
+  it "validates date-time format with time fraction successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "date-time"
+    )
+    data_sample["owner"] = "2014-05-13T08:42:40.444Z"
+    assert validate
+  end
+
   it "validates date-time format unsuccessfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "date-time"
