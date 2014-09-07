@@ -6,7 +6,8 @@ module JsonSchema
       errors.map(&:to_s)
     end
 
-    def initialize(schema, message, type)
+    # make `type` required on the next major version bump
+    def initialize(schema, message, type = nil)
       @schema = schema
       @message = message
       @type = type
@@ -20,7 +21,8 @@ module JsonSchema
   class ValidationError < SchemaError
     attr_accessor :path
 
-    def initialize(schema, path, message, type)
+    # make `type` required on the next major version bump
+    def initialize(schema, path, message, type = nil)
       super(schema, message, type)
       @path = path
     end
