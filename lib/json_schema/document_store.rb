@@ -6,13 +6,16 @@ module JsonSchema
   # that have already happened and handles cyclic dependencies. Store a
   # reference to the top-level schema before doing anything else.
   class DocumentStore
+    include Enumerable
+
     def initialize
       @schema_map = {}
     end
 
     def add_schema(schema)
       raise "can't add nil URI" if schema.uri.nil?
-      @schema_map[schema.uri] = schema
+      uri = schema.uri.chomp('#')
+      @schema_map[uri] = schema
     end
 
     def each
@@ -20,6 +23,7 @@ module JsonSchema
     end
 
     def lookup_schema(uri)
+      uri = uri.chomp('#')
       @schema_map[uri]
     end
   end
