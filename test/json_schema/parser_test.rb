@@ -257,6 +257,15 @@ describe JsonSchema::Parser do
     assert_includes error_types, :unknown_type
   end
 
+  it "errors on unknown formats" do
+    schema_sample["format"] = "obscure-thing"
+    refute parse
+    assert_includes error_messages, '"obscure-thing" is not a valid format, ' \
+                                    'must be one of date, date-time, email, ' \
+                                    'hostname, ipv4, ipv6, regex, uri, uuid.'
+    assert_includes error_types, :unknown_format
+  end
+
   def error_messages
     @parser.errors.map { |e| e.message }
   end

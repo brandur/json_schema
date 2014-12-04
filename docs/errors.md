@@ -14,6 +14,7 @@ which is human-readable and contains information for the developer, and a
 * `unresolved_pointer`: pointer in document couldn't be resolved
 * `scheme_not_supported`: lookup of reference over scheme specified isn't supported
 * `invalid_type`: the schema being parsed is not a valid JSON schema, because a value is the wrong type
+* `unknown_format`: the format specified is not supported by this gem
 
 ### Validation errors
 

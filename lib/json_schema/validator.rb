@@ -177,6 +177,8 @@ module JsonSchema
     def validate_format(schema, data, errors, path)
       return true unless schema.format
       valid = case schema.format
+      when "date"
+        data =~ DATE_PATTERN
       when "date-time"
         data =~ DATE_TIME_PATTERN
       when "email"
@@ -511,6 +513,8 @@ module JsonSchema
     HOSTNAME_PATTERN = /^(?=.{1,255}$)[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?(?:\.[0-9A-Za-z](?:(?:[0-9A-Za-z]|-){0,61}[0-9A-Za-z])?)*\.?$/
 
     DATE_TIME_PATTERN = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-2][0-9]:[0-5][0-9]:[0-5][0-9](Z|[\-+][0-9]{2}:[0-5][0-9])$/
+
+    DATE_PATTERN = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/
 
     # from: http://stackoverflow.com/a/17871737
     IPV4_PATTERN = /^((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])$/
