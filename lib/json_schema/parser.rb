@@ -14,6 +14,7 @@ module JsonSchema
       String     => "string",
       TrueClass  => "boolean",
     }
+    FORMATS = %w{date date-time email hostname ipv4 ipv6 regex uri uuid}
 
     attr_accessor :errors
 
@@ -287,6 +288,7 @@ module JsonSchema
       schema.min_length = validate_type(schema, [Integer], "minLength")
       schema.pattern    = validate_type(schema, [String], "pattern")
       schema.pattern    = Regexp.new(schema.pattern) if schema.pattern
+      validate_format(schema, schema.format) if schema.format
 
       # hyperschema
       schema.links      = validate_type(schema, [Array], "links")
@@ -330,6 +332,13 @@ module JsonSchema
       else
         value
       end
+    end
+
+    def validate_format(schema, format)
+      return if FORMATS.include?(format)
+
+      message = %{#{format.inspect} is not a valid format, must be one of #{FORMATS.join(', ')}.}
+      @errors << SchemaError.new(schema, message, :unknown_format)
     end
   end
 end

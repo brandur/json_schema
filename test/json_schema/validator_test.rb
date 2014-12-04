@@ -506,6 +506,22 @@ describe JsonSchema::Validator do
     assert_includes error_types, :not_failed
   end
 
+  it "validates date format successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "date"
+    )
+    data_sample["owner"] = "2014-05-13"
+    assert validate
+  end
+
+  it "validates date format unsuccessfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "date"
+    )
+    data_sample["owner"] = "13/05/2014"
+    refute validate
+  end
+
   it "validates date-time format successfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "date-time"
