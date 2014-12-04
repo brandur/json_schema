@@ -4,6 +4,7 @@ module JsonSchema
   class Parser
     ALLOWED_TYPES = %w{any array boolean integer number null object string}
     BOOLEAN = [FalseClass, TrueClass]
+    FORMATS = %w{date date-time email hostname ipv4 ipv6 regex uri uuid}
     FRIENDLY_TYPES = {
       Array      => "array",
       FalseClass => "boolean",
@@ -14,7 +15,6 @@ module JsonSchema
       String     => "string",
       TrueClass  => "boolean",
     }
-    FORMATS = %w{date date-time email hostname ipv4 ipv6 regex uri uuid}
 
     attr_accessor :errors
 
