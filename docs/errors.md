@@ -22,7 +22,7 @@ which is human-readable and contains information for the developer, and a
 * `invalid_type`: type supplied is not allowed by the schema
 * `invalid_format`: `format` condition not satisfied
 * `invalid_keys`: some keys of a hash supplied aren't allowed
-* `any_of_failed`: `anyOf` condition failed
+* `any_of_failed`: `anyOf` condition failed (this will also produce sub-errors)
 * `all_of_failed`: `allOf` condition failed
 * `one_of_failed`: `oneOf` condition failed
 * `not_failed`: input matched the `not` schema
