@@ -22,7 +22,7 @@ which is human-readable and contains information for the developer, and a
 * `invalid_type`: type supplied is not allowed by the schema
 * `invalid_format`: `format` condition not satisfied
 * `invalid_keys`: some keys of a hash supplied aren't allowed
-* `any_of_failed`: `anyOf` condition failed (this will also produce sub-errors)
+* `any_of_failed`: `anyOf` condition failed
 * `all_of_failed`: `allOf` condition failed
 * `one_of_failed`: `oneOf` condition failed
 * `not_failed`: input matched the `not` schema
@@ -38,3 +38,7 @@ which is human-readable and contains information for the developer, and a
 * `pattern_failed`: input string didn't match regex `pattern`
 * `required_failed`: some `required` keys weren't included
 * `unique_items_failed`: array contained duplicates, disallowed by `"uniqueItems": true`
+
+`ValidationErrors` from `anyOf` will also populate `sub_errors` on the error object. This
+is an array of arrays, with each sub-array containing the validation errors for each
+subschema.

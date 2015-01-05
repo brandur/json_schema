@@ -12,7 +12,7 @@ module JsonSchema
       "string"  => String,
     }
 
-    attr_accessor :errors, :sub_errors
+    attr_accessor :errors
 
     def initialize(schema)
       @schema = schema
@@ -20,7 +20,6 @@ module JsonSchema
 
     def validate(data)
       @errors = []
-      @sub_errors = []
       @visits = {}
       validate_data(@schema, data, @errors, ['#'])
       @errors.size == 0
@@ -151,19 +150,22 @@ module JsonSchema
 
     def validate_any_of(schema, data, errors, path)
       return true if schema.any_of.empty?
+
+      sub_errors = []
+
       subschemata_validity = schema.any_of.map do |subschema|
-        current_suberrors = []
-        current_valid = validate_data(subschema, data, current_suberrors, path)
-        @sub_errors << current_suberrors if current_suberrors.any?
-        current_valid
+        current_sub_errors = []
+        sub_errors << current_sub_errors
+        validate_data(subschema, data, current_sub_errors, path)
       end
 
-      valid = subschemata_validity.any? { |valid| valid == true }
-      if !valid
+      unless subschemata_validity.any? { |valid| valid == true }
         message = %{No subschema in "anyOf" matched.}
-        errors << ValidationError.new(schema, path, message, :any_of_failed)
+        errors << ValidationError.new(schema, path, message, :any_of_failed, sub_errors)
+        return false
       end
-      valid
+
+      true
     end
 
     def validate_dependencies(schema, data, errors, path)

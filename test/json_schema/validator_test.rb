@@ -481,6 +481,9 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{No subschema in "anyOf" matched.}
     assert_includes error_types, :any_of_failed
+    any_of_error = @validator.errors.find { |error| error.type == :any_of_failed }
+    sub_error_messages = any_of_error.sub_errors.map { |errors| errors.map(&:message) }
+    sub_error_types = any_of_error.sub_errors.map { |errors| errors.map(&:type) }
     assert_includes sub_error_messages, [%{At least 5 characters are required; only 2 were supplied.}]
     assert_includes sub_error_messages, [%{At least 3 characters are required; only 2 were supplied.}]
     assert_equal sub_error_types, [[:min_length_failed], [:min_length_failed]]
@@ -751,16 +754,8 @@ describe JsonSchema::Validator do
     @validator.errors.map(&:message)
   end
 
-  def sub_error_messages
-    @validator.sub_errors.map { |errors| errors.map(&:message) }
-  end
-
   def error_types
     @validator.errors.map(&:type)
-  end
-
-  def sub_error_types
-    @validator.sub_errors.map { |errors| errors.map(&:type) }
   end
 
   def pointer(path)

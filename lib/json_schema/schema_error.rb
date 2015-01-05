@@ -18,11 +18,12 @@ module JsonSchema
   end
 
   class ValidationError < SchemaError
-    attr_accessor :path
+    attr_accessor :path, :sub_errors
 
-    def initialize(schema, path, message, type)
+    def initialize(schema, path, message, type, sub_errors = nil)
       super(schema, message, type)
       @path = path
+      @sub_errors = sub_errors
     end
 
     def pointer
