@@ -409,19 +409,25 @@ module JsonSchema
 
     def validate_one_of(schema, data, errors, path)
       return true if schema.one_of.empty?
+      sub_errors = []
+
       num_valid = schema.one_of.count do |subschema|
-        validate_data(subschema, data, [], path)
+        current_sub_errors = []
+        sub_errors << current_sub_errors
+        validate_data(subschema, data, current_sub_errors, path)
       end
-      if num_valid != 1
-        message =
-          if num_valid == 0
-            %{No subschema in "oneOf" matched.}
-          else
-            %{More than one subschema in "oneOf" matched.}
-          end
-        errors << ValidationError.new(schema, path, message, :one_of_failed)
-      end
-      num_valid == 1
+
+      return true if num_valid == 1
+
+      message =
+        if num_valid == 0
+          %{No subschema in "oneOf" matched.}
+        else
+          %{More than one subschema in "oneOf" matched.}
+        end
+      errors << ValidationError.new(schema, path, message, :one_of_failed, sub_errors)
+
+      false
     end
 
     def validate_not(schema, data, errors, path)

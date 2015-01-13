@@ -493,13 +493,19 @@ describe JsonSchema::Validator do
     pointer("#/definitions/app/definitions/contrived").merge!(
       "oneOf" => [
         { "pattern" => "^(foo|aaa)$" },
-        { "pattern" => "^(foo|zzz)$" }
+        { "pattern" => "^(foo|zzz)$" },
+        { "pattern" => "^(hell|no)$" }
       ]
     )
     data_sample["contrived"] = "foo"
     refute validate
     assert_includes error_messages, %{More than one subschema in "oneOf" matched.}
     assert_includes error_types, :one_of_failed
+    one_of_error = @validator.errors.find { |error| error.type == :one_of_failed }
+    sub_error_messages = one_of_error.sub_errors.map { |errors| errors.map(&:message) }
+    sub_error_types = one_of_error.sub_errors.map { |errors| errors.map(&:type) }
+    assert_equal sub_error_messages, [[], [], [%{foo does not match /^(hell|no)$/.}]]
+    assert_equal sub_error_types, [[], [], [:pattern_failed]]
   end
 
   it "validates not" do

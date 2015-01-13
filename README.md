@@ -34,9 +34,8 @@ Errors have a `message` (for humans), and `type` (for machines).
 the supplied document which violated the schema. See [errors](docs/errors.md)
 for more info.
 
-Non-bang methods return a three-element array, with `true`/`false` at index 0
-to indicate pass/fail, an array of errors at index 1 (if any), and the sub-errors
-(if any) at index 2.
+Non-bang methods return a two-element array, with `true`/`false` at index 0
+to indicate pass/fail, and an array of errors at index 1 (if any).
 
 ## Development
 
