@@ -38,3 +38,7 @@ which is human-readable and contains information for the developer, and a
 * `pattern_failed`: input string didn't match regex `pattern`
 * `required_failed`: some `required` keys weren't included
 * `unique_items_failed`: array contained duplicates, disallowed by `"uniqueItems": true`
+
+`ValidationError`s from `anyOf` and `oneOf` will also populate `sub_errors` on the error
+object. This is an array of arrays, with each sub-array containing the validation errors
+for each subschema.

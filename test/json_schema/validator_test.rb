@@ -481,19 +481,31 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{No subschema in "anyOf" matched.}
     assert_includes error_types, :any_of_failed
+    any_of_error = @validator.errors.find { |error| error.type == :any_of_failed }
+    sub_error_messages = any_of_error.sub_errors.map { |errors| errors.map(&:message) }
+    sub_error_types = any_of_error.sub_errors.map { |errors| errors.map(&:type) }
+    assert_includes sub_error_messages, [%{At least 5 characters are required; only 2 were supplied.}]
+    assert_includes sub_error_messages, [%{At least 3 characters are required; only 2 were supplied.}]
+    assert_equal sub_error_types, [[:min_length_failed], [:min_length_failed]]
   end
 
   it "validates oneOf" do
     pointer("#/definitions/app/definitions/contrived").merge!(
       "oneOf" => [
         { "pattern" => "^(foo|aaa)$" },
-        { "pattern" => "^(foo|zzz)$" }
+        { "pattern" => "^(foo|zzz)$" },
+        { "pattern" => "^(hell|no)$" }
       ]
     )
     data_sample["contrived"] = "foo"
     refute validate
     assert_includes error_messages, %{More than one subschema in "oneOf" matched.}
     assert_includes error_types, :one_of_failed
+    one_of_error = @validator.errors.find { |error| error.type == :one_of_failed }
+    sub_error_messages = one_of_error.sub_errors.map { |errors| errors.map(&:message) }
+    sub_error_types = one_of_error.sub_errors.map { |errors| errors.map(&:type) }
+    assert_equal sub_error_messages, [[], [], [%{foo does not match /^(hell|no)$/.}]]
+    assert_equal sub_error_types, [[], [], [:pattern_failed]]
   end
 
   it "validates not" do
@@ -745,11 +757,11 @@ describe JsonSchema::Validator do
   end
 
   def error_messages
-    @validator.errors.map { |e| e.message }
+    @validator.errors.map(&:message)
   end
 
   def error_types
-    @validator.errors.map { |e| e.type }
+    @validator.errors.map(&:type)
   end
 
   def pointer(path)
