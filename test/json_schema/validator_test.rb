@@ -732,6 +732,16 @@ describe JsonSchema::Validator do
     assert_includes error_types, :pattern_failed
   end
 
+  it "validates non-ECMA-262 pattern" do
+    pointer("#/definitions/app/definitions/name").merge!(
+      "pattern" => "\\Ameow",
+    )
+    data_sample["name"] = "meow"
+    refute validate
+    assert_includes error_messages, %{/\\Ameow/ is not an ECMA-262 regular expression.}
+    assert_includes error_types, :pattern_failed
+  end
+
   it "builds appropriate JSON Pointers to bad data" do
     pointer("#/definitions/app/definitions/visibility").merge!(
       "enum" => ["private", "public"]

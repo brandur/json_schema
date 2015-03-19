@@ -12,6 +12,7 @@ Gem::Specification.new do |s|
   s.executables   = ["validate-schema"]
   s.files         = Dir["README.md", "bin/*", "schemas/*", "{lib,test}/**/*.rb"]
 
+  s.add_dependency             'ecma-re-validator', '~> 0.1'
   s.add_development_dependency "minitest", "~> 5.3"
   s.add_development_dependency "rake", "~> 10.3"
 end
