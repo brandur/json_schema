@@ -1,5 +1,4 @@
 require "uri"
-require 'ecma-re-validator'
 
 module JsonSchema
   class Validator
@@ -445,11 +444,6 @@ module JsonSchema
 
     def validate_pattern(schema, data, errors, path)
       return true unless schema.pattern
-      unless EcmaReValidator.valid?(schema.pattern)
-        message = %{#{schema.pattern.inspect} is not an ECMA-262 regular expression.}
-        errors << ValidationError.new(schema, path, message, :pattern_failed)
-        return false
-      end
 
       if data =~ schema.pattern
         true
