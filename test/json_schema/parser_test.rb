@@ -3,6 +3,12 @@ require "test_helper"
 require "json_schema"
 
 describe JsonSchema::Parser do
+  after do
+    JsonSchema.configure do |c|
+      c.validate_regex_with = nil
+    end
+  end
+
   it "parses the basic attributes of a schema" do
     schema = parse
     assert_nil schema.id
@@ -264,6 +270,22 @@ describe JsonSchema::Parser do
                                     'must be one of date, date-time, email, ' \
                                     'hostname, ipv4, ipv6, regex, uri, uuid.'
     assert_includes error_types, :unknown_format
+  end
+
+  it "passes for an invalid regex when not asked to check" do
+    schema_sample["pattern"] = "\\Ameow"
+    assert parse
+  end
+
+  it "errors for an invalid regex when asked to check" do
+    require 'ecma-re-validator'
+    JsonSchema.configure do |c|
+      c.validate_regex_with = :'ecma-re-validator'
+    end
+    schema_sample["pattern"] = "\\Ameow"
+    refute parse
+    assert_includes error_messages, '"\\\\Ameow" is not an ECMA-262 regular expression.'
+    assert_includes error_types, :regex_failed
   end
 
   def error_messages
