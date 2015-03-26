@@ -444,6 +444,7 @@ module JsonSchema
 
     def validate_pattern(schema, data, errors, path)
       return true unless schema.pattern
+
       if data =~ schema.pattern
         true
       else
