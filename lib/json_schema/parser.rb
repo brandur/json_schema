@@ -211,10 +211,21 @@ module JsonSchema
         # leave the original data reference intact
         properties = schema.pattern_properties.dup
         properties = properties.map do |k, s|
-          [Regexp.new(k), parse_data(s, schema, "patternProperties/#{k}")]
+          [parse_regex(schema, k), parse_data(s, schema, "patternProperties/#{k}")]
         end
         schema.pattern_properties = Hash[*properties.flatten]
       end
+    end
+
+    def parse_regex(schema, regex)
+      case JsonSchema.configuration.validate_regex_with
+      when :'ecma-re-validator'
+        unless EcmaReValidator.valid?(regex)
+          message = %{#{regex.inspect} is not an ECMA-262 regular expression.}
+          @errors << SchemaError.new(schema, message, :regex_failed)
+        end
+      end
+      Regexp.new(regex)
     end
 
     def parse_properties(schema)
@@ -287,7 +298,7 @@ module JsonSchema
       schema.max_length = validate_type(schema, [Integer], "maxLength")
       schema.min_length = validate_type(schema, [Integer], "minLength")
       schema.pattern    = validate_type(schema, [String], "pattern")
-      schema.pattern    = Regexp.new(schema.pattern) if schema.pattern
+      schema.pattern    = parse_regex(schema, schema.pattern) if schema.pattern
       validate_format(schema, schema.format) if schema.format
 
       # hyperschema
