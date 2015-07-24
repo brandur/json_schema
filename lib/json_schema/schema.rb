@@ -215,9 +215,7 @@ module JsonSchema
     end
 
     def inspect
-      str = inspect_schema
-      str = JSON.pretty_generate(str).gsub(/\\?"/, '') if str.is_a?(Hash)
-      "\#<JsonSchema::Schema #{str}>"
+      "\#<JsonSchema::Schema>"
     end
 
     def inspect_schema
