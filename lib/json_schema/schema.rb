@@ -215,7 +215,7 @@ module JsonSchema
     end
 
     def inspect
-      "\#<JsonSchema::Schema>"
+      "\#<JsonSchema::Schema pointer=#{pointer}>"
     end
 
     def inspect_schema
