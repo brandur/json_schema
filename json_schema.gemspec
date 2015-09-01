@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.license       = "MIT"
 
   s.executables   = ["validate-schema"]
-  s.files         = Dir["README.md", "bin/*", "schemas/*", "{lib,test}/**/*.rb"]
+  s.files         = Dir["README.md", "LICENSE", "bin/*", "schemas/*", "{lib,test}/**/*.rb"]
 
   s.add_development_dependency 'ecma-re-validator', '~> 0.1'
   s.add_development_dependency "minitest", "~> 5.3"
