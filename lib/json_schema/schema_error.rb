@@ -34,4 +34,29 @@ module JsonSchema
       "#{pointer}: failed schema #{schema.pointer}: #{message}"
     end
   end
+
+  module ErrorFormatter
+    def to_list(list)
+      words_connector     = ', '
+      two_words_connector = ' or '
+      last_word_connector = ', or '
+
+      length = list.length
+      joined_list = case length
+                    when 1
+                      list[0]
+                    when 2
+                      "#{list[0]}#{two_words_connector}#{list[1]}"
+                     else
+                      "#{list[0...-1].join(words_connector)}#{last_word_connector}#{list[-1]}"
+                    end
+
+      if joined_list[0] =~ /^[aeiou]/
+        "an #{joined_list}"
+      else
+        "a #{joined_list}"
+      end
+    end
+    module_function :to_list
+  end
 end
