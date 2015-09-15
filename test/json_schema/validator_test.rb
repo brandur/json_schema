@@ -44,6 +44,32 @@ describe JsonSchema::Validator do
     assert_includes error_types, :invalid_type
   end
 
+  it "provides accurate error messages for multiple type errors" do
+    pointer("#/definitions/app").merge!(
+      "type" => ["string"]
+    )
+    @data_sample = 4
+    refute validate
+    assert_includes error_messages, %{4 is not a string.}
+    assert_includes error_types, :invalid_type
+
+    pointer("#/definitions/app").merge!(
+      "type" => ["string", "null"]
+    )
+    @data_sample = 4
+    refute validate
+    assert_includes error_messages, %{4 is not a string or null.}
+    assert_includes error_types, :invalid_type
+
+    pointer("#/definitions/app").merge!(
+      "type" => ["object", "null", "string"]
+    )
+    @data_sample = 4
+    refute validate
+    assert_includes error_messages, %{4 is not an object, null, or string.}
+    assert_includes error_types, :invalid_type
+  end
+
   it "validates items with list successfully" do
     pointer("#/definitions/app/definitions/flags").merge!(
       "items" => {
