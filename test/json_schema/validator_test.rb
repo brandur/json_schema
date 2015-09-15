@@ -40,7 +40,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not a object.}
+    assert_includes error_messages, %{4 is not an object.}
     assert_includes error_types, :invalid_type
   end
 
@@ -420,7 +420,7 @@ describe JsonSchema::Validator do
       "KEY" => 456
     }
     refute validate
-    assert_includes error_messages, %{456 is not a null/string.}
+    assert_includes error_messages, %{456 is not a null or string.}
     assert_includes error_types, :invalid_type
   end
 

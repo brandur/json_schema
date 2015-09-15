@@ -506,7 +506,7 @@ module JsonSchema
       if valid_types.any? { |t| data.is_a?(t) }
         true
       else
-        message = %{#{data.inspect} is not a #{schema.type.join("/")}.}
+        message = %{#{data.inspect} is not #{ErrorFormatter.to_list(schema.type)}.}
         errors << ValidationError.new(schema, path, message, :invalid_type)
         false
       end
