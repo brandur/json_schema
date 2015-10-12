@@ -267,6 +267,10 @@ module JsonSchema
       end
     end
 
+    def final_pointer
+      pointer.split("/").last
+    end
+
     def validate(data)
       validator = Validator.new(self)
       valid = validator.validate(data)
