@@ -267,8 +267,8 @@ module JsonSchema
       end
     end
 
-    def final_pointer
-      pointer.split("/").last
+    def split_pointer
+      pointer.split("/")
     end
 
     def validate(data)

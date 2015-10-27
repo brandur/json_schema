@@ -506,7 +506,13 @@ module JsonSchema
       if valid_types.any? { |t| data.is_a?(t) }
         true
       else
-        message = %{For #{schema.final_pointer}, #{data.inspect} is not #{ErrorFormatter.to_list(schema.type)}.}
+        key = if schema.fragment =~ /patternProperties/
+                idx = schema.split_pointer.index("patternProperties")
+                schema.split_pointer[idx - 1]
+              else
+                schema.split_pointer.last
+              end
+        message = %{For '#{key}', #{data.inspect} is not #{ErrorFormatter.to_list(schema.type)}.}
         errors << ValidationError.new(schema, path, message, :invalid_type)
         false
       end
