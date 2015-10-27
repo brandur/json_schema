@@ -40,7 +40,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not an object.}
+    assert_includes error_messages, %{For 'app', 4 is not an object.}
     assert_includes error_types, :invalid_type
   end
 
@@ -50,7 +50,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not a string.}
+    assert_includes error_messages, %{For 'app', 4 is not a string.}
     assert_includes error_types, :invalid_type
 
     pointer("#/definitions/app").merge!(
@@ -58,7 +58,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not a string or null.}
+    assert_includes error_messages, %{For 'app', 4 is not a string or null.}
     assert_includes error_types, :invalid_type
 
     pointer("#/definitions/app").merge!(
@@ -66,7 +66,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not an object, null, or string.}
+    assert_includes error_messages, %{For 'app', 4 is not an object, null, or string.}
     assert_includes error_types, :invalid_type
   end
 
@@ -382,7 +382,7 @@ describe JsonSchema::Validator do
     data_sample["foo"] = 4
     data_sample["matches_pattern"] = "yes!"
     refute validate
-    assert_includes error_messages, %{4 is not a boolean.}
+    assert_includes error_messages, %{For 'additionalProperties', 4 is not a boolean.}
     assert_includes error_types, :invalid_type
   end
 
@@ -446,7 +446,7 @@ describe JsonSchema::Validator do
       "KEY" => 456
     }
     refute validate
-    assert_includes error_messages, %{456 is not a null or string.}
+    assert_includes error_messages, %{For 'config_vars', 456 is not a null or string.}
     assert_includes error_types, :invalid_type
   end
 
