@@ -51,3 +51,11 @@ Or run specific suites or tests with:
 ruby -Ilib -Itest test/json_schema/validator_test.rb
 ruby -Ilib -Itest test/json_schema/validator_test.rb -n /anyOf/
 ```
+
+## Release
+
+Use the `release` task:
+
+```
+bundle exec rake release
+```
