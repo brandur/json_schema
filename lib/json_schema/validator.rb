@@ -508,13 +508,18 @@ module JsonSchema
       else
         fragment = schema.fragment
         key = if fragment =~ /patternProperties/
-                idx = schema.split_pointer.index('patternProperties')
+                split_pointer = schema.pointer.split("/").reverse
+                idx = split_pointer.index('patternProperties')
+
                 # this join mimics the fragment format below in that it's
                 # parent + key
-                schema.split_pointer[idx - 2] + "/" + schema.split_pointer[idx - 1]
-              else
-                fragment
+                parts = split_pointer[(idx + 1)..(idx + 2)]
+
+                # protect against a `nil` that could occur if
+                # `patternProperties` has no parent
+                parts ? parts.compact.reverse.join("/") : nil
               end
+        key = fragment if key.nil?
         message = %{For '#{key}', #{data.inspect} is not #{ErrorFormatter.to_list(schema.type)}.}
         errors << ValidationError.new(schema, path, message, :invalid_type)
         false
