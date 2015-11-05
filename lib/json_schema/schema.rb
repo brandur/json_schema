@@ -23,9 +23,6 @@ module JsonSchema
     # schema for debugging.
     attr_accessor :fragment
 
-    # An array that represents the nested path of the final JSON Pointer.
-    attr_accessor :split_pointer
-
     # Rather than a normal schema, the node may be a JSON Reference. In this
     # case, no other attributes will be filled in except for #parent.
     attr_accessor :reference
@@ -268,10 +265,6 @@ module JsonSchema
       else
         fragment
       end
-    end
-
-    def split_pointer
-      @split_pointer ||= pointer.split("/")
     end
 
     def validate(data)
