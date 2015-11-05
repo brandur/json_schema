@@ -602,6 +602,14 @@ describe JsonSchema::Validator do
     assert validate
   end
 
+  it "validates email format with long TLDs successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "email"
+    )
+    data_sample["owner"] = "dwarf@example.technology"
+    assert validate
+  end
+
   it "validates email format unsuccessfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "email"
