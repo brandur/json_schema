@@ -450,6 +450,27 @@ describe JsonSchema::Validator do
     assert_includes error_types, :invalid_type
   end
 
+  it "validates patternProperties with missing parent" do
+    pointer("#").merge!(
+      "patternProperties" => {
+        "^S_" => {
+          "type" => "string"
+        }
+      }
+    )
+    pointer("#/definitions/app").merge!(
+      "additionalProperties" => true,
+      "required" => ["S_0"]
+    )
+
+    data_sample["S_0"] = 123
+    data_sample.delete("name")
+
+    refute validate
+    assert_includes error_messages, %{For '^S_', 123 is not a string.}
+    assert_includes error_types, :invalid_type
+  end
+
   it "validates required" do
     pointer("#/definitions/app/dependencies").merge!(
       "required" => ["name"]
