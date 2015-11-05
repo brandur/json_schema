@@ -506,22 +506,7 @@ module JsonSchema
       if valid_types.any? { |t| data.is_a?(t) }
         true
       else
-        fragment = schema.fragment
-        key = if fragment =~ /patternProperties/
-                split_pointer = schema.pointer.split("/")
-                idx = split_pointer.index("patternProperties")
-
-                # this join mimics the fragment format below in that it's
-                # parent + key
-                if idx - 2 >= 0
-                  parts = split_pointer[(idx - 2)..(idx - 1)]
-                end
-
-                # protect against a `nil` that could occur if
-                # `patternProperties` has no parent
-                parts ? parts.compact.join("/") : nil
-              end
-        key = fragment if key.nil?
+        key = find_parent(schema)
         message = %{For '#{key}', #{data.inspect} is not #{ErrorFormatter.to_list(schema.type)}.}
         errors << ValidationError.new(schema, path, message, :invalid_type)
         false
@@ -537,6 +522,25 @@ module JsonSchema
         errors << ValidationError.new(schema, path, message, :unique_items_failed)
         false
       end
+    end
+
+    def find_parent(schema)
+      fragment = schema.fragment
+      key = if fragment =~ /patternProperties/
+              split_pointer = schema.pointer.split("/")
+              idx = split_pointer.index("patternProperties")
+
+              # this join mimics the fragment format below in that it's
+              # parent + key
+              if idx - 2 >= 0
+                parts = split_pointer[(idx - 2)..(idx - 1)]
+              end
+
+              # protect against a `nil` that could occur if
+              # `patternProperties` has no parent
+              parts ? parts.compact.join("/") : nil
+            end
+      key || fragment
     end
 
     EMAIL_PATTERN = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i
