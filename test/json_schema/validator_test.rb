@@ -40,7 +40,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not an object.}
+    assert_includes error_messages, %{For 'definitions/app', 4 is not an object.}
     assert_includes error_types, :invalid_type
   end
 
@@ -50,7 +50,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not a string.}
+    assert_includes error_messages, %{For 'definitions/app', 4 is not a string.}
     assert_includes error_types, :invalid_type
 
     pointer("#/definitions/app").merge!(
@@ -58,7 +58,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not a string or null.}
+    assert_includes error_messages, %{For 'definitions/app', 4 is not a string or null.}
     assert_includes error_types, :invalid_type
 
     pointer("#/definitions/app").merge!(
@@ -66,7 +66,7 @@ describe JsonSchema::Validator do
     )
     @data_sample = 4
     refute validate
-    assert_includes error_messages, %{4 is not an object, null, or string.}
+    assert_includes error_messages, %{For 'definitions/app', 4 is not an object, null, or string.}
     assert_includes error_types, :invalid_type
   end
 
@@ -382,7 +382,7 @@ describe JsonSchema::Validator do
     data_sample["foo"] = 4
     data_sample["matches_pattern"] = "yes!"
     refute validate
-    assert_includes error_messages, %{4 is not a boolean.}
+    assert_includes error_messages, %{For 'additionalProperties', 4 is not a boolean.}
     assert_includes error_types, :invalid_type
   end
 
@@ -446,7 +446,15 @@ describe JsonSchema::Validator do
       "KEY" => 456
     }
     refute validate
-    assert_includes error_messages, %{456 is not a null or string.}
+    assert_includes error_messages, %{For 'definitions/config_vars', 456 is not a null or string.}
+    assert_includes error_types, :invalid_type
+  end
+
+  it "validates patternProperties with missing parent" do
+    data_sample["S_0"] = 123
+
+    refute validate_parentless_pattern
+    assert_includes error_messages, %{For 'patternProperties/^S_', 123 is not a string.}
     assert_includes error_types, :invalid_type
   end
 
@@ -800,6 +808,22 @@ describe JsonSchema::Validator do
 
   def pointer(path)
     JsonPointer.evaluate(schema_sample, path)
+  end
+
+  def validate_parentless_pattern
+    schema = {
+      "$schema" => "http://json-schema.org/draft-04/hyper-schema",
+      "patternProperties" => {
+        "^S_" => {
+          "type" => [
+            "string"
+          ]
+        }
+      }
+    }
+    schema = JsonSchema.parse!(schema)
+    @validator = JsonSchema::Validator.new(schema)
+    @validator.validate(data_sample)
   end
 
   def schema_sample
