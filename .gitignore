@@ -1,3 +1,4 @@
 Gemfile.lock
 tags
 *.gem
+.bundle/
