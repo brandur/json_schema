@@ -19,6 +19,9 @@ require "json_schema"
 schema_data = JSON.parse(File.read("schema.json"))
 schema = JsonSchema.parse!(schema_data)
 
+# expand $ref nodes - raise SchemaError if unable to resolve
+schema.expand_references!
+
 # validate some data - raise ValidationError if it doesn't conform
 data = JSON.parse(File.read("data.json"))
 schema.validate!(data)
