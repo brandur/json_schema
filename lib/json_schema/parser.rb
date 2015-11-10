@@ -1,10 +1,11 @@
 require_relative "../json_reference"
+require_relative "validator"
 
 module JsonSchema
   class Parser
     ALLOWED_TYPES = %w{any array boolean integer number null object string}
     BOOLEAN = [FalseClass, TrueClass]
-    FORMATS = %w{date date-time email hostname ipv4 ipv6 regex uri uuid}
+    FORMATS = JsonSchema::Validator::DEFAULT_FORMAT_VALIDATORS.keys
     FRIENDLY_TYPES = {
       Array      => "array",
       FalseClass => "boolean",
@@ -346,9 +347,10 @@ module JsonSchema
     end
 
     def validate_format(schema, format)
-      return if FORMATS.include?(format)
+      valid_formats = FORMATS + JsonSchema.configuration.custom_formats.keys
+      return if valid_formats.include?(format)
 
-      message = %{#{format.inspect} is not a valid format, must be one of #{FORMATS.join(', ')}.}
+      message = %{#{format.inspect} is not a valid format, must be one of #{valid_formats.join(', ')}.}
       @errors << SchemaError.new(schema, message, :unknown_format)
     end
   end

@@ -4,9 +4,7 @@ require "json_schema"
 
 describe JsonSchema::Parser do
   after do
-    JsonSchema.configure do |c|
-      c.validate_regex_with = nil
-    end
+    JsonSchema.configuration.reset!
   end
 
   it "parses the basic attributes of a schema" do
@@ -286,6 +284,27 @@ describe JsonSchema::Parser do
     refute parse
     assert_includes error_messages, '"\\\\Ameow" is not an ECMA-262 regular expression.'
     assert_includes error_types, :regex_failed
+  end
+
+  it "parses custom formats" do
+    JsonSchema.configure do |c|
+      c.register_format 'the-answer', ->(data) { data.to_i == 42 }
+    end
+    schema_sample["format"] = "the-answer"
+    assert parse
+  end
+
+  it "rejects bad formats even when there are custom formats defined" do
+    JsonSchema.configure do |c|
+      c.register_format "the-answer", ->(data) { data.to_i == 42 }
+    end
+    schema_sample["format"] = "not-a-format"
+    refute parse
+    assert_includes error_messages, '"not-a-format" is not a valid format, ' \
+                                    'must be one of date, date-time, email, ' \
+                                    'hostname, ipv4, ipv6, regex, uri, uuid, ' \
+                                    'the-answer.'
+    assert_includes error_types, :unknown_format
   end
 
   def error_messages

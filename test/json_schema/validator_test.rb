@@ -3,6 +3,10 @@ require "test_helper"
 require "json_schema"
 
 describe JsonSchema::Validator do
+  after do
+    JsonSchema.configuration.reset!
+  end
+
   it "can find data valid" do
     assert validate
   end
@@ -812,6 +816,30 @@ describe JsonSchema::Validator do
     assert_includes error_messages, %{Validation loop detected.}
   end
 =end
+
+  it "validates custom formats successfully" do
+    JsonSchema.configure do |c|
+      c.register_format "the-answer", ->(data) { data.to_i == 42 }
+    end
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "the-answer"
+    )
+    data_sample["owner"] = "42"
+    assert validate
+  end
+
+  it "validates custom formats unsuccessfully" do
+    JsonSchema.configure do |c|
+      c.register_format "the-answer", ->(data) { data.to_i == 42 }
+    end
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "the-answer"
+    )
+    data_sample["owner"] = "43"
+    refute validate
+    assert_includes error_messages, %{43 is not a valid the-answer.}
+    assert_includes error_types, :invalid_format
+  end
 
   def data_sample
     @data_sample ||= DataScaffold.data_sample
