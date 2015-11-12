@@ -738,9 +738,9 @@ describe JsonSchema::Validator do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uri"
     )
-    data_sample["owner"] = "http://"
+    data_sample["owner"] = "http://example.com[]"
     refute validate
-    assert_includes error_messages, %{http:// is not a valid uri.}
+    assert_includes error_messages, %{http://example.com[] is not a valid uri.}
     assert_includes error_types, :invalid_format
   end
 
