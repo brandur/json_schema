@@ -57,8 +57,10 @@ ruby -Ilib -Itest test/json_schema/validator_test.rb -n /anyOf/
 
 ## Release
 
-Use the `release` task:
+1. Update the version in `json_schema.gemspec` as appropriate for [semantic
+   versioning](http://semver.org).
+2. Run the `release` task:
 
-```
-bundle exec rake release
-```
+    ```
+    bundle exec rake release
+    ```
