@@ -42,6 +42,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{For 'definitions/app', 4 is not an object.}
     assert_includes error_types, :invalid_type
+    assert_includes error_data, 4
   end
 
   it "provides accurate error messages for multiple type errors" do
@@ -91,6 +92,7 @@ describe JsonSchema::Validator do
     assert_includes error_messages,
       %{1337 does not match /^[a-z][a-z\\-]*[a-z]$/.}
     assert_includes error_types, :pattern_failed
+    assert_includes error_data, "1337"
   end
 
   it "validates items with tuple successfully" do
@@ -128,6 +130,7 @@ describe JsonSchema::Validator do
     assert_includes error_messages,
       %{2 items required; only 1 was supplied.}
     assert_includes error_types, :min_items_failed
+    assert_includes error_data, ["cedar"]
   end
 
   it "validates items with tuple unsuccessfully for too many items" do
@@ -143,6 +146,7 @@ describe JsonSchema::Validator do
     assert_includes error_messages,
       %{No more than 2 items are allowed; 3 were supplied.}
       assert_includes error_types, :max_items_failed
+      assert_includes error_data, ["cedar", "https", "websockets"]
   end
 
   it "validates items with tuple unsuccessfully for non-conforming items" do
@@ -158,6 +162,7 @@ describe JsonSchema::Validator do
     assert_includes error_messages,
       %{1337 is not a member of ["http", "https"].}
     assert_includes error_types, :invalid_type
+    assert_includes error_data, "1337"
   end
 
   it "validates maxItems successfully" do
@@ -177,6 +182,7 @@ describe JsonSchema::Validator do
     assert_includes error_messages,
       %{No more than 10 items are allowed; 11 were supplied.}
     assert_includes error_types, :max_items_failed
+    assert_includes error_data, (0...11).to_a
   end
 
   it "validates minItems successfully" do
@@ -195,6 +201,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{1 item required; only 0 were supplied.}
     assert_includes error_types, :min_items_failed
+    assert_includes error_data, []
   end
 
   it "validates uniqueItems successfully" do
@@ -213,6 +220,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{Duplicate items are not allowed.}
     assert_includes error_types, :unique_items_failed
+    assert_includes error_data, ["websockets", "websockets"]
   end
 
   it "validates maximum for an integer with exclusiveMaximum false" do
@@ -224,6 +232,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{11 must be less than or equal to 10.}
     assert_includes error_types, :max_failed
+    assert_includes error_data, 11
   end
 
   it "validates maximum for an integer with exclusiveMaximum true" do
@@ -268,6 +277,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{0 must be greater than or equal to 1.}
     assert_includes error_types, :min_failed
+    assert_includes error_data, 0
   end
 
   it "validates minimum for an integer with exclusiveMaximum true" do
@@ -311,6 +321,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{1 is not a multiple of 2.}
     assert_includes error_types, :multiple_of_failed
+    assert_includes error_data, 1
   end
 
   it "validates multipleOf for a number" do
@@ -421,6 +432,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{No more than 0 properties are allowed; 1 was supplied.}
     assert_includes error_types, :max_properties_failed
+    assert_includes error_data, { "name" => "cloudnasium" }
   end
 
   it "validates minProperties" do
@@ -431,6 +443,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{At least 10 properties are required; 1 was supplied.}
     assert_includes error_types, :min_properties_failed
+    assert_includes error_data, { "name" => "cloudnasium" }
   end
 
   it "validates patternProperties" do
@@ -502,6 +515,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{At least 3 characters are required; only 2 were supplied.}
     assert_includes error_types, :all_of_failed
+    assert_includes error_data, "ab"
   end
 
   it "validates anyOf" do
@@ -521,6 +535,7 @@ describe JsonSchema::Validator do
     assert_includes sub_error_messages, [%{At least 5 characters are required; only 2 were supplied.}]
     assert_includes sub_error_messages, [%{At least 3 characters are required; only 2 were supplied.}]
     assert_equal sub_error_types, [[:min_length_failed], [:min_length_failed]]
+    assert_includes error_data, "ab"
   end
 
   it "validates oneOf" do
@@ -540,6 +555,7 @@ describe JsonSchema::Validator do
     sub_error_types = one_of_error.sub_errors.map { |errors| errors.map(&:type) }
     assert_equal sub_error_messages, [[], [], [%{foo does not match /^(hell|no)$/.}]]
     assert_equal sub_error_types, [[], [], [:pattern_failed]]
+    assert_includes error_data, "foo"
   end
 
   it "validates not" do
@@ -550,6 +566,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{Matched "not" subschema.}
     assert_includes error_types, :not_failed
+    assert_includes error_data, ""
   end
 
   it "validates date format successfully" do
@@ -600,6 +617,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{2014-05-13T08:42:40 is not a valid date-time.}
     assert_includes error_types, :invalid_format
+    assert_includes error_data, "2014-05-13T08:42:40"
   end
 
   it "validates email format successfully" do
@@ -720,9 +738,9 @@ describe JsonSchema::Validator do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uri"
     )
-    data_sample["owner"] = "http://"
+    data_sample["owner"] = "http://example.com[]"
     refute validate
-    assert_includes error_messages, %{http:// is not a valid uri.}
+    assert_includes error_messages, %{http://example.com[] is not a valid uri.}
     assert_includes error_types, :invalid_format
   end
 
@@ -772,6 +790,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{ab does not match /^[a-z][a-z0-9-]{3,30}$/.}
     assert_includes error_types, :pattern_failed
+    assert_includes error_data, "ab"
   end
 
   it "builds appropriate JSON Pointers to bad data" do
@@ -800,6 +819,10 @@ describe JsonSchema::Validator do
 
   def error_messages
     @validator.errors.map(&:message)
+  end
+
+  def error_data
+    @validator.errors.map(&:data)
   end
 
   def error_types
