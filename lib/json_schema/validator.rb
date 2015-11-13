@@ -184,27 +184,11 @@ module JsonSchema
 
     def validate_format(schema, data, errors, path)
       return true unless schema.format
-      valid = case schema.format
-      when "date"
-        data =~ DATE_PATTERN
-      when "date-time"
-        data =~ DATE_TIME_PATTERN
-      when "email"
-        data =~ EMAIL_PATTERN
-      when "hostname"
-        data =~ HOSTNAME_PATTERN
-      when "ipv4"
-        data =~ IPV4_PATTERN
-      when "ipv6"
-        data =~ IPV6_PATTERN
-      when "regex"
-        Regexp.new(data) rescue false
-      when "uri"
-        URI.parse(data) rescue false
-      when "uuid"
-        data =~ UUID_PATTERN
-      end
-      if valid
+      validator = (
+        JsonSchema.configuration.custom_formats[schema.format] ||
+        DEFAULT_FORMAT_VALIDATORS[schema.format]
+      )
+      if validator[data]
         true
       else
         message = %{#{data} is not a valid #{schema.format}.}
@@ -542,6 +526,18 @@ module JsonSchema
             end
       key || fragment
     end
+
+    DEFAULT_FORMAT_VALIDATORS = {
+      "date" => ->(data) { data =~ DATE_PATTERN },
+      "date-time" => ->(data) { data =~ DATE_TIME_PATTERN },
+      "email" => ->(data) { data =~ EMAIL_PATTERN },
+      "hostname" => ->(data) { data =~ HOSTNAME_PATTERN },
+      "ipv4" => ->(data) { data =~ IPV4_PATTERN },
+      "ipv6" => ->(data) { data =~ IPV6_PATTERN },
+      "regex" => ->(data) { Regexp.new(data) rescue false },
+      "uri" => ->(data) { URI.parse(data) rescue false },
+      "uuid" => ->(data) { data =~ UUID_PATTERN },
+    }.freeze
 
     EMAIL_PATTERN = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]+$/i
 
