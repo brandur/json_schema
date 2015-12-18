@@ -161,7 +161,8 @@ module JsonSchema
 
       unless subschemata_validity.any? { |valid| valid == true }
         message = %{No subschema in "anyOf" matched.}
-        errors << ValidationError.new(schema, path, message, :any_of_failed, sub_errors, data: data)
+        errors << ValidationError.new(schema, path, message, :any_of_failed,
+          sub_errors: sub_errors, data: data)
         return false
       end
 
@@ -409,7 +410,8 @@ module JsonSchema
         else
           %{More than one subschema in "oneOf" matched.}
         end
-      errors << ValidationError.new(schema, path, message, :one_of_failed, sub_errors, data: data)
+      errors << ValidationError.new(schema, path, message, :one_of_failed,
+        sub_errors: sub_errors, data: data)
 
       false
     end

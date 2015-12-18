@@ -20,11 +20,14 @@ module JsonSchema
   class ValidationError < SchemaError
     attr_accessor :data, :path, :sub_errors
 
-    def initialize(schema, path, message, type, sub_errors = nil, data: nil)
+    def initialize(schema, path, message, type, options = {})
       super(schema, message, type)
       @path = path
-      @sub_errors = sub_errors
-      @data = data
+
+      # TODO: change to named optional arguments when Ruby 1.9 support is
+      # removed
+      @data = options[:data]
+      @sub_errors = options[:sub_errors]
     end
 
     def pointer
