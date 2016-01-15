@@ -162,7 +162,8 @@ describe JsonSchema::ReferenceExpander do
   # they've been nested
   it "builds appropriate JSON Pointers for circular dependencies" do
     pointer("#/properties").merge!(
-      "app" => { "$ref" => "#" }
+      "app"  => { "$ref" => "#" },
+      "app1" => { "$ref" => "#/properties/app"}
     )
     expand
 
@@ -173,6 +174,12 @@ describe JsonSchema::ReferenceExpander do
     # but diving deeper results in the same pointer again
     schema = schema.properties["app"]
     assert_equal "#/properties/app", schema.pointer
+
+    schema = @schema.properties["app1"]
+    assert_equal "#/properties/app1", schema.pointer
+
+    schema = schema.properties["app1"]
+    assert_equal "#/properties/app1", schema.pointer
   end
 
   it "errors on a JSON Pointer that can't be resolved" do
