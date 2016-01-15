@@ -841,6 +841,23 @@ describe JsonSchema::Validator do
     assert_includes error_types, :invalid_format
   end
 
+  it "raises an aggregate error with validate!" do
+    pointer("#/definitions/app").merge!(
+      "type" => ["object"]
+    )
+
+    schema = JsonSchema.parse!(schema_sample)
+    schema.expand_references!
+    schema = schema.definitions["app"]
+    validator = JsonSchema::Validator.new(schema)
+
+    # don't bother checking the particulars of the error here because we have
+    # other tests for that above
+    assert_raises JsonSchema::AggregateError do
+      validator.validate!(4)
+    end
+  end
+
   def data_sample
     @data_sample ||= DataScaffold.data_sample
   end

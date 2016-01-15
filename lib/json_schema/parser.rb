@@ -37,7 +37,7 @@ module JsonSchema
     def parse!(data, parent = nil)
       schema = parse(data, parent)
       if !schema
-        raise @errors.join(" ")
+        raise AggregateError.new(@errors)
       end
       schema
     end

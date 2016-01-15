@@ -16,7 +16,7 @@ module JsonPointer
       end
 
       if path[0] != "/"
-        raise %{Path must begin with a leading "/": #{original_path}.}
+        raise ArgumentError, %{Path must begin with a leading "/": #{original_path}.}
       end
 
       path_parts = split(path)
@@ -35,7 +35,7 @@ module JsonPointer
         key = transform_key(path_parts.shift)
         if data.is_a?(Array)
           unless key =~ /^\d+$/
-            raise %{Key operating on an array must be a digit or "-": #{key}.}
+            raise ArgumentError, %{Key operating on an array must be a digit or "-": #{key}.}
           end
           evaluate_segment(data[key.to_i], path_parts)
         else
