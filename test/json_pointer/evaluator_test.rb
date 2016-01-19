@@ -31,14 +31,14 @@ describe JsonPointer::Evaluator do
   end
 
   it "raises when a path doesn't being with /" do
-    e = assert_raises(RuntimeError) { @evaluator.evaluate("foo") }
+    e = assert_raises(ArgumentError) { @evaluator.evaluate("foo") }
     assert_equal %{Path must begin with a leading "/": foo.}, e.message
-    e = assert_raises(RuntimeError) { @evaluator.evaluate("#foo") }
+    e = assert_raises(ArgumentError) { @evaluator.evaluate("#foo") }
     assert_equal %{Path must begin with a leading "/": #foo.}, e.message
   end
 
   it "raises when a non-digit is specified on an array" do
-    e = assert_raises(RuntimeError) { @evaluator.evaluate("/foo/bar") }
+    e = assert_raises(ArgumentError) { @evaluator.evaluate("/foo/bar") }
     assert_equal %{Key operating on an array must be a digit or "-": bar.},
       e.message
   end

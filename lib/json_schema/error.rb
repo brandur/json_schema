@@ -1,5 +1,20 @@
 module JsonSchema
-  class SchemaError
+  class Error < RuntimeError
+  end
+
+  class AggregateError < Error
+    attr_accessor :errors
+
+    def initialize(errors)
+      @errors = errors
+    end
+
+    def to_s
+      @errors.join(" ")
+    end
+  end
+
+  class SchemaError < Error
     attr_accessor :message, :schema, :type
 
     def self.aggregate(errors)

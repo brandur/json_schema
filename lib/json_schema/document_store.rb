@@ -13,7 +13,7 @@ module JsonSchema
     end
 
     def add_schema(schema)
-      raise "can't add nil URI" if schema.uri.nil?
+      raise ArgumentError, "can't add nil URI" if schema.uri.nil?
       uri = schema.uri.chomp('#')
       @schema_map[uri] = schema
     end

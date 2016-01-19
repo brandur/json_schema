@@ -33,7 +33,7 @@ module JsonSchema
 
     def expand!(schema, options = {})
       if !expand(schema, options)
-        raise @errors.join(" ")
+        raise AggregateError.new(@errors)
       end
       true
     end

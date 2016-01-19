@@ -212,6 +212,21 @@ describe JsonSchema::ReferenceExpander do
     assert_includes error_types, :unresolved_references
   end
 
+  it "raises an aggregate error with expand!" do
+    pointer("#/properties").merge!(
+      "app" => { "$ref" => "#/definitions/nope" }
+    )
+
+    schema = JsonSchema::Parser.new.parse!(schema_sample)
+    expander = JsonSchema::ReferenceExpander.new
+
+    # don't bother checking the particulars of the error here because we have
+    # other tests for that above
+    assert_raises JsonSchema::AggregateError do
+      expander.expand!(schema)
+    end
+  end
+
   def error_messages
     @expander.errors.map { |e| e.message }
   end

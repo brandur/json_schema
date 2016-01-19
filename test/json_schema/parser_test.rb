@@ -307,6 +307,18 @@ describe JsonSchema::Parser do
     assert_includes error_types, :unknown_format
   end
 
+  it "raises an aggregate error with parse!" do
+    schema_sample["id"] = 4
+
+    parser = JsonSchema::Parser.new
+
+    # don't bother checking the particulars of the error here because we have
+    # other tests for that above
+    assert_raises JsonSchema::AggregateError do
+      parser.parse!(schema_sample)
+    end
+  end
+
   def error_messages
     @parser.errors.map { |e| e.message }
   end
