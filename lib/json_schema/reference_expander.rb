@@ -132,12 +132,16 @@ module JsonSchema
           return
         end
 
-        # Parse a new schema and use the same parent node. Basically this is
-        # exclusively for the case of a reference that needs to be
-        # de-referenced again to be resolved.
-        # TODO: Fix to never parse.
-        new_schema = Parser.new.parse(data, ref_schema.parent)
-        build_schema_paths(ref.uri, resolved_schema)
+        if new_schema = lookup_pointer(ref.uri, data["$ref"])
+          new_schema.clones << ref_schema
+        else
+          # Parse a new schema and use the same parent node. Basically this is
+          # exclusively for the case of a reference that needs to be
+          # de-referenced again to be resolved.
+          # TODO: Fix to never parse.
+          new_schema = Parser.new.parse(data, ref_schema.parent)
+          build_schema_paths(ref.uri, resolved_schema)
+        end
       else
         # insert a clone record so that the expander knows to expand it when
         # the schema traversal is finished
