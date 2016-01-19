@@ -132,6 +132,11 @@ module JsonSchema
           return
         end
 
+        # Try to aggressively detect a circular dependency in case of another
+        # reference. See:
+        #
+        #     https://github.com/brandur/json_schema/issues/50
+        #
         if new_schema = lookup_pointer(ref.uri, data["$ref"])
           new_schema.clones << ref_schema
         else
