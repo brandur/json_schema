@@ -38,6 +38,15 @@ describe JsonSchema::Validator do
     assert validate
   end
 
+  it "validates type with enum successfully" do
+    pointer("#/definitions/app/definitions/visibility").merge!(
+      "type" => ["string", "null"],
+      "enum" => ["private", "public"]
+    )
+    data_sample["visibility"] = nil
+    assert validate
+  end
+
   it "validates type unsuccessfully" do
     pointer("#/definitions/app").merge!(
       "type" => ["object"]
