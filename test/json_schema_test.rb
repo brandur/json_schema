@@ -28,7 +28,7 @@ describe JsonSchema do
       pointer("#/properties").merge!(
         "app" => 4
       )
-      e = assert_raises(RuntimeError) do
+      e = assert_raises(JsonSchema::AggregateError) do
         JsonSchema.parse!(schema_sample)
       end
       assert_includes e.message, %{4 is not a valid schema.}
