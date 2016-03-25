@@ -42,6 +42,9 @@ module JsonSchema
 
     def add_reference(schema)
       uri = URI.parse(schema.uri)
+      # do not update with subschema (longer is subschema)
+      return if (stored_schema = lookup_reference(uri)) && (stored_schema.pointer.length < schema.pointer.length)
+
       if uri.absolute?
         @store.add_schema(schema)
       else
