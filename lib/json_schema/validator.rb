@@ -129,9 +129,13 @@ module JsonSchema
       # validated according to subschema
       if schema.additional_properties.is_a?(Schema)
         extra = get_extra_keys(schema, data)
-        extra.each do |key|
+        validations = extra.map do |key|
           validate_data(schema.additional_properties, data[key], errors, path + [key])
         end
+
+        # true only if all keys validate
+        validations.all?
+
       # boolean indicates whether additional properties are allowed
       else
         validate_extra(schema, data, errors, path)
