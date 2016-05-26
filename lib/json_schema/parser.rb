@@ -270,7 +270,7 @@ module JsonSchema
       validate_known_type!(schema)
 
       # validation: array
-      schema.additional_items = validate_type(schema, BOOLEAN, "additionalItems")
+      schema.additional_items = validate_type(schema, BOOLEAN + [Hash], "additionalItems")
       schema.items            = validate_type(schema, [Array, Hash], "items")
       schema.max_items        = validate_type(schema, [Integer], "maxItems")
       schema.min_items        = validate_type(schema, [Integer], "minItems")
