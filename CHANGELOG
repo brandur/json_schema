@@ -1,2 +1,4 @@
+Unreleased
+
 0.12.4 2016-05-26
 	Allow `additionalItems` to be a schema object in addition to a boolean
