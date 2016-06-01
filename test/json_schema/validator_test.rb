@@ -445,7 +445,7 @@ describe JsonSchema::Validator do
     )
     data_sample["name"] = "cloudnasium"
     refute validate
-    assert_includes error_messages, %{At least 10 properties are required; 1 was supplied.}
+    assert_includes error_messages, %{At least 2 properties are required; 1 was supplied.}
     assert_includes error_types, :min_properties_failed
     assert_includes error_data, { "name" => "cloudnasium" }
   end

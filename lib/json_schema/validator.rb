@@ -375,8 +375,8 @@ module JsonSchema
       if data.keys.size >= schema.min_properties
         true
       else
-        message = %{At least #{schema.max_properties} propert}+
-          (schema.max_properties == 1 ? "y is" : "ies are") +
+        message = %{At least #{schema.min_properties} propert}+
+          (schema.min_properties == 1 ? "y is" : "ies are") +
           %{ required; #{data.keys.size} }+
           (data.keys.size == 1 ? "was" : "were") +
           %{ supplied.}
