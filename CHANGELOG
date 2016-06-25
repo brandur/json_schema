@@ -1,5 +1,8 @@
 Unreleased
 
+0.13.0 2016-06-25
+	Add support for validating schemas given to the `additionalItems` property
+
 0.12.5 2016-06-01
 	Fix error message raised by `minProperties` validations
 
