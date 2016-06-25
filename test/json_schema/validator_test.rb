@@ -110,7 +110,7 @@ describe JsonSchema::Validator do
     assert validate
   end
 
-  it "validates items with tuple successfully with additionalItems" do
+  it "validates items with tuple with additionalItems boolean successfully" do
     pointer("#/definitions/app/definitions/flags").merge!(
       "additionalItems" => true,
       "items" => [
@@ -120,6 +120,89 @@ describe JsonSchema::Validator do
     )
     data_sample["flags"] = ["cedar", "https", "websockets"]
     assert validate
+  end
+
+  it "validates items with tuple with additionalItems boolean unsuccessfully" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => false,
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "https", "websockets"]
+    refute validate
+    assert_includes error_messages, %{No more than 2 items are allowed; 3 were supplied.}
+    assert_includes error_types, :max_items_failed
+    assert_includes error_data, ["cedar", "https", "websockets"]
+  end
+
+  it "validates items with tuple with additionalItems schema successfully" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => { "enum" => [ "foo", "websockets" ] },
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "https", "websockets"]
+    assert validate
+  end
+
+  it "validates items with tuple with additionalItems schema unsuccessfully for non-conforming additional item" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => { "enum" => [ "foo", "bar" ] },
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "https", "websockets"]
+    refute validate
+    assert_includes error_messages,
+      %{websockets is not a member of ["foo", "bar"].}
+    assert_includes error_types, :invalid_type
+    assert_includes error_data, "websockets"
+  end
+
+  it "validates items with tuple with additionalItems schema unsuccessfully with multiple failures" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => { "enum" => [ "foo", "bar" ] },
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "https", "websockets", "1337"]
+    refute validate
+    assert_includes error_messages,
+      %{websockets is not a member of ["foo", "bar"].}
+    assert_includes error_types, :invalid_type
+    assert_includes error_data, "websockets"
+    assert_includes error_messages,
+      %{1337 is not a member of ["foo", "bar"].}
+    assert_includes error_types, :invalid_type
+    assert_includes error_data, "1337"
+  end
+
+  it "validates items with tuple with additionalItems schema unsuccessfully with non-conforming items and additional items" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => { "enum" => [ "foo", "bar" ] },
+      "items" => [
+        { "enum" => ["bamboo", "cedar"] },
+        { "enum" => ["http", "https"] }
+      ]
+    )
+    data_sample["flags"] = ["cedar", "1337", "websockets"]
+    refute validate
+    assert_includes error_messages,
+      %{websockets is not a member of ["foo", "bar"].}
+    assert_includes error_types, :invalid_type
+    assert_includes error_data, "websockets"
+    assert_includes error_messages,
+      %{1337 is not a member of ["http", "https"].}
+    assert_includes error_types, :invalid_type
+    assert_includes error_data, "1337"
   end
 
   it "validates items with tuple unsuccessfully for not enough items" do

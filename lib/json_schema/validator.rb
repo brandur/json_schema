@@ -249,6 +249,12 @@ module JsonSchema
           false
         else
           valid = true
+          if data.size > schema.items.count && schema.additional_items.is_a?(Schema)
+            (schema.items.count..data.count - 1).each do |i|
+              valid = strict_and valid,
+                validate_data(schema.additional_items, data[i], errors, path + [i])
+            end
+          end
           schema.items.each_with_index do |subschema, i|
             valid = strict_and valid,
               validate_data(subschema, data[i], errors, path + [i])

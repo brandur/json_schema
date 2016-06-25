@@ -70,6 +70,24 @@ describe JsonSchema::Parser do
     assert_equal ["http", "https"], schema.items[1].enum
   end
 
+  it "parses array additionalItems object validation as boolean" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => false
+    )
+    schema = parse.definitions["app"].definitions["flags"]
+    assert_equal false, schema.additional_items
+  end
+
+  it "parses array additionalItems object validation as schema" do
+    pointer("#/definitions/app/definitions/flags").merge!(
+      "additionalItems" => {
+        "type" => "boolean"
+       }
+    )
+    schema = parse.definitions["app"].definitions["flags"].additional_items
+    assert_equal ["boolean"], schema.type
+  end
+
   it "parses integer validations" do
     schema = parse.definitions["app"].definitions["id"]
     assert_equal 0, schema.min

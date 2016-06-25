@@ -70,6 +70,21 @@ module JsonSchema
       end
     end
 
+    def parse_additional_items(schema)
+      if schema.additional_items
+        # an object indicates a schema that will be used to parse any
+        # items not listed in `items`
+        if schema.additional_items.is_a?(Hash)
+          schema.additional_items = parse_data(
+            schema.additional_items,
+            schema,
+            "additionalItems"
+          )
+        end
+        # otherwise, leave as boolean
+      end
+    end
+
     def parse_additional_properties(schema)
       if schema.additional_properties
         # an object indicates a schema that will be used to parse any
@@ -308,6 +323,7 @@ module JsonSchema
       schema.path_start = validate_type(schema, [String], "pathStart")
       schema.read_only  = validate_type(schema, BOOLEAN, "readOnly")
 
+      parse_additional_items(schema)
       parse_additional_properties(schema)
       parse_all_of(schema)
       parse_any_of(schema)
