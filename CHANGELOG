@@ -1,9 +1,12 @@
 Unreleased
 
-0.13.2 2016-06-25
+0.13.3 2016-08-30
+	Fix a nil error that occurred on relative JSON reference expansion
+
+0.13.2 2016-08-29
 	Remove accidentally included "pry" require
 
-0.13.1 2016-06-25
+0.13.1 2016-08-29
 	Fix a number of warnings emitted by Ruby
 
 0.13.0 2016-06-25
