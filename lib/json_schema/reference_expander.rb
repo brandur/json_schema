@@ -185,7 +185,6 @@ module JsonSchema
         resolve_uri(ref_schema, uri)
       # relative
       elsif uri
-require "pry"
         # build an absolute path using the URI of the current schema
         # TODO: fix this. References don't get URIs which might be an error.
         schema_uri = ref_schema.uri.chomp("/")
