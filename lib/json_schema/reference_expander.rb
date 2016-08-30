@@ -185,7 +185,10 @@ module JsonSchema
         resolve_uri(ref_schema, uri)
       # relative
       elsif uri
-        # build an absolute path using the URI of the current schema
+        # Build an absolute path using the URI of the current schema.
+        #
+        # Note that this code path will never currently be hit because the
+        # incoming reference schema will never have a URI.
         if ref_schema.uri
           schema_uri = ref_schema.uri.chomp("/")
           resolve_uri(ref_schema, URI.parse(schema_uri + "/" + uri.path))
