@@ -16,7 +16,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "minitest", "~> 5.3"
   s.add_development_dependency "rake", "~> 10.3"
 
-  s.add_development_dependency "byebug"
-  s.add_development_dependency "pry"
-  s.add_development_dependency "pry-byebug"
+  if RUBY_VERSION >= '2.0'
+    s.add_development_dependency "byebug"
+    s.add_development_dependency "pry"
+    s.add_development_dependency "pry-byebug"
+  end
 end
