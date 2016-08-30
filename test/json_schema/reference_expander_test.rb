@@ -205,6 +205,16 @@ describe JsonSchema::ReferenceExpander do
     assert_includes error_types, :unresolved_pointer
   end
 
+  it "errors on a relative URI that cannot be transformed to an absolute" do
+    pointer("#/properties").merge!(
+      "app" => { "$ref" => "relative#definitions/name" }
+    )
+    refute expand
+    assert_includes error_messages,
+      %{Couldn't resolve references: relative#definitions/name.}
+    assert_includes error_types, :unresolved_references
+  end
+
   it "errors on a reference cycle" do
     pointer("#/properties").merge!(
       "app0" => { "$ref" => "#/properties/app2" },
