@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = "json_schema"
-  s.version       = "0.13.0"
+  s.version       = "0.13.1"
 
   s.summary       = "A JSON Schema V4 and Hyperschema V4 parser and validator."
 
@@ -14,5 +14,6 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'ecma-re-validator', '~> 0.1'
   s.add_development_dependency "minitest", "~> 5.3"
+  s.add_development_dependency "pry"
   s.add_development_dependency "rake", "~> 10.3"
 end

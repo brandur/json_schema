@@ -1,5 +1,8 @@
 Unreleased
 
+0.13.1 2016-06-25
+	Fix a number of warnings emitted by Ruby
+
 0.13.0 2016-06-25
 	Add support for validating schemas given to the `additionalItems` property
 
