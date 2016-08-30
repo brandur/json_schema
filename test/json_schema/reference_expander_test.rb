@@ -79,15 +79,15 @@ describe JsonSchema::ReferenceExpander do
     expand
     assert_equal [], error_messages
     schema = @schema.properties["app"].definitions["contrived_plus"]
-    assert_equal /^(foo|aaa)$/, schema.one_of[0].pattern
-    assert_equal /^(foo|zzz)$/, schema.one_of[1].pattern
+    assert_equal(/^(foo|aaa)$/, schema.one_of[0].pattern)
+    assert_equal(/^(foo|zzz)$/, schema.one_of[1].pattern)
   end
 
   it "will expand not" do
     expand
     assert_equal [], error_messages
     schema = @schema.properties["app"].definitions["contrived_plus"]
-    assert_equal /^$/, schema.not.pattern
+    assert_equal(/^$/, schema.not.pattern)
   end
 
   it "will expand additionalProperties" do

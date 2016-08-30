@@ -52,7 +52,7 @@ describe JsonSchema::Parser do
 
   it "parses array validations" do
     schema = parse.definitions["app"].definitions["flags"]
-    assert_equal /^[a-z][a-z\-]*[a-z]$/, schema.items.pattern
+    assert_equal(/^[a-z][a-z\-]*[a-z]$/, schema.items.pattern)
     assert_equal 1, schema.min_items
     assert_equal 10, schema.max_items
     assert_equal true, schema.unique_items
@@ -140,7 +140,7 @@ describe JsonSchema::Parser do
   it "parses the patternProperties object validation" do
     schema = parse.definitions["app"].definitions["config_vars"]
     property = schema.pattern_properties.first
-    assert_equal /^\w+$/, property[0]
+    assert_equal(/^\w+$/, property[0])
     assert_equal ["null", "string"], property[1].type
   end
 
@@ -171,7 +171,7 @@ describe JsonSchema::Parser do
     schema = parse.definitions["app"].definitions["name"]
     assert_equal 30, schema.max_length
     assert_equal 3, schema.min_length
-    assert_equal /^[a-z][a-z0-9-]{3,30}$/, schema.pattern
+    assert_equal(/^[a-z][a-z0-9-]{3,30}$/, schema.pattern)
   end
 
   it "parses hypermedia links" do
@@ -214,7 +214,6 @@ describe JsonSchema::Parser do
       "type"           => "image/png"
     )
     schema = parse.definitions["app"]
-    media = JsonSchema::Schema::Media.new
     assert_equal "base64", schema.media.binary_encoding
     assert_equal "image/png", schema.media.type
   end

@@ -13,6 +13,9 @@ module JsonReference
     attr_accessor :uri
 
     def initialize(ref)
+      # Note that the #to_s of `nil` is an empty string.
+      @uri = nil
+
       # given a simple fragment without '#', resolve as a JSON Pointer only as
       # per spec
       if ref.include?("#")

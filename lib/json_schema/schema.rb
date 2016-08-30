@@ -12,6 +12,9 @@ module JsonSchema
     end
 
     def self.attr_reader_default(attr, default)
+      # remove the reader already created by attr_accessor
+      remove_method(attr)
+
       class_eval("def #{attr} ; !@#{attr}.nil? ? @#{attr} : #{default} ; end")
     end
 
@@ -283,11 +286,11 @@ module JsonSchema
 
       # schema attributes
       attr_accessor :description
-      attr_accessor :enc_type
+      attr_writer :enc_type
       attr_accessor :href
+      attr_writer :media_type
       attr_accessor :method
       attr_accessor :rel
-      attr_accessor :media_type
       attr_accessor :schema
       attr_accessor :target_schema
       attr_accessor :title
