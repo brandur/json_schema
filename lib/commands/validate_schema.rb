@@ -98,10 +98,19 @@ module Commands
 
     def read_file(file)
       contents = File.read(file)
-      if File.extname(file) == ".yaml"
-        YAML.load(contents)
+
+      # Perform an empty check because boath YAML and JSON's load will return
+      # `nil` in the case of an empty file, which will otherwise produce
+      # confusing results.
+      if contents.empty?
+        @errors = ["#{file}: File is empty."]
+        nil
       else
-        JSON.load(contents)
+        if File.extname(file) == ".yaml"
+          YAML.load(contents)
+        else
+          JSON.load(contents)
+        end
       end
     rescue Errno::ENOENT
       @errors = ["#{file}: No such file or directory."]

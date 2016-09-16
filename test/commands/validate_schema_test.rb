@@ -71,6 +71,14 @@ describe Commands::ValidateSchema do
     refute success
   end
 
+  it "errors on empty files" do
+    temp_file("") do |path|
+      success = @command.run([hyper_schema_path, path])
+      assert_equal ["#{path}: File is empty."], @command.errors
+      refute success
+    end
+  end
+
   def basic_hyper_schema
     <<-eos
       { "$schema": "http://json-schema.org/draft-04/hyper-schema" }
