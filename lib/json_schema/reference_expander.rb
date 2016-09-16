@@ -176,7 +176,7 @@ module JsonSchema
           resolve_uri(ref_schema, uri)
         else
           message =
-            %{Reference resolution over #{scheme} is not currently supported.}
+            %{Reference resolution over #{scheme} is not currently supported (URI: #{uri}).}
           @errors << SchemaError.new(ref_schema, message, :scheme_not_supported)
           nil
         end
