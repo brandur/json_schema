@@ -1,5 +1,8 @@
 Unreleased
 
+0.13.4 2016-10-04
+	Fix return type of `validate_dependencies` to always be a boolean
+
 0.13.3 2016-08-30
 	Fix a nil error that occurred on relative JSON reference expansion
 
