@@ -175,9 +175,9 @@ module JsonSchema
 
     def validate_dependencies(schema, data, errors, path)
       return true if schema.dependencies.empty?
-      schema.dependencies.each do |key, obj|
+      result = schema.dependencies.map do |key, obj|
         # if the key is not present, the dependency is fulfilled by definition
-        next unless data[key]
+        next true unless data[key]
         if obj.is_a?(Schema)
           validate_data(obj, data, errors, path)
         else
@@ -185,6 +185,7 @@ module JsonSchema
           validate_required(schema, data, errors, path, obj)
         end
       end
+      result.all?
     end
 
     def validate_format(schema, data, errors, path)
