@@ -1,5 +1,8 @@
 Unreleased
 
+0.13.5 2016-10-05
+	Allow a schema that is a reference (and nothing else) to be expanded
+
 0.13.4 2016-10-04
 	Fix return type of `validate_dependencies` to always be a boolean
 
