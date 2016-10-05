@@ -28,7 +28,11 @@ module JsonSchema
     end
 
     def to_s
-      "#{schema.pointer}: #{message}"
+      if schema && schema.pointer
+        "#{schema.pointer}: #{message}"
+      else
+        message
+      end
     end
   end
 
