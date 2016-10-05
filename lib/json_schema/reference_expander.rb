@@ -11,7 +11,14 @@ module JsonSchema
       @schema       = schema
       @schema_paths = {}
       @store        = options[:store] || DocumentStore.new
-      @uri          = URI.parse(schema.uri)
+
+      # If the given JSON schema is _just_ a JSON reference and nothing else,
+      # short circuit the whole expansion process and return the result.
+      if schema.reference && !schema.expanded?
+        return dereference(schema, [])
+      end
+
+      @uri = URI.parse(schema.uri)
 
       @store.each do |uri, store_schema|
         build_schema_paths(uri, store_schema)
