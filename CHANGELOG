@@ -1,5 +1,8 @@
 Unreleased
 
+0.13.6 2016-10-05
+	More robust SchemaError: no secondary exception thrown without a pointer
+
 0.13.5 2016-10-05
 	Allow a schema that is a reference (and nothing else) to be expanded
 
