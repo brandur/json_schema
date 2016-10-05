@@ -244,6 +244,27 @@ describe JsonSchema::ReferenceExpander do
     end
   end
 
+  it "expands a schema that is just a reference" do
+    # First initialize another schema. Give it a fully qualified URI so that we
+    # can reference it across schemas.
+    schema = JsonSchema::Parser.new.parse!(schema_sample)
+    schema.uri = "http://json-schema.org/test"
+
+    # Initialize a store and add our schema to it.
+    store = JsonSchema::DocumentStore.new
+    store.add_schema(schema)
+
+    # Have the parser parse _just_ a reference. It should resolve to a
+    # subschema in the schema that we initialized above.
+    schema = JsonSchema::Parser.new.parse!(
+      { "$ref" => "http://json-schema.org/test#/definitions/app" }
+    )
+    expander = JsonSchema::ReferenceExpander.new
+    expander.expand!(schema, store: store)
+
+    assert schema.expanded?
+  end
+
   def error_messages
     @expander.errors.map { |e| e.message }
   end
