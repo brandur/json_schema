@@ -43,6 +43,14 @@ describe JsonPointer::Evaluator do
       e.message
   end
 
+  it "can evaluate on a schema object" do
+    schema = JsonSchema.parse!(DataScaffold.schema_sample)
+    evaluator = JsonPointer::Evaluator.new(schema)
+    res = evaluator.evaluate("#/definitions/app/definitions/contrived/allOf/0")
+    assert_kind_of JsonSchema::Schema, res
+    assert 30, res.max_length
+  end
+
   def data
    {
       "foo"  => ["bar", "baz"],

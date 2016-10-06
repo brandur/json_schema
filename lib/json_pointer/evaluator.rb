@@ -1,4 +1,9 @@
 module JsonPointer
+  # Evaluates a JSON pointer within a JSON document.
+  #
+  # Note that this class is designed to evaluate references across a plain JSON
+  # data object _or_ an instance of `JsonSchema::Schema`, so the constructor's
+  # `data` argument can be of either type.
   class Evaluator
     def initialize(data)
       @data = data
