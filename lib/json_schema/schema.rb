@@ -2,13 +2,26 @@ require "json"
 
 module JsonSchema
   class Schema
-    @@copyable = []
+    @@copyable_attrs = []
+
+    # Attributes that are part of the JSON schema and hyper-schema
+    # specifications. These are allowed to be accessed with the [] operator.
+    #
+    # Hash contains the access key mapped to the name of the method that should
+    # be invoked to retrieve a value. For example, `type` maps to `type` and
+    # `additionalItems` maps to `additional_items`.
+    @@schema_attrs = {}
 
     # identical to attr_accessible, but allows us to copy in values from a
     # target schema to help preserve our hierarchy during reference expansion
     def self.attr_copyable(attr)
       attr_accessor(attr)
-      @@copyable << "@#{attr}".to_sym
+      @@copyable_attrs << "@#{attr}".to_sym
+    end
+
+    def self.attr_schema(attr, options = {})
+      attr_copyable(attr)
+      @@schema_attrs[options[:schema_name] || attr] = attr
     end
 
     def self.attr_reader_default(attr, default)
@@ -71,22 +84,22 @@ module JsonSchema
     # the parent, and absolute URI's will replace it.
     #
     # Type: String
-    attr_copyable :id
+    attr_schema :id
 
     # Short title of the schema.
     #
     # Type: String
-    attr_copyable :title
+    attr_schema :title
 
     # More detailed description of the schema.
     #
     # Type: String
-    attr_copyable :description
+    attr_schema :description
 
     # Default JSON value for this particular schema
     #
     # Type: [any]
-    attr_copyable :default
+    attr_schema :default
 
     #
     # Validation: Any
@@ -96,79 +109,79 @@ module JsonSchema
     # set of to be valid.
     #
     # Type: Array[Schema]
-    attr_copyable :all_of
+    attr_schema :all_of, :schema_name => :allOf
 
     # A collection of subschemas of which data must validate against any schema
     # in the set to be be valid.
     #
     # Type: Array[Schema]
-    attr_copyable :any_of
+    attr_schema :any_of, :schema_name => :anyOf
 
     # A collection of inlined subschemas. Standard convention is to subschemas
     # here and reference them from elsewhere.
     #
     # Type: Hash[String => Schema]
-    attr_copyable :definitions
+    attr_schema :definitions
 
     # A collection of objects that must include the data for it to be valid.
     #
     # Type: Array
-    attr_copyable :enum
+    attr_schema :enum
 
     # A collection of subschemas of which data must validate against exactly
     # one of to be valid.
     #
     # Type: Array[Schema]
-    attr_copyable :one_of
+    attr_schema :one_of, :schema_name => :oneOf
 
     # A subschema which data must not validate against to be valid.
     #
     # Type: Schema
-    attr_copyable :not
+    attr_schema :not
 
     # An array of types that data is allowed to be. The spec allows this to be
     # a string as well, but the parser will always normalize this to an array
     # of strings.
     #
     # Type: Array[String]
-    attr_copyable :type
+    attr_schema :type
 
     # validation: array
-    attr_copyable :additional_items
-    attr_copyable :items
-    attr_copyable :max_items
-    attr_copyable :min_items
-    attr_copyable :unique_items
+    attr_schema :additional_items, :schema_name => :additionalItems
+    attr_schema :items
+    attr_schema :max_items, :schema_name => :maxItems
+    attr_schema :min_items, :schema_name => :minItems
+    attr_schema :unique_items, :schema_name => :uniqueItems
 
     # validation: number/integer
-    attr_copyable :max
-    attr_copyable :max_exclusive
-    attr_copyable :min
-    attr_copyable :min_exclusive
-    attr_copyable :multiple_of
+    attr_schema :max
+    attr_schema :max_exclusive, :schema_name => :maxExclusive
+    attr_schema :min
+    attr_schema :min_exclusive, :schema_name => :minExclusive
+    attr_schema :multiple_of, :schema_name => :multipleOf
 
     # validation: object
-    attr_copyable :additional_properties
-    attr_copyable :dependencies
-    attr_copyable :max_properties
-    attr_copyable :min_properties
-    attr_copyable :pattern_properties
-    attr_copyable :properties
-    attr_copyable :required
+    attr_schema :additional_properties, :schema_name => :additionalProperties
+    attr_schema :dependencies
+    attr_schema :max_properties, :schema_name => :maxProperties
+    attr_schema :min_properties, :schema_name => :minProperties
+    attr_schema :pattern_properties, :schema_name => :patternProperties
+    attr_schema :properties
+    attr_schema :required
     # warning: strictProperties is technically V5 spec (but I needed it now)
-    attr_copyable :strict_properties
+    attr_schema :strict_properties, :schema_name => :strictProperties
 
     # validation: string
-    attr_copyable :format
-    attr_copyable :max_length
-    attr_copyable :min_length
-    attr_copyable :pattern
+    attr_schema :format
+    attr_schema :max_length, :schema_name => :maxLength
+    attr_schema :min_length, :schema_name => :minLength
+    attr_schema :pattern
 
     # hyperschema
-    attr_copyable :links
-    attr_copyable :media
-    attr_copyable :path_start
-    attr_copyable :read_only
+    attr_schema :links
+    attr_schema :media
+    attr_schema :path_start, :schema_name => :pathStart
+    attr_schema :read_only, :schema_name => :readOnly
 
     # Give these properties reader defaults for particular behavior so that we
     # can preserve the `nil` nature of their instance variables. Knowing that
@@ -197,8 +210,17 @@ module JsonSchema
     alias :read_only? :read_only
     alias :unique_items? :unique_items
 
+    def [](name)
+      name = name.to_sym
+      if @@schema_attrs.key?(name)
+        send(@@schema_attrs[name])
+      else
+        raise NoMethodError, "Schema does not respond to ##{name}"
+      end
+    end
+
     def copy_from(schema)
-      @@copyable.each do |copyable|
+      @@copyable_attrs.each do |copyable|
         instance_variable_set(copyable, schema.instance_variable_get(copyable))
       end
     end
@@ -229,7 +251,7 @@ module JsonSchema
         str
       else
         hash = {}
-        @@copyable.each do |copyable|
+        @@copyable_attrs.each do |copyable|
           next if [:@clones, :@data, :@parent, :@uri].include?(copyable)
           if value = instance_variable_get(copyable)
             if value.is_a?(Array)
