@@ -139,10 +139,10 @@ module JsonSchema
       ref = ref_schema.reference
 
       if !(new_schema = lookup_pointer(ref.uri, ref.pointer))
-        data = JsonPointer.evaluate(resolved_schema.data, ref.pointer)
+        new_schema = JsonPointer.evaluate(resolved_schema, ref.pointer)
 
         # couldn't resolve pointer within known schema; that's an error
-        if data.nil?
+        if new_schema.nil?
           message = %{Couldn't resolve pointer "#{ref.pointer}".}
           @errors << SchemaError.new(resolved_schema, message, :unresolved_pointer)
           return
@@ -153,14 +153,13 @@ module JsonSchema
         #
         #     https://github.com/brandur/json_schema/issues/50
         #
-        if new_schema = lookup_pointer(ref.uri, data["$ref"])
-          new_schema.clones << ref_schema
+        if new_schema.reference &&
+          new_new_schema = lookup_pointer(ref.uri, new_schema.reference.pointer)
+            new_new_schema.clones << ref_schema
         else
           # Parse a new schema and use the same parent node. Basically this is
           # exclusively for the case of a reference that needs to be
           # de-referenced again to be resolved.
-          # TODO: Fix to never parse.
-          new_schema = Parser.new.parse(data, ref_schema.parent)
           build_schema_paths(ref.uri, resolved_schema)
         end
       else
