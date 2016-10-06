@@ -1,5 +1,8 @@
 Unreleased
 
+0.14.0 2016-10-06
+	Allow JSON pointer resolution on a `JsonSchema::Schema` object
+
 0.13.6 2016-10-05
 	More robust SchemaError: no secondary exception thrown without a pointer
 
