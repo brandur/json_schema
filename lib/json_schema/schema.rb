@@ -210,6 +210,14 @@ module JsonSchema
     alias :read_only? :read_only
     alias :unique_items? :unique_items
 
+    # Allows the values of schema attributes to be accessed with a symbol or a
+    # string. So for example, the value of `schema.additional_items` could be
+    # procured with `schema[:additionalItems]`. This only works for attributes
+    # that are part of the JSON schema specification; other methods on the
+    # class are not available (e.g. `expanded`.)
+    #
+    # This is implemented so that `JsonPointer::Evaluator` can evaluate a
+    # reference on an sintance of this class (as well as plain JSON data).
     def [](name)
       name = name.to_sym
       if @@schema_attrs.key?(name)
