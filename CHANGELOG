@@ -1,5 +1,8 @@
 Unreleased
 
+0.14.1 2016-10-07
+	Nil schema fields on `JsonSchema::Schema` init to prevent Ruby warnings
+
 0.14.0 2016-10-06
 	Allow JSON pointer resolution on a `JsonSchema::Schema` object
 
