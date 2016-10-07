@@ -33,6 +33,14 @@ module JsonSchema
 
     def initialize
       @clones = Set.new
+
+      # nil out all our schema fields so that it's possible to instantiate a
+      # schema instance without going through the parser and validate against
+      # it without Ruby throwing warnings about uninitialized instance
+      # variables.
+      @@schema_attrs.each do |_, a|
+        send(:"#{a}=", nil)
+      end
     end
 
     # Fragment of a JSON Pointer that can help us build a pointer back to this
