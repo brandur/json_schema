@@ -162,6 +162,15 @@ module JsonSchema
     attr_schema :path_start, :schema_name => :pathStart
     attr_schema :read_only, :schema_name => :readOnly
 
+    # hyperschema link attributes
+    attr_schema :enc_type
+    attr_schema :href
+    attr_schema :media_type
+    attr_schema :method
+    attr_schema :rel
+    attr_schema :schema
+    attr_schema :target_schema
+
     # Give these properties reader defaults for particular behavior so that we
     # can preserve the `nil` nature of their instance variables. Knowing that
     # these were `nil` when we read them allows us to properly reflect the
@@ -180,6 +189,9 @@ module JsonSchema
     attr_reader_default :properties, {}
     attr_reader_default :strict_properties, false
     attr_reader_default :type, []
+
+    attr_reader_default :enc_type, "application/json"
+    attr_reader_default :media_type, "application/json"
 
     # allow booleans to be access with question mark
     alias :additional_items? :additional_items
@@ -269,18 +281,6 @@ module JsonSchema
     # Link subobject for a hyperschema.
     class Link < Schema
       inherit_attrs
-
-      # hyperschema link attributes
-      attr_schema :enc_type
-      attr_schema :href
-      attr_schema :media_type
-      attr_schema :method
-      attr_schema :rel
-      attr_schema :schema
-      attr_schema :target_schema
-
-      attr_reader_default :enc_type, "application/json"
-      attr_reader_default :media_type, "application/json"
     end
 
     # Media type subobject for a hyperschema.

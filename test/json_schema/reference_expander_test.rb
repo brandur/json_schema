@@ -270,6 +270,11 @@ describe JsonSchema::ReferenceExpander do
       "link" => { "$ref" => "#/links/0" }
     )
     assert expand
+
+    referenced = @schema.links[0]
+    reference = @schema.properties["link"]
+
+    assert_equal reference.href, referenced.href
   end
 
   def error_messages
