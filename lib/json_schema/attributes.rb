@@ -27,6 +27,24 @@ module JsonSchema
 
         # Usually the default being assigned here is nil.
         self.copyable_attrs["@#{attr}".to_sym] = options[:default]
+
+        if default = options[:default]
+          # remove the reader already created by attr_accessor
+          remove_method(attr)
+
+          define_method(attr) do
+            val = instance_variable_get(:"@#{attr}")
+            if !val.nil?
+              val
+            else
+              if [Array, Hash, Set].include?(default.class)
+                default.dup
+              else
+                default
+              end
+            end
+          end
+        end
       end
 
       def attr_schema(attr, options = {})
@@ -82,9 +100,8 @@ module JsonSchema
     end
 
     def initialize_attrs
-      self.class.copyable_attrs.each do |attr, default|
-        default = default.dup if [Array, Hash, Set].include?(default.class)
-        instance_variable_set(attr, default)
+      self.class.copyable_attrs.each do |attr, _|
+        instance_variable_set(attr, nil)
       end
     end
   end

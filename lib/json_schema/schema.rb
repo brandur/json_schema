@@ -9,6 +9,11 @@ module JsonSchema
       # instance without going through the parser and validate against it
       # without Ruby throwing warnings about uninitialized instance variables.
       initialize_attrs
+
+      # Don't put this in as an attribute default. We require that this precise
+      # pointer gets copied between all clones of any given schema so that they
+      # all share exactly the same set.
+      @clones = Set.new
     end
 
     # Fragment of a JSON Pointer that can help us build a pointer back to this
@@ -41,8 +46,11 @@ module JsonSchema
     # initialized after the original. Used for JSON Reference expansion. The
     # only copy not present in this set is the original Schema object.
     #
+    # Note that this doesn't have a default option because we rely on the fact
+    # that the set is the *same object* between all clones of any given schema.
+    #
     # Type: Set[Schema]
-    attr_copyable :clones, :default => Set.new
+    attr_copyable :clones
 
     # The normalized URI of this schema. Note that child schemas inherit a URI
     # from their parent unless they have one explicitly defined, so this is
@@ -203,7 +211,7 @@ module JsonSchema
         str
       else
         hash = {}
-        self.class.copyable_attrs.each do |copyable|
+        self.class.copyable_attrs.each do |copyable, _|
           next if [:@clones, :@data, :@parent, :@uri].include?(copyable)
           if value = instance_variable_get(copyable)
             if value.is_a?(Array)
