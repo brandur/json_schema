@@ -265,6 +265,13 @@ describe JsonSchema::ReferenceExpander do
     assert schema.expanded?
   end
 
+  it "expands a reference to a link" do
+    pointer("#/properties").merge!(
+      "link" => { "$ref" => "#/links/0" }
+    )
+    assert expand
+  end
+
   def error_messages
     @expander.errors.map { |e| e.message }
   end
