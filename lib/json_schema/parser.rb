@@ -186,6 +186,13 @@ module JsonSchema
           link             = Schema::Link.new
           link.parent      = schema
 
+          link.data        = l
+
+          # any parsed schema is automatically expanded
+          link.expanded    = true
+
+          link.uri         = nil
+
           link.description = l["description"]
           link.enc_type    = l["encType"]
           link.href        = l["href"]

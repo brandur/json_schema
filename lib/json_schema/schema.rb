@@ -2,45 +2,15 @@ require "json"
 
 module JsonSchema
   class Schema
-    @@copyable_attrs = []
-
-    # Attributes that are part of the JSON schema and hyper-schema
-    # specifications. These are allowed to be accessed with the [] operator.
-    #
-    # Hash contains the access key mapped to the name of the method that should
-    # be invoked to retrieve a value. For example, `type` maps to `type` and
-    # `additionalItems` maps to `additional_items`.
-    @@schema_attrs = {}
-
-    # identical to attr_accessible, but allows us to copy in values from a
-    # target schema to help preserve our hierarchy during reference expansion
-    def self.attr_copyable(attr)
-      attr_accessor(attr)
-      @@copyable_attrs << "@#{attr}".to_sym
-    end
-
-    def self.attr_schema(attr, options = {})
-      attr_copyable(attr)
-      @@schema_attrs[options[:schema_name] || attr] = attr
-    end
-
-    def self.attr_reader_default(attr, default)
-      # remove the reader already created by attr_accessor
-      remove_method(attr)
-
-      class_eval("def #{attr} ; !@#{attr}.nil? ? @#{attr} : #{default} ; end")
-    end
+    include Attributes
 
     def initialize
-      @clones = Set.new
+      # nil out all our fields so that it's possible to instantiate a schema
+      # instance without going through the parser and validate against it
+      # without Ruby throwing warnings about uninitialized instance variables.
+      initialize_attrs
 
-      # nil out all our schema fields so that it's possible to instantiate a
-      # schema instance without going through the parser and validate against
-      # it without Ruby throwing warnings about uninitialized instance
-      # variables.
-      @@schema_attrs.each do |_, a|
-        send(:"#{a}=", nil)
-      end
+      @clones = Set.new
     end
 
     # Fragment of a JSON Pointer that can help us build a pointer back to this
@@ -94,12 +64,13 @@ module JsonSchema
     # Type: String
     attr_schema :id
 
-    # Short title of the schema.
+    # Short title of the schema (or the hyper-schema link if this is one).
     #
     # Type: String
     attr_schema :title
 
-    # More detailed description of the schema.
+    # More detailed description of the schema (or the hyper-schema link if this
+    # is one).
     #
     # Type: String
     attr_schema :description
@@ -191,6 +162,15 @@ module JsonSchema
     attr_schema :path_start, :schema_name => :pathStart
     attr_schema :read_only, :schema_name => :readOnly
 
+    # hyperschema link attributes
+    attr_schema :enc_type
+    attr_schema :href
+    attr_schema :media_type
+    attr_schema :method
+    attr_schema :rel
+    attr_schema :schema
+    attr_schema :target_schema
+
     # Give these properties reader defaults for particular behavior so that we
     # can preserve the `nil` nature of their instance variables. Knowing that
     # these were `nil` when we read them allows us to properly reflect the
@@ -210,6 +190,9 @@ module JsonSchema
     attr_reader_default :strict_properties, false
     attr_reader_default :type, []
 
+    attr_reader_default :enc_type, "application/json"
+    attr_reader_default :media_type, "application/json"
+
     # allow booleans to be access with question mark
     alias :additional_items? :additional_items
     alias :expanded? :expanded
@@ -217,29 +200,6 @@ module JsonSchema
     alias :min_exclusive? :min_exclusive
     alias :read_only? :read_only
     alias :unique_items? :unique_items
-
-    # Allows the values of schema attributes to be accessed with a symbol or a
-    # string. So for example, the value of `schema.additional_items` could be
-    # procured with `schema[:additionalItems]`. This only works for attributes
-    # that are part of the JSON schema specification; other methods on the
-    # class are not available (e.g. `expanded`.)
-    #
-    # This is implemented so that `JsonPointer::Evaluator` can evaluate a
-    # reference on an sintance of this class (as well as plain JSON data).
-    def [](name)
-      name = name.to_sym
-      if @@schema_attrs.key?(name)
-        send(@@schema_attrs[name])
-      else
-        raise NoMethodError, "Schema does not respond to ##{name}"
-      end
-    end
-
-    def copy_from(schema)
-      @@copyable_attrs.each do |copyable|
-        instance_variable_set(copyable, schema.instance_variable_get(copyable))
-      end
-    end
 
     def expand_references(options = {})
       expander = ReferenceExpander.new
@@ -267,7 +227,7 @@ module JsonSchema
         str
       else
         hash = {}
-        @@copyable_attrs.each do |copyable|
+        self.class.copyable_attrs.each do |copyable|
           next if [:@clones, :@data, :@parent, :@uri].include?(copyable)
           if value = instance_variable_get(copyable)
             if value.is_a?(Array)
@@ -319,27 +279,8 @@ module JsonSchema
     end
 
     # Link subobject for a hyperschema.
-    class Link
-      attr_accessor :parent
-
-      # schema attributes
-      attr_accessor :description
-      attr_writer :enc_type
-      attr_accessor :href
-      attr_writer :media_type
-      attr_accessor :method
-      attr_accessor :rel
-      attr_accessor :schema
-      attr_accessor :target_schema
-      attr_accessor :title
-
-      def enc_type
-        @enc_type || "application/json"
-      end
-
-      def media_type
-        @media_type || "application/json"
-      end
+    class Link < Schema
+      inherit_attrs
     end
 
     # Media type subobject for a hyperschema.

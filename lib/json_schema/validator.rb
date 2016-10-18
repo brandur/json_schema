@@ -409,8 +409,9 @@ module JsonSchema
 
       num_valid = schema.one_of.count do |subschema|
         current_sub_errors = []
+        valid = validate_data(subschema, data, current_sub_errors, path)
         sub_errors << current_sub_errors
-        validate_data(subschema, data, current_sub_errors, path)
+        valid
       end
 
       return true if num_valid == 1
