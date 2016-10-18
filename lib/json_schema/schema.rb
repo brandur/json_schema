@@ -9,8 +9,6 @@ module JsonSchema
       # instance without going through the parser and validate against it
       # without Ruby throwing warnings about uninitialized instance variables.
       initialize_attrs
-
-      @clones = Set.new
     end
 
     # Fragment of a JSON Pointer that can help us build a pointer back to this
@@ -179,6 +177,7 @@ module JsonSchema
     attr_reader_default :additional_properties, true
     attr_reader_default :all_of, []
     attr_reader_default :any_of, []
+    attr_reader_default :clones, Set.new
     attr_reader_default :definitions, {}
     attr_reader_default :dependencies, {}
     attr_reader_default :links, []

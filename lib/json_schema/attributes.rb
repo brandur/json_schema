@@ -5,6 +5,11 @@ module JsonSchema
   module Attributes
     # Provides class-level methods for the Attributes module.
     module ClassMethods
+      # Attributes that should be copied between classes when invoking
+      # Attributes#copy_from.
+      #
+      # Hash contains instance variable names mapped to a default value for the
+      # field.
       attr_reader :copyable_attrs
 
       # Attributes that are part of the JSON schema and hyper-schema
@@ -19,7 +24,7 @@ module JsonSchema
       # target schema to help preserve our hierarchy during reference expansion
       def attr_copyable(attr)
         attr_accessor(attr)
-        self.copyable_attrs << "@#{attr}".to_sym
+        self.copyable_attrs["@#{attr}".to_sym] = nil
       end
 
       def attr_schema(attr, options = {})
@@ -28,10 +33,7 @@ module JsonSchema
       end
 
       def attr_reader_default(attr, default)
-        # remove the reader already created by attr_accessor
-        remove_method(attr)
-
-        class_eval("def #{attr} ; !@#{attr}.nil? ? @#{attr} : #{default} ; end")
+        self.copyable_attrs["@#{attr}".to_sym] = default
       end
 
       # Directive indicating that attributes should be inherited from a parent
@@ -48,7 +50,7 @@ module JsonSchema
       # methods in the Attributes module work. Run automatically when the
       # module is mixed into another class.
       def initialize_attrs
-        @copyable_attrs = []
+        @copyable_attrs = {}
         @schema_attrs = {}
       end
     end
@@ -76,14 +78,15 @@ module JsonSchema
     end
 
     def copy_from(schema)
-      self.class.copyable_attrs.each do |copyable|
+      self.class.copyable_attrs.each do |copyable, _|
         instance_variable_set(copyable, schema.instance_variable_get(copyable))
       end
     end
 
     def initialize_attrs
-      self.class.copyable_attrs.each do |a|
-        instance_variable_set(a, nil)
+      self.class.copyable_attrs.each do |attr, default|
+        default = default.dup if [Array, Hash, Set].include?(default.class)
+        instance_variable_set(attr, default)
       end
     end
   end

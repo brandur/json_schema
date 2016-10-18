@@ -499,7 +499,7 @@ module JsonSchema
     end
 
     def validate_type(schema, data, errors, path)
-      return true if schema.type.empty?
+      return true if !schema.type || schema.type.empty?
       valid_types = schema.type.map { |t| TYPE_MAP[t] }.flatten.compact
       if valid_types.any? { |t| data.is_a?(t) }
         true

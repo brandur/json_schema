@@ -21,6 +21,19 @@ describe JsonSchema::Attributes do
   it "defines attributes with default readers" do
     obj = TestAttributes.new
     assert_equal [], obj.copyable_default
+
+    assert_equal "application/json", obj.copyable_default_with_string
+
+    hash = obj.copyable_default_with_object
+    assert_equal({}, hash)
+    hash[:x] = 123
+
+    # This is a check to make sure that the new object is not the same object
+    # as the one that we just mutated above. When assigning defaults the module
+    # should dup any common data strcutures that it puts in here.
+    obj = TestAttributes.new
+    hash = obj.copyable_default_with_object
+    assert_equal({}, hash)
   end
 
   it "inherits attributes when so instructed" do
@@ -76,6 +89,12 @@ describe JsonSchema::Attributes do
 
     attr_copyable :copyable_default
     attr_reader_default :copyable_default, []
+
+    attr_copyable :copyable_default_with_string
+    attr_reader_default :copyable_default_with_string, "application/json"
+
+    attr_copyable :copyable_default_with_object
+    attr_reader_default :copyable_default_with_object, {}
   end
 
   class TestAttributesDescendant < TestAttributes

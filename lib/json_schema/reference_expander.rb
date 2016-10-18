@@ -254,10 +254,12 @@ module JsonSchema
           each { |s| yielder << s }
 
         # schemas contained inside hyper-schema links objects
-        schema.links.map { |l| [l.schema, l.target_schema] }.
-          flatten.
-          compact.
-          each { |s| yielder << s }
+        if schema.links
+          schema.links.map { |l| [l.schema, l.target_schema] }.
+            flatten.
+            compact.
+            each { |s| yielder << s }
+        end
       end
     end
 
