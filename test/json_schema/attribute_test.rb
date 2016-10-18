@@ -87,14 +87,9 @@ describe JsonSchema::Attributes do
     attr_schema :schema
     attr_schema :schema_named, :schema_name => :named
 
-    attr_copyable :copyable_default
-    attr_reader_default :copyable_default, []
-
-    attr_copyable :copyable_default_with_string
-    attr_reader_default :copyable_default_with_string, "application/json"
-
-    attr_copyable :copyable_default_with_object
-    attr_reader_default :copyable_default_with_object, {}
+    attr_copyable :copyable_default, :default => []
+    attr_copyable :copyable_default_with_string, :default => "application/json"
+    attr_copyable :copyable_default_with_object, :default => {}
   end
 
   class TestAttributesDescendant < TestAttributes

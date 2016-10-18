@@ -22,18 +22,16 @@ module JsonSchema
 
       # identical to attr_accessible, but allows us to copy in values from a
       # target schema to help preserve our hierarchy during reference expansion
-      def attr_copyable(attr)
+      def attr_copyable(attr, options = {})
         attr_accessor(attr)
-        self.copyable_attrs["@#{attr}".to_sym] = nil
+
+        # Usually the default being assigned here is nil.
+        self.copyable_attrs["@#{attr}".to_sym] = options[:default]
       end
 
       def attr_schema(attr, options = {})
-        attr_copyable(attr)
+        attr_copyable(attr, :default => options[:default])
         self.schema_attrs[options[:schema_name] || attr] = attr
-      end
-
-      def attr_reader_default(attr, default)
-        self.copyable_attrs["@#{attr}".to_sym] = default
       end
 
       # Directive indicating that attributes should be inherited from a parent
