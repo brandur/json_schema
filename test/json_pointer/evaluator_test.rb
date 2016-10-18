@@ -1,6 +1,7 @@
 require "test_helper"
 
 require "json_pointer"
+require "json_schema"
 
 describe JsonPointer::Evaluator do
   before do
