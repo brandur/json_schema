@@ -10,6 +10,9 @@ module JsonSchema
       # without Ruby throwing warnings about uninitialized instance variables.
       initialize_attrs
 
+      # Don't put this in as an attribute default. We require that this precise
+      # pointer gets copied between all clones of any given schema so that they
+      # all share exactly the same set.
       @clones = Set.new
     end
 
@@ -42,6 +45,9 @@ module JsonSchema
     # Collection of clones of this schema object, meaning all Schemas that were
     # initialized after the original. Used for JSON Reference expansion. The
     # only copy not present in this set is the original Schema object.
+    #
+    # Note that this doesn't have a default option because we rely on the fact
+    # that the set is the *same object* between all clones of any given schema.
     #
     # Type: Set[Schema]
     attr_copyable :clones
@@ -88,19 +94,19 @@ module JsonSchema
     # set of to be valid.
     #
     # Type: Array[Schema]
-    attr_schema :all_of, :schema_name => :allOf
+    attr_schema :all_of, :default => [], :schema_name => :allOf
 
     # A collection of subschemas of which data must validate against any schema
     # in the set to be be valid.
     #
     # Type: Array[Schema]
-    attr_schema :any_of, :schema_name => :anyOf
+    attr_schema :any_of, :default => [], :schema_name => :anyOf
 
     # A collection of inlined subschemas. Standard convention is to subschemas
     # here and reference them from elsewhere.
     #
     # Type: Hash[String => Schema]
-    attr_schema :definitions
+    attr_schema :definitions, :default => {}
 
     # A collection of objects that must include the data for it to be valid.
     #
@@ -111,7 +117,7 @@ module JsonSchema
     # one of to be valid.
     #
     # Type: Array[Schema]
-    attr_schema :one_of, :schema_name => :oneOf
+    attr_schema :one_of, :default => [], :schema_name => :oneOf
 
     # A subschema which data must not validate against to be valid.
     #
@@ -123,10 +129,10 @@ module JsonSchema
     # of strings.
     #
     # Type: Array[String]
-    attr_schema :type
+    attr_schema :type, :default => []
 
     # validation: array
-    attr_schema :additional_items, :schema_name => :additionalItems
+    attr_schema :additional_items, :default => true, :schema_name => :additionalItems
     attr_schema :items
     attr_schema :max_items, :schema_name => :maxItems
     attr_schema :min_items, :schema_name => :minItems
@@ -134,21 +140,21 @@ module JsonSchema
 
     # validation: number/integer
     attr_schema :max
-    attr_schema :max_exclusive, :schema_name => :maxExclusive
+    attr_schema :max_exclusive, :default => false, :schema_name => :maxExclusive
     attr_schema :min
-    attr_schema :min_exclusive, :schema_name => :minExclusive
+    attr_schema :min_exclusive, :default => false, :schema_name => :minExclusive
     attr_schema :multiple_of, :schema_name => :multipleOf
 
     # validation: object
-    attr_schema :additional_properties, :schema_name => :additionalProperties
-    attr_schema :dependencies
+    attr_schema :additional_properties, :default => true, :schema_name => :additionalProperties
+    attr_schema :dependencies, :default => {}
     attr_schema :max_properties, :schema_name => :maxProperties
     attr_schema :min_properties, :schema_name => :minProperties
-    attr_schema :pattern_properties, :schema_name => :patternProperties
-    attr_schema :properties
+    attr_schema :pattern_properties, :default => {}, :schema_name => :patternProperties
+    attr_schema :properties, :default => {}
     attr_schema :required
     # warning: strictProperties is technically V5 spec (but I needed it now)
-    attr_schema :strict_properties, :schema_name => :strictProperties
+    attr_schema :strict_properties, :default => false, :schema_name => :strictProperties
 
     # validation: string
     attr_schema :format
@@ -157,41 +163,19 @@ module JsonSchema
     attr_schema :pattern
 
     # hyperschema
-    attr_schema :links
+    attr_schema :links, :default => []
     attr_schema :media
     attr_schema :path_start, :schema_name => :pathStart
     attr_schema :read_only, :schema_name => :readOnly
 
     # hyperschema link attributes
-    attr_schema :enc_type
+    attr_schema :enc_type, :default => "application/json"
     attr_schema :href
-    attr_schema :media_type
+    attr_schema :media_type, :default => "application/json"
     attr_schema :method
     attr_schema :rel
     attr_schema :schema
     attr_schema :target_schema
-
-    # Give these properties reader defaults for particular behavior so that we
-    # can preserve the `nil` nature of their instance variables. Knowing that
-    # these were `nil` when we read them allows us to properly reflect the
-    # parsed schema back to JSON.
-    attr_reader_default :additional_items, true
-    attr_reader_default :additional_properties, true
-    attr_reader_default :all_of, []
-    attr_reader_default :any_of, []
-    attr_reader_default :definitions, {}
-    attr_reader_default :dependencies, {}
-    attr_reader_default :links, []
-    attr_reader_default :one_of, []
-    attr_reader_default :max_exclusive, false
-    attr_reader_default :min_exclusive, false
-    attr_reader_default :pattern_properties, {}
-    attr_reader_default :properties, {}
-    attr_reader_default :strict_properties, false
-    attr_reader_default :type, []
-
-    attr_reader_default :enc_type, "application/json"
-    attr_reader_default :media_type, "application/json"
 
     # allow booleans to be access with question mark
     alias :additional_items? :additional_items
@@ -227,7 +211,7 @@ module JsonSchema
         str
       else
         hash = {}
-        self.class.copyable_attrs.each do |copyable|
+        self.class.copyable_attrs.each do |copyable, _|
           next if [:@clones, :@data, :@parent, :@uri].include?(copyable)
           if value = instance_variable_get(copyable)
             if value.is_a?(Array)
