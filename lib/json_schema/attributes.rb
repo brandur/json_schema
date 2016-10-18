@@ -40,8 +40,8 @@ module JsonSchema
       # Must appear as first statement in class that mixes in (or whose parent
       # mixes in) the Attributes module.
       def inherit_attrs
-        @copyable_attrs = self.superclass.instance_variable_get(:@copyable_attrs)
-        @schema_attrs = self.superclass.instance_variable_get(:@schema_attrs)
+        @copyable_attrs = self.superclass.instance_variable_get(:@copyable_attrs).dup
+        @schema_attrs = self.superclass.instance_variable_get(:@schema_attrs).dup
       end
 
       # Initializes some class instance variables required to make other
@@ -81,9 +81,9 @@ module JsonSchema
       end
     end
 
-    def initialize_schema_attrs
-      self.class.schema_attrs.each do |_, a|
-        send(:"#{a}=", nil)
+    def initialize_attrs
+      self.class.copyable_attrs.each do |a|
+        instance_variable_set(a, nil)
       end
     end
   end
