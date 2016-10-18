@@ -37,20 +37,16 @@ module JsonSchema
       # Directive indicating that attributes should be inherited from a parent
       # class.
       #
-      # Must appear as first statement in class that mixes in the Attributes
-      # module. Either this method *or* #initialize_attrs should be used, but
-      # not both.
+      # Must appear as first statement in class that mixes in (or whose parent
+      # mixes in) the Attributes module.
       def inherit_attrs
         @copyable_attrs = self.superclass.instance_variable_get(:@copyable_attrs)
         @schema_attrs = self.superclass.instance_variable_get(:@schema_attrs)
       end
 
       # Initializes some class instance variables required to make other
-      # methods in the Attributes module work.
-      #
-      # Must appear as first statement in class that mixes in the Attributes
-      # module. Either this method *or* #initialize_attrs should be used, but
-      # not both.
+      # methods in the Attributes module work. Run automatically when the
+      # module is mixed into another class.
       def initialize_attrs
         @copyable_attrs = []
         @schema_attrs = {}
@@ -59,6 +55,7 @@ module JsonSchema
 
     def self.included(klass)
       klass.extend(ClassMethods)
+      klass.send(:initialize_attrs)
     end
 
     # Allows the values of schema attributes to be accessed with a symbol or a

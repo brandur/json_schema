@@ -14,8 +14,6 @@ module JsonSchema
       initialize_schema_attrs
     end
 
-    initialize_attrs
-
     # Fragment of a JSON Pointer that can help us build a pointer back to this
     # schema for debugging.
     attr_accessor :fragment
