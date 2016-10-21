@@ -128,10 +128,9 @@ module JsonSchema
         message = %{#{data.inspect} is not a valid schema.}
         @errors << SchemaError.new(parent, message, :schema_not_found)
       elsif ref = data["$ref"]
-        schema = Schema.new
+        schema = JsonReference::Reference.new(ref)
         schema.fragment = fragment
         schema.parent = parent
-        schema.reference = JsonReference::Reference.new(ref)
       else
         schema = parse_schema(data, parent, fragment)
       end
@@ -187,9 +186,6 @@ module JsonSchema
           link.parent      = schema
 
           link.data        = l
-
-          # any parsed schema is automatically expanded
-          link.expanded    = true
 
           link.uri         = nil
 
@@ -269,9 +265,6 @@ module JsonSchema
 
       schema.data        = data
       schema.id          = validate_type(schema, [String], "id")
-
-      # any parsed schema is automatically expanded
-      schema.expanded    = true
 
       # build URI early so we can reference it in errors
       schema.uri         = build_uri(schema.id, parent ? parent.uri : nil)

@@ -2,7 +2,7 @@ require "json"
 
 module JsonSchema
   class Schema
-    include Attributes
+    include JsonCommon::Attributes
 
     def initialize
       # nil out all our fields so that it's possible to instantiate a schema
@@ -19,12 +19,6 @@ module JsonSchema
     # Fragment of a JSON Pointer that can help us build a pointer back to this
     # schema for debugging.
     attr_accessor :fragment
-
-    # Rather than a normal schema, the node may be a JSON Reference. In this
-    # case, no other attributes will be filled in except for #parent.
-    attr_accessor :reference
-
-    attr_copyable :expanded
 
     # A reference to the data which the Schema was initialized from. Used for
     # resolving JSON Pointer references.
@@ -179,7 +173,6 @@ module JsonSchema
 
     # allow booleans to be access with question mark
     alias :additional_items? :additional_items
-    alias :expanded? :expanded
     alias :max_exclusive? :max_exclusive
     alias :min_exclusive? :min_exclusive
     alias :read_only? :read_only
@@ -206,7 +199,6 @@ module JsonSchema
     def inspect_schema
       if reference
         str = reference.to_s
-        str += expanded? ? " [EXPANDED]" : " [COLLAPSED]"
         str += original? ? " [ORIGINAL]" : " [CLONE]"
         str
       else
@@ -252,6 +244,10 @@ module JsonSchema
       end
     end
 
+    def reference?
+      false
+    end
+
     def validate(data)
       validator = Validator.new(self)
       valid = validator.validate(data)
@@ -265,6 +261,10 @@ module JsonSchema
     # Link subobject for a hyperschema.
     class Link < Schema
       inherit_attrs
+
+      def reference?
+        false
+      end
     end
 
     # Media type subobject for a hyperschema.

@@ -12,7 +12,7 @@ describe JsonSchema::ReferenceExpander do
     # this used to be a $ref
     reference = @schema.properties["app"]
 
-    assert_equal "#/definitions/app", reference.reference.pointer
+    assert_equal "#/definitions/app", reference.pointer
     assert_equal referenced.description, reference.description
     assert_equal referenced.id, reference.id
     assert_equal referenced.type, reference.type

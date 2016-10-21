@@ -2,7 +2,7 @@ require "test_helper"
 
 require "json_schema"
 
-describe JsonSchema::Attributes do
+describe JsonCommon::Attributes do
   it "defines copyable attributes" do
     obj = TestAttributes.new
     obj.copyable = "foo"
@@ -76,7 +76,7 @@ describe JsonSchema::Attributes do
   end
 
   class TestAttributes
-    include JsonSchema::Attributes
+    include JsonCommon::Attributes
 
     def initialize
       initialize_attrs

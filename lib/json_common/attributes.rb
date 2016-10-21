@@ -1,4 +1,4 @@
-module JsonSchema
+module JsonCommon
   # Attributes mixes in some useful attribute-related methods for use in
   # defining schema classes in a spirit similar to Ruby's attr_accessor and
   # friends.
@@ -93,9 +93,21 @@ module JsonSchema
       end
     end
 
+    # This value only set if this object was hydrated from another copyable
+    # object using #copy_from.
+    def copy_attrs_ref
+      @copy_attrs_ref
+    end
+
     def copy_from(schema)
-      self.class.copyable_attrs.each do |copyable, _|
-        instance_variable_set(copyable, schema.instance_variable_get(copyable))
+      @copy_attrs_ref = schema.copy_attrs_ref || schema.class.copyable_attrs
+
+      @copy_attrs_ref.each do |attr, default|
+        # proxy this value back to original schema
+        attr = attr[1..-1].to_sym # strips "@"
+        self.define_singleton_method(attr) do
+          schema.send(attr)
+        end
       end
     end
 

@@ -18,7 +18,6 @@ describe JsonSchema::Parser do
 
   it "parses subschemas" do
     schema = parse.definitions["app"]
-    assert_nil schema.reference
     assert_equal "App", schema.title
     assert_equal "An app.", schema.description
     assert_equal "schemata/app", schema.id
@@ -29,7 +28,6 @@ describe JsonSchema::Parser do
 
   it "parses sub-subschemas" do
     schema = parse.definitions["app"].definitions["name"]
-    assert_nil schema.reference
     assert_equal "hello-world", schema.default
     assert_equal "unique name of app", schema.description
     assert_equal ["string"], schema.type
@@ -38,11 +36,10 @@ describe JsonSchema::Parser do
   end
 
   it "parses references" do
-    schema = parse.properties["app"]
-    refute_nil schema.reference
-    assert_nil schema.reference.uri
-    assert_equal "#/definitions/app", schema.reference.pointer
-    refute_nil schema.parent
+    reference = parse.properties["app"]
+    assert_kind_of JsonReference::Reference, reference
+    assert_equal "#/definitions/app", reference.pointer
+    refute_nil reference.parent
   end
 
   it "parses enum validation" do
@@ -163,8 +160,12 @@ describe JsonSchema::Parser do
   it "parses the anyOf schema validation" do
     schema = parse.definitions["app"].definitions["identity"]
     assert_equal 2, schema.any_of.count
-    assert_equal "/schemata/app#/definitions/id", schema.any_of[0].reference.to_s
-    assert_equal "/schemata/app#/definitions/name", schema.any_of[1].reference.to_s
+
+    assert_kind_of JsonReference::Reference, schema.any_of[0]
+    assert_equal "/schemata/app#/definitions/id", schema.any_of[0].to_s
+
+    assert_kind_of JsonReference::Reference, schema.any_of[1]
+    assert_equal "/schemata/app#/definitions/name", schema.any_of[1].to_s
   end
 
   it "parses basic set of string validations" do
@@ -204,8 +205,10 @@ describe JsonSchema::Parser do
     assert_equal :post, link.method
     assert_equal "create", link.rel
     assert_equal "application/json", link.media_type
+
+    assert_kind_of JsonReference::Reference, link.schema.properties["name"]
     assert_equal "#/definitions/app/definitions/name",
-      link.schema.properties["name"].reference.pointer
+      link.schema.properties["name"].pointer
   end
 
   it "parses hypermedia media" do

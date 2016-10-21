@@ -1,4 +1,4 @@
-require_relative "json_schema/attributes"
+require_relative "json_common/attributes"
 require_relative "json_schema/configuration"
 require_relative "json_schema/document_store"
 require_relative "json_schema/error"

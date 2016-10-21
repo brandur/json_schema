@@ -14,7 +14,7 @@ module JsonSchema
 
       # If the given JSON schema is _just_ a JSON reference and nothing else,
       # short circuit the whole expansion process and return the result.
-      if schema.reference && !schema.expanded?
+      if schema.reference? && !schema.expanded?
         return dereference(schema, [])
       end
 
@@ -66,7 +66,7 @@ module JsonSchema
     end
 
     def build_schema_paths(uri, schema)
-      return if schema.reference
+      return if schema.reference?
 
       paths = @schema_paths[uri] ||= {}
       paths[schema.pointer] = schema
@@ -84,38 +84,37 @@ module JsonSchema
       end
     end
 
-    def dereference(ref_schema, ref_stack)
-      ref = ref_schema.reference
-
+    def dereference(ref, ref_stack)
       # detects a reference cycle
       if ref_stack.include?(ref)
         message = %{Reference loop detected: #{ref_stack.sort.join(", ")}.}
-        @errors << SchemaError.new(ref_schema, message, :loop_detected)
+        @errors << SchemaError.new(ref, message, :loop_detected)
         return false
       end
 
-      new_schema = resolve_reference(ref_schema)
+      new_schema = resolve_reference(ref)
       return false unless new_schema
 
       # if the reference resolved to a new reference we need to continue
       # dereferencing until we either hit a non-reference schema, or a
       # reference which is already resolved
-      if new_schema.reference && !new_schema.expanded?
+      if new_schema.reference? && !new_schema.expanded?
         success = dereference(new_schema, ref_stack + [ref])
         return false unless success
       end
 
       # copy new schema into existing one while preserving parent, fragment,
       # and reference
-      parent = ref_schema.parent
-      ref_schema.copy_from(new_schema)
-      ref_schema.parent = parent
+      parent = ref.parent
+      ref.copy_from(new_schema)
+      ref.expanded = true
+      ref.parent = parent
 
       # correct all parent references to point back to ref_schema instead of
       # new_schema
-      if ref_schema.original?
-        schema_children(ref_schema).each do |schema|
-          schema.parent = ref_schema
+      if ref.original?
+        schema_children(ref).each do |schema|
+          schema.parent = ref
         end
       end
 
@@ -135,9 +134,7 @@ module JsonSchema
       end
     end
 
-    def resolve_pointer(ref_schema, resolved_schema)
-      ref = ref_schema.reference
-
+    def resolve_pointer(ref, resolved_schema)
       if !(new_schema = lookup_pointer(ref.uri, ref.pointer))
         new_schema = JsonPointer.evaluate(resolved_schema, ref.pointer)
 
@@ -153,9 +150,9 @@ module JsonSchema
         #
         #     https://github.com/brandur/json_schema/issues/50
         #
-        if new_schema.reference &&
-          new_new_schema = lookup_pointer(ref.uri, new_schema.reference.pointer)
-            new_new_schema.clones << ref_schema
+        if new_schema.reference? &&
+          new_new_schema = lookup_pointer(ref.uri, new_schema.pointer)
+            new_new_schema.clones << ref
         else
           # Parse a new schema and use the same parent node. Basically this is
           # exclusively for the case of a reference that needs to be
@@ -165,13 +162,12 @@ module JsonSchema
       else
         # insert a clone record so that the expander knows to expand it when
         # the schema traversal is finished
-        new_schema.clones << ref_schema
+        new_schema.clones << ref
       end
       new_schema
     end
 
-    def resolve_reference(ref_schema)
-      ref = ref_schema.reference
+    def resolve_reference(ref)
       uri = ref.uri
 
       if uri && uri.host
@@ -179,46 +175,48 @@ module JsonSchema
         # allow resolution if something we've already parsed has claimed the
         # full URL
         if @store.lookup_schema(uri.to_s)
-          resolve_uri(ref_schema, uri)
+          resolve_uri(ref, uri)
         else
           message =
             %{Reference resolution over #{scheme} is not currently supported (URI: #{uri}).}
-          @errors << SchemaError.new(ref_schema, message, :scheme_not_supported)
+          @errors << SchemaError.new(ref, message, :scheme_not_supported)
           nil
         end
       # absolute
       elsif uri && uri.path[0] == "/"
-        resolve_uri(ref_schema, uri)
+        resolve_uri(ref, uri)
       # relative
       elsif uri
         # Build an absolute path using the URI of the current schema.
         #
         # Note that this code path will never currently be hit because the
         # incoming reference schema will never have a URI.
-        if ref_schema.uri
-          schema_uri = ref_schema.uri.chomp("/")
-          resolve_uri(ref_schema, URI.parse(schema_uri + "/" + uri.path))
+        if ref.uri
+          schema_uri = ref.uri.to_s.chomp("/")
+          resolve_uri(ref, URI.parse(schema_uri + "/" + uri.path))
         else
           nil
         end
 
       # just a JSON Pointer -- resolve against schema root
       else
-        resolve_pointer(ref_schema, @schema)
+        resolve_pointer(ref, @schema)
       end
     end
 
-    def resolve_uri(ref_schema, uri)
+    def resolve_uri(ref, uri)
       if schema = lookup_reference(uri)
-        resolve_pointer(ref_schema, schema)
+        resolve_pointer(ref, schema)
       else
         message = %{Couldn't resolve URI: #{uri.to_s}.}
-        @errors << SchemaError.new(ref_schema, message, :unresolved_pointer)
+        @errors << SchemaError.new(ref, message, :unresolved_pointer)
         nil
       end
     end
 
     def schema_children(schema)
+      return [] if schema.reference?
+
       Enumerator.new do |yielder|
         schema.all_of.each { |s| yielder << s }
         schema.any_of.each { |s| yielder << s }
@@ -268,8 +266,8 @@ module JsonSchema
       return [] unless schema.original?
 
       schema_children(schema).reduce([]) do |arr, subschema|
-        if !subschema.expanded?
-          arr += [subschema.reference]
+        if subschema.reference? && !subschema.expanded?
+          arr += [subschema]
         else
           arr += unresolved_refs(subschema)
         end
@@ -280,11 +278,11 @@ module JsonSchema
       add_reference(schema)
 
       schema_children(schema).each do |subschema|
-        if subschema.reference && !subschema.expanded?
+        if subschema.reference? && !subschema.expanded?
           dereference(subschema, [])
         end
 
-        if !subschema.reference
+        if !subschema.reference?
           traverse_schema(subschema)
         end
       end
