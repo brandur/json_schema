@@ -1,4 +1,5 @@
 require "set"
+require_relative "../json_reference"
 
 module JsonSchema
   class ReferenceExpander
@@ -135,12 +136,12 @@ module JsonSchema
     end
 
     def resolve_pointer(ref, resolved_schema)
-      if !(new_schema = lookup_pointer(ref.uri, ref.pointer))
-        new_schema = JsonPointer.evaluate(resolved_schema, ref.pointer)
+      if !(new_schema = lookup_pointer(ref.uri, ref.reference_pointer))
+        new_schema = JsonPointer.evaluate(resolved_schema, ref.reference_pointer)
 
         # couldn't resolve pointer within known schema; that's an error
         if new_schema.nil?
-          message = %{Couldn't resolve pointer "#{ref.pointer}".}
+          message = %{Couldn't resolve pointer "#{ref.reference_pointer}".}
           @errors << SchemaError.new(resolved_schema, message, :unresolved_pointer)
           return
         end
@@ -151,7 +152,7 @@ module JsonSchema
         #     https://github.com/brandur/json_schema/issues/50
         #
         if new_schema.reference? &&
-          new_new_schema = lookup_pointer(ref.uri, new_schema.pointer)
+          new_new_schema = lookup_pointer(ref.uri, new_schema.reference_pointer)
             new_new_schema.clones << ref
         else
           # Parse a new schema and use the same parent node. Basically this is
@@ -226,7 +227,7 @@ module JsonSchema
         schema.properties.each { |_, s| yielder << s }
 
         if additional = schema.additional_properties
-          if additional.is_a?(Schema)
+          if additional.kind_of?(JsonCommon::Node)
             yielder << additional
           end
         end
@@ -248,7 +249,7 @@ module JsonSchema
         # dependencies can either be simple or "schema"; only replace the
         # latter
         schema.dependencies.values.
-          select { |s| s.is_a?(Schema) }.
+          select { |s| s.kind_of?(JsonCommon::Node) }.
           each { |s| yielder << s }
 
         # schemas contained inside hyper-schema links objects

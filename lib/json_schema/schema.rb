@@ -3,6 +3,7 @@ require "json"
 module JsonSchema
   class Schema
     include JsonCommon::Attributes
+    include JsonCommon::Node
 
     def initialize
       # nil out all our fields so that it's possible to instantiate a schema
@@ -34,7 +35,7 @@ module JsonSchema
     # `properties`, `anyOf`, etc.
     #
     # Type: Schema
-    attr_copyable :parent
+    attr_accessor :parent
 
     # Collection of clones of this schema object, meaning all Schemas that were
     # initialized after the original. Used for JSON Reference expansion. The
@@ -236,14 +237,6 @@ module JsonSchema
       !clones.include?(self)
     end
 
-    def pointer
-      if parent
-        parent.pointer + "/" + fragment
-      else
-        fragment
-      end
-    end
-
     def reference?
       false
     end
@@ -260,6 +253,8 @@ module JsonSchema
 
     # Link subobject for a hyperschema.
     class Link < Schema
+      include JsonCommon::Node
+
       inherit_attrs
 
       def reference?

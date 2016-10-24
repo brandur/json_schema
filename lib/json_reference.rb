@@ -1,5 +1,6 @@
 require "uri"
 require_relative "json_common/attributes"
+require_relative "json_common/node"
 require_relative "json_pointer"
 
 module JsonReference
@@ -10,6 +11,7 @@ module JsonReference
   class Reference
     include Comparable
     include JsonCommon::Attributes
+    include JsonCommon::Node
 
     # Collection of clones of this schema object, meaning all Schemas that were
     # initialized after the original. Used for JSON Reference expansion. The
@@ -33,9 +35,9 @@ module JsonReference
     # `properties`, `anyOf`, etc.
     #
     # Type: Schema
-    attr_copyable :parent
+    attr_accessor :parent
 
-    attr_accessor :pointer
+    attr_accessor :reference_pointer
     attr_accessor :uri
 
     def initialize(ref)
@@ -53,18 +55,18 @@ module JsonReference
       # given a simple fragment without '#', resolve as a JSON Pointer only as
       # per spec
       if ref.include?("#")
-        uri, @pointer = ref.split('#')
+        uri, @reference_pointer = ref.split('#')
         if uri && !uri.empty?
           @uri = URI.parse(uri)
         end
-        @pointer ||= ""
+        @reference_pointer ||= ""
       else
-        @pointer = ref
+        @reference_pointer = ref
       end
 
       # normalize pointers by prepending "#" and stripping trailing "/"
-      @pointer = "#" + @pointer
-      @pointer = @pointer.chomp("/")
+      @reference_pointer = "#" + @reference_pointer
+      @reference_pointer = @reference_pointer.chomp("/")
     end
 
     def <=>(other)
@@ -86,14 +88,14 @@ module JsonReference
     # Given the document addressed by #uri, resolves the JSON Pointer part of
     # the reference.
     def resolve_pointer(data)
-      JsonPointer.evaluate(data, @pointer)
+      JsonPointer.evaluate(data, @reference_pointer)
     end
 
     def to_s
       if @uri
-        "#{@uri.to_s}#{@pointer}"
+        "#{@uri.to_s}#{@reference_pointer}"
       else
-        @pointer
+        @reference_pointer
       end
     end
   end
