@@ -5,6 +5,8 @@ module JsonCommon
   module Attributes
     # Provides class-level methods for the Attributes module.
     module ClassMethods
+      attr_reader :copyable_aliases
+
       # Attributes that should be copied between classes when invoking
       # Attributes#copy_from.
       #
@@ -19,6 +21,14 @@ module JsonCommon
       # be invoked to retrieve a value. For example, `type` maps to `type` and
       # `additionalItems` maps to `additional_items`.
       attr_reader :schema_attrs
+
+      def alias_copyable(dest, source)
+        self.class.define_singleton_method(dest) do
+          send(source)
+        end
+
+        self.copyable_aliases << dest
+      end
 
       # identical to attr_accessible, but allows us to copy in values from a
       # target schema to help preserve our hierarchy during reference expansion
@@ -66,6 +76,7 @@ module JsonCommon
       # methods in the Attributes module work. Run automatically when the
       # module is mixed into another class.
       def initialize_attrs
+        @copyable_aliases = []
         @copyable_attrs = {}
         @schema_attrs = {}
       end
@@ -93,6 +104,10 @@ module JsonCommon
       end
     end
 
+    def copy_aliases_ref
+      @copy_aliases_ref
+    end
+
     # This value only set if this object was hydrated from another copyable
     # object using #copy_from.
     def copy_attrs_ref
@@ -101,12 +116,18 @@ module JsonCommon
 
     def copy_from(schema)
       @copy_attrs_ref = schema.copy_attrs_ref || schema.class.copyable_attrs
-
       @copy_attrs_ref.each do |attr, default|
         # proxy this value back to original schema
         attr = attr[1..-1].to_sym # strips "@"
         self.define_singleton_method(attr) do
           schema.send(attr)
+        end
+      end
+
+      @copy_aliases_ref = schema.copy_aliases_ref || schema.class.copyable_aliases
+      @copy_aliases_ref.each do |name|
+        self.define_singleton_method(name) do
+          schema.send(name)
         end
       end
     end

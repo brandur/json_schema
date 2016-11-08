@@ -173,11 +173,11 @@ module JsonSchema
     attr_schema :target_schema
 
     # allow booleans to be access with question mark
-    alias :additional_items? :additional_items
-    alias :max_exclusive? :max_exclusive
-    alias :min_exclusive? :min_exclusive
-    alias :read_only? :read_only
-    alias :unique_items? :unique_items
+    alias_copyable :additional_items?, :additional_items
+    alias_copyable :max_exclusive?, :max_exclusive
+    alias_copyable :min_exclusive?, :min_exclusive
+    alias_copyable :read_only?, :read_only
+    alias_copyable :unique_items?, :unique_items
 
     def expand_references(options = {})
       expander = ReferenceExpander.new
