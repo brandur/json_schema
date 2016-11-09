@@ -185,6 +185,7 @@ module JsonSchema
         schema.links = schema.links.each_with_index.map { |l, i|
           link             = Schema::Link.new
           link.parent      = schema
+          link.fragment    = "links/#{i}"
 
           link.data        = l
 

@@ -198,6 +198,8 @@ describe JsonSchema::Parser do
     schema = parse.definitions["app"]
     link = schema.links[0]
     assert_equal schema, link.parent
+    assert_equal "links/0", link.fragment
+    assert_equal "#/definitions/app/links/0", link.pointer
     assert_equal "Create a new app.", link.description
     assert_equal "application/x-www-form-urlencoded", link.enc_type
     assert_equal "/apps", link.href
