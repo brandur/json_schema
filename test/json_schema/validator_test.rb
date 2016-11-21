@@ -600,8 +600,43 @@ describe JsonSchema::Validator do
     )
     data_sample["contrived"] = "ab"
     refute validate
-    assert_includes error_messages, %{At least 3 characters are required; only 2 were supplied.}
+    assert_includes error_messages, %{Not all subschemas of "allOf" matched.}
     assert_includes error_types, :all_of_failed
+  end
+
+  it "includes the failing condition when validating allOf" do
+    pointer("#/definitions/app/definitions/contrived").merge!(
+      "allOf" => [
+        { "maxLength" => 30 },
+        { "minLength" => 3 }
+      ]
+    )
+    data_sample["contrived"] = "ab"
+    refute validate
+    assert_includes error_messages, %{At least 3 characters are required; only 2 were supplied.}
+    assert_includes error_data, "ab"
+  end
+
+  it "includes all failing conditions for allOf as sub-errors when all_of_sub_errors is true" do
+    JsonSchema.configure do |c|
+      c.all_of_sub_errors = true
+    end
+    pointer("#/definitions/app/definitions/contrived").merge!(
+      "allOf" => [
+        { "minLength" => 5 },
+        { "minLength" => 3 }
+      ]
+    )
+    data_sample["contrived"] = "ab"
+    refute validate
+    assert_includes error_messages, %{Not all subschemas of "allOf" matched.}
+    assert_includes error_types, :all_of_failed
+    all_of_error = @validator.errors.find { |error| error.type == :all_of_failed }
+    sub_error_messages = all_of_error.sub_errors.map { |errors| errors.map(&:message) }
+    sub_error_types = all_of_error.sub_errors.map { |errors| errors.map(&:type) }
+    assert_includes sub_error_messages, [%{At least 3 characters are required; only 2 were supplied.}]
+    assert_includes sub_error_messages, [%{At least 5 characters are required; only 2 were supplied.}]
+    assert_equal sub_error_types, [[:min_length_failed], [:min_length_failed]]
     assert_includes error_data, "ab"
   end
 

@@ -2,6 +2,7 @@ module JsonSchema
   class Configuration
     attr_reader :custom_formats
     attr_reader :validate_regex_with
+    attr_accessor :all_of_sub_errors
 
     def validate_regex_with=(validator)
       @validate_regex_with = validator
@@ -15,6 +16,7 @@ module JsonSchema
     def reset!
       @validate_regex_with = nil
       @custom_formats = {}
+      @all_of_sub_errors = false
     end
 
     private
