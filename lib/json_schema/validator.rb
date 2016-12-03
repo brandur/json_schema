@@ -145,6 +145,10 @@ module JsonSchema
     def validate_all_of(schema, data, errors, path)
       return true if schema.all_of.empty?
 
+      # We've kept this feature behind a configuration flag for now because
+      # there is some performance implication to producing each sub error.
+      # Normally we can short circuit the validation after encountering only
+      # one problem, but here we have to evaluate all subschemas every time.
       if JsonSchema.configuration.all_of_sub_errors
         sub_errors = []
         valid = schema.all_of.map do |subschema|
