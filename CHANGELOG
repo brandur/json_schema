@@ -1,5 +1,8 @@
 Unreleased
 
+0.15.0 2016-12-02
+	Add `all_of_sub_errors` option to get subschema errors for `allOf` validations
+
 0.14.4 2016-11-09
 	Fix bug where inspecting a Hyper-schema link would throw an exception
 
