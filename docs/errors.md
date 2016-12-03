@@ -39,6 +39,6 @@ which is human-readable and contains information for the developer, and a
 * `required_failed`: some `required` keys weren't included
 * `unique_items_failed`: array contained duplicates, disallowed by `"uniqueItems": true`
 
-`ValidationError`s from `anyOf` and `oneOf` will also populate `sub_errors` on the error
-object. This is an array of arrays, with each sub-array containing the validation errors
-for each subschema.
+`ValidationError`s from `allOf` (only if `all_of_sub_errors` is configured as true), `anyOf`, and `oneOf` will
+also populate `sub_errors` on the error object. This is an array of arrays, with each sub-array containing the
+validation errors for each subschema.

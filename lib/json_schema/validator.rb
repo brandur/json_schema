@@ -144,11 +144,24 @@ module JsonSchema
 
     def validate_all_of(schema, data, errors, path)
       return true if schema.all_of.empty?
-      valid = schema.all_of.all? do |subschema|
-        validate_data(subschema, data, errors, path)
+
+      if JsonSchema.configuration.all_of_sub_errors
+        sub_errors = []
+        valid = schema.all_of.map do |subschema|
+          current_sub_errors = []
+          sub_errors << current_sub_errors
+          validate_data(subschema, data, current_sub_errors, path)
+        end.all?
+      else
+        sub_errors = nil
+        valid = schema.all_of.all? do |subschema|
+          validate_data(subschema, data, errors, path)
+        end
       end
+
       message = %{Not all subschemas of "allOf" matched.}
-      errors << ValidationError.new(schema, path, message, :all_of_failed, data: data) if !valid
+      errors << ValidationError.new(schema, path, message, :all_of_failed,
+        sub_errors: sub_errors, data: data) if !valid
       valid
     end
 
