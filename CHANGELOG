@@ -1,5 +1,8 @@
 Unreleased
 
+0.16.0 2016-12-08
+	Populate error `data` with missing fields during validation
+
 0.15.0 2016-12-02
 	Add `all_of_sub_errors` option to get subschema errors for `allOf` validations
 
