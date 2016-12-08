@@ -503,7 +503,7 @@ module JsonSchema
         message = %{"#{missing.sort.join('", "')}" } +
           (missing.length == 1 ? "wasn't" : "weren't") +
           %{ supplied.}
-        errors << ValidationError.new(schema, path, message, :required_failed)
+        errors << ValidationError.new(schema, path, message, :required_failed, data: missing)
         false
       end
     end
