@@ -566,6 +566,7 @@ describe JsonSchema::Validator do
     refute validate
     assert_includes error_messages, %{"name" wasn't supplied.}
     assert_includes error_types, :required_failed
+    assert_includes error_data, ["name"]
   end
 
   it "validates strictProperties successfully" do
