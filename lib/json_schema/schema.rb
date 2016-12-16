@@ -169,13 +169,13 @@ module JsonSchema
     attr_schema :read_only, :schema_name => :readOnly
 
     # hyperschema link attributes
-    attr_schema :enc_type, :default => "application/json"
+    attr_schema :enc_type, :schema_name => :encType, :default => "application/json"
     attr_schema :href
-    attr_schema :media_type, :default => "application/json"
+    attr_schema :media_type, :schema_name => :mediaType, :default => "application/json"
     attr_schema :method
     attr_schema :rel
     attr_schema :schema
-    attr_schema :target_schema
+    attr_schema :target_schema, :schema_name => :targetSchema
 
     # allow booleans to be access with question mark
     alias :additional_items? :additional_items
