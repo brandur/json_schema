@@ -1,5 +1,8 @@
 Unreleased
 
+0.16.1 2016-12-15
+	Fix serialized schema names for Hyper-schemas
+
 0.16.0 2016-12-08
 	Populate error `data` with missing fields during validation
 
