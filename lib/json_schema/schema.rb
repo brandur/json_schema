@@ -139,10 +139,10 @@ module JsonSchema
     attr_schema :unique_items, :schema_name => :uniqueItems
 
     # validation: number/integer
-    attr_schema :max
-    attr_schema :max_exclusive, :default => false, :schema_name => :maxExclusive
-    attr_schema :min
-    attr_schema :min_exclusive, :default => false, :schema_name => :minExclusive
+    attr_schema :max, :schema_name => :maximum
+    attr_schema :max_exclusive, :default => false, :schema_name => :exclusiveMaximum
+    attr_schema :min, :schema_name => :minimum
+    attr_schema :min_exclusive, :default => false, :schema_name => :exclusiveMinimum
     attr_schema :multiple_of, :schema_name => :multipleOf
 
     # validation: object
