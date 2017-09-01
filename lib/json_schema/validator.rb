@@ -567,6 +567,15 @@ module JsonSchema
       "ipv6" => ->(data) { data =~ IPV6_PATTERN },
       "regex" => ->(data) { Regexp.new(data) rescue false },
       "uri" => ->(data) { URI.parse(data) rescue false },
+
+      # From the spec: a string instance is valid URI Reference (either a URI
+      # or a relative-reference), according to RFC3986.
+      #
+      # URI.parse will a handle a relative reference as well as an absolute
+      # one. Really though we should try to make "uri" more restrictive, and
+      # both of these could do to be more robust.
+      "uri-reference" => ->(data) { URI.parse(data) rescue false },
+
       "uuid" => ->(data) { data =~ UUID_PATTERN },
     }.freeze
 

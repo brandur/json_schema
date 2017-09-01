@@ -285,7 +285,8 @@ describe JsonSchema::Parser do
     refute parse
     assert_includes error_messages, '"obscure-thing" is not a valid format, ' \
                                     'must be one of date, date-time, email, ' \
-                                    'hostname, ipv4, ipv6, regex, uri, uuid.'
+                                    'hostname, ipv4, ipv6, regex, uri, ' \
+                                    'uri-reference, uuid.'
     assert_includes error_types, :unknown_format
   end
 
@@ -321,8 +322,8 @@ describe JsonSchema::Parser do
     refute parse
     assert_includes error_messages, '"not-a-format" is not a valid format, ' \
                                     'must be one of date, date-time, email, ' \
-                                    'hostname, ipv4, ipv6, regex, uri, uuid, ' \
-                                    'the-answer.'
+                                    'hostname, ipv4, ipv6, regex, uri, ' \
+                                    'uri-reference, uuid, the-answer.'
     assert_includes error_types, :unknown_format
   end
 

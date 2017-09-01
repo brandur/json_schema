@@ -867,6 +867,32 @@ describe JsonSchema::Validator do
     assert_includes error_types, :invalid_format
   end
 
+  it "validates absolute uri-reference format successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "uri-reference"
+    )
+    data_sample["owner"] = "https://example.com"
+    assert validate
+  end
+
+  it "validates relative uri format successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "uri"
+    )
+    data_sample["owner"] = "#hello"
+    assert validate
+  end
+
+  it "validates uri format unsuccessfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "uri-reference"
+    )
+    data_sample["owner"] = "http://example.com[]"
+    refute validate
+    assert_includes error_messages, %{http://example.com[] is not a valid uri-reference.}
+    assert_includes error_types, :invalid_format
+  end
+
   it "validates uuid format successfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "uuid"
