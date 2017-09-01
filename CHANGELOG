@@ -1,5 +1,8 @@
 Unreleased
 
+0.17.0 2017-09-01
+	Add support for the `uri-reference` format
+
 0.16.2 2017-08-17
 	Fix schema names of minimum/maximum/exclusiveMinimum/exclusiveMaximum on indexing
 
