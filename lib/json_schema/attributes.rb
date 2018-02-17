@@ -25,23 +25,21 @@ module JsonSchema
       def attr_copyable(attr, options = {})
         attr_accessor(attr)
 
+        ref = :"@#{attr}"
         # Usually the default being assigned here is nil.
-        self.copyable_attrs["@#{attr}".to_sym] = options[:default]
+        self.copyable_attrs[ref] = options[:default]
 
         if default = options[:default]
           # remove the reader already created by attr_accessor
           remove_method(attr)
 
+          need_dup = [Array, Hash, Set].include?(default.class)
           define_method(attr) do
-            val = instance_variable_get(:"@#{attr}")
+            val = instance_variable_get(ref)
             if !val.nil?
               val
             else
-              if [Array, Hash, Set].include?(default.class)
-                default.dup
-              else
-                default
-              end
+              need_dup ? default.class.new : default
             end
           end
         end
