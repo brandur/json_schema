@@ -172,22 +172,17 @@ module JsonSchema
     def validate_any_of(schema, data, errors, path)
       return true if schema.any_of.empty?
 
-      sub_errors = []
-
-      subschemata_validity = schema.any_of.map do |subschema|
+      sub_errors = schema.any_of.map do |subschema|
         current_sub_errors = []
-        sub_errors << current_sub_errors
-        validate_data(subschema, data, current_sub_errors, path)
+        return true if validate_data(subschema, data, current_sub_errors, path)
+        current_sub_errors
       end
 
-      unless subschemata_validity.any? { |valid| valid == true }
-        message = %{No subschema in "anyOf" matched.}
-        errors << ValidationError.new(schema, path, message, :any_of_failed,
-          sub_errors: sub_errors, data: data)
-        return false
-      end
+      message = %{No subschema in "anyOf" matched.}
+      errors << ValidationError.new(schema, path, message, :any_of_failed,
+        sub_errors: sub_errors, data: data)
 
-      true
+      false
     end
 
     def validate_dependencies(schema, data, errors, path)
