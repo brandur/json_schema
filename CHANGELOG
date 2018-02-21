@@ -1,5 +1,8 @@
 Unreleased
 
+0.17.2 2019-02-20
+	Add minor optimization for an `any_of` that validates successfully (#93)
+
 0.17.1 2019-02-12
 	Add minor optimization using `Enumerable#flat_map` (#91)
 
