@@ -22,6 +22,7 @@ module JsonSchema
       @errors = []
       @visits = {}
       @fail_fast = fail_fast
+      define_singleton_method(:custom_and, method(@fail_fast ? :fast_and : :strict_and))
       catch(:fail_fast) do
         validate_data(@schema, data, @errors, ['#'])
       end
@@ -69,7 +70,11 @@ module JsonSchema
 
     # works around &&'s "lazy" behavior
     def strict_and(valid_old, valid_new)
-      throw :fail_fast, false if @fail_fast && !valid_new
+      valid_old && valid_new
+    end
+
+    def fast_and(valid_old, valid_new)
+      throw :fail_fast, false if !valid_new
       valid_old && valid_new
     end
 
@@ -81,46 +86,46 @@ module JsonSchema
       end
 
       # validation: any
-      valid = strict_and valid, validate_all_of(schema, data, errors, path)
-      valid = strict_and valid, validate_any_of(schema, data, errors, path)
-      valid = strict_and valid, validate_enum(schema, data, errors, path)
-      valid = strict_and valid, validate_one_of(schema, data, errors, path)
-      valid = strict_and valid, validate_not(schema, data, errors, path)
-      valid = strict_and valid, validate_type(schema, data, errors, path)
+      valid = custom_and valid, validate_all_of(schema, data, errors, path)
+      valid = custom_and valid, validate_any_of(schema, data, errors, path)
+      valid = custom_and valid, validate_enum(schema, data, errors, path)
+      valid = custom_and valid, validate_one_of(schema, data, errors, path)
+      valid = custom_and valid, validate_not(schema, data, errors, path)
+      valid = custom_and valid, validate_type(schema, data, errors, path)
 
       # validation: array
       if data.is_a?(Array)
-        valid = strict_and valid, validate_items(schema, data, errors, path)
-        valid = strict_and valid, validate_max_items(schema, data, errors, path)
-        valid = strict_and valid, validate_min_items(schema, data, errors, path)
-        valid = strict_and valid, validate_unique_items(schema, data, errors, path)
+        valid = custom_and valid, validate_items(schema, data, errors, path)
+        valid = custom_and valid, validate_max_items(schema, data, errors, path)
+        valid = custom_and valid, validate_min_items(schema, data, errors, path)
+        valid = custom_and valid, validate_unique_items(schema, data, errors, path)
       end
 
       # validation: integer/number
       if data.is_a?(Float) || data.is_a?(Integer)
-        valid = strict_and valid, validate_max(schema, data, errors, path)
-        valid = strict_and valid, validate_min(schema, data, errors, path)
-        valid = strict_and valid, validate_multiple_of(schema, data, errors, path)
+        valid = custom_and valid, validate_max(schema, data, errors, path)
+        valid = custom_and valid, validate_min(schema, data, errors, path)
+        valid = custom_and valid, validate_multiple_of(schema, data, errors, path)
       end
 
       # validation: object
       if data.is_a?(Hash)
-        valid = strict_and valid, validate_additional_properties(schema, data, errors, path)
-        valid = strict_and valid, validate_dependencies(schema, data, errors, path)
-        valid = strict_and valid, validate_max_properties(schema, data, errors, path)
-        valid = strict_and valid, validate_min_properties(schema, data, errors, path)
-        valid = strict_and valid, validate_pattern_properties(schema, data, errors, path)
-        valid = strict_and valid, validate_properties(schema, data, errors, path)
-        valid = strict_and valid, validate_required(schema, data, errors, path, schema.required)
-        valid = strict_and valid, validate_strict_properties(schema, data, errors, path)
+        valid = custom_and valid, validate_additional_properties(schema, data, errors, path)
+        valid = custom_and valid, validate_dependencies(schema, data, errors, path)
+        valid = custom_and valid, validate_max_properties(schema, data, errors, path)
+        valid = custom_and valid, validate_min_properties(schema, data, errors, path)
+        valid = custom_and valid, validate_pattern_properties(schema, data, errors, path)
+        valid = custom_and valid, validate_properties(schema, data, errors, path)
+        valid = custom_and valid, validate_required(schema, data, errors, path, schema.required)
+        valid = custom_and valid, validate_strict_properties(schema, data, errors, path)
       end
 
       # validation: string
       if data.is_a?(String)
-        valid = strict_and valid, validate_format(schema, data, errors, path)
-        valid = strict_and valid, validate_max_length(schema, data, errors, path)
-        valid = strict_and valid, validate_min_length(schema, data, errors, path)
-        valid = strict_and valid, validate_pattern(schema, data, errors, path)
+        valid = custom_and valid, validate_format(schema, data, errors, path)
+        valid = custom_and valid, validate_max_length(schema, data, errors, path)
+        valid = custom_and valid, validate_min_length(schema, data, errors, path)
+        valid = custom_and valid, validate_pattern(schema, data, errors, path)
       end
 
       valid
@@ -271,12 +276,12 @@ module JsonSchema
           valid = true
           if data.size > schema.items.count && schema.additional_items.is_a?(Schema)
             (schema.items.count..data.count - 1).each do |i|
-              valid = strict_and valid,
+              valid = custom_and valid,
                 validate_data(schema.additional_items, data[i], errors, path + [i])
             end
           end
           schema.items.each_with_index do |subschema, i|
-            valid = strict_and valid,
+            valid = custom_and valid,
               validate_data(subschema, data[i], errors, path + [i])
           end
           valid
@@ -284,7 +289,7 @@ module JsonSchema
       else
         valid = true
         data.each_with_index do |value, i|
-          valid = strict_and valid,
+          valid = custom_and valid,
             validate_data(schema.items, value, errors, path + [i])
         end
         valid
@@ -479,7 +484,7 @@ module JsonSchema
       schema.pattern_properties.each do |pattern, subschema|
         data.each do |key, value|
           if key =~ pattern
-            valid = strict_and valid,
+            valid = custom_and valid,
               validate_data(subschema, value, errors, path + [key])
           end
         end
@@ -492,7 +497,7 @@ module JsonSchema
       valid = true
       schema.properties.each do |key, subschema|
         next unless data.key?(key)
-        valid = strict_and valid,
+        valid = custom_and valid,
           validate_data(subschema, data[key], errors, path + [key])
       end
       valid
@@ -514,7 +519,7 @@ module JsonSchema
     def validate_strict_properties(schema, data, errors, path)
       return true if !schema.strict_properties
 
-      strict_and validate_extra(schema, data, errors, path),
+      custom_and validate_extra(schema, data, errors, path),
         validate_required(schema, data, errors, path, schema.properties.keys)
     end
 
