@@ -5,7 +5,7 @@ require "json_reference"
 describe JsonReference::Reference do
   it "expands a reference without a URI" do
     ref = reference("#/definitions")
-    assert_equal nil, ref.uri
+    assert_nil ref.uri
     assert_equal "#/definitions", ref.pointer
   end
 
@@ -17,7 +17,7 @@ describe JsonReference::Reference do
 
   it "expands just a root sign" do
     ref = reference("#")
-    assert_equal nil, ref.uri
+    assert_nil ref.uri
     assert_equal "#", ref.pointer
   end
 
@@ -29,13 +29,13 @@ describe JsonReference::Reference do
 
   it "normalizes pointers by adding a root sign prefix" do
     ref = reference("/definitions")
-    assert_equal nil, ref.uri
+    assert_nil ref.uri
     assert_equal "#/definitions", ref.pointer
   end
 
   it "normalizes pointers by stripping a trailing slash" do
     ref = reference("#/definitions/")
-    assert_equal nil, ref.uri
+    assert_nil ref.uri
     assert_equal "#/definitions", ref.pointer
   end
 

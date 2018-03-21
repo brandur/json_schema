@@ -7,7 +7,7 @@ describe JsonSchema do
     it "succeeds" do
       schema, errors = JsonSchema.parse(schema_sample)
       assert schema
-      assert_equal nil, errors
+      assert_nil errors
     end
 
     it "returns errors on a parsing problem" do
