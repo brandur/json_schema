@@ -48,7 +48,7 @@ describe JsonSchema::Attributes do
     obj.schema = "schema"
 
     assert_raises NoMethodError do
-      assert_equal nil, obj[:copyable]
+      assert_nil obj[:copyable]
     end
 
     assert_equal "schema", obj[:schema]
@@ -71,8 +71,8 @@ describe JsonSchema::Attributes do
     obj = TestAttributes.new
 
     # should produce a nil value *without* a Ruby warning
-    assert_equal nil, obj.copyable
-    assert_equal nil, obj.schema
+    assert_nil obj.copyable
+    assert_nil obj.schema
   end
 
   class TestAttributes
