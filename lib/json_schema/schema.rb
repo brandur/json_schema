@@ -252,9 +252,9 @@ module JsonSchema
       end
     end
 
-    def validate(data)
+    def validate(data, fail_fast = false)
       validator = Validator.new(self)
-      valid = validator.validate(data)
+      valid = validator.validate(data, fail_fast)
       [valid, validator.errors]
     end
 

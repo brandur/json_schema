@@ -18,10 +18,13 @@ module JsonSchema
       @schema = schema
     end
 
-    def validate(data)
+    def validate(data, fail_fast = false)
       @errors = []
       @visits = {}
-      validate_data(@schema, data, @errors, ['#'])
+      @fail_fast = fail_fast
+      catch(:fail_fast) do
+        validate_data(@schema, data, @errors, ['#'])
+      end
       @errors.size == 0
     end
 
@@ -66,6 +69,7 @@ module JsonSchema
 
     # works around &&'s "lazy" behavior
     def strict_and(valid_old, valid_new)
+      throw :fail_fast, false if @fail_fast && !valid_new
       valid_old && valid_new
     end
 
@@ -149,7 +153,7 @@ module JsonSchema
       # there is some performance implication to producing each sub error.
       # Normally we can short circuit the validation after encountering only
       # one problem, but here we have to evaluate all subschemas every time.
-      if JsonSchema.configuration.all_of_sub_errors
+      if JsonSchema.configuration.all_of_sub_errors && !@fail_fast
         sub_errors = []
         valid = schema.all_of.map do |subschema|
           current_sub_errors = []
@@ -174,7 +178,10 @@ module JsonSchema
 
       sub_errors = schema.any_of.map do |subschema|
         current_sub_errors = []
-        return true if validate_data(subschema, data, current_sub_errors, path)
+        valid = catch(:fail_fast) do
+          validate_data(subschema, data, current_sub_errors, path)
+        end
+        return true if valid
         current_sub_errors
       end
 
@@ -421,7 +428,9 @@ module JsonSchema
 
       num_valid = schema.one_of.count do |subschema|
         current_sub_errors = []
-        valid = validate_data(subschema, data, current_sub_errors, path)
+        valid = catch(:fail_fast) do
+          validate_data(subschema, data, current_sub_errors, path)
+        end
         sub_errors << current_sub_errors
         valid
       end
@@ -482,10 +491,9 @@ module JsonSchema
       return true if schema.properties.empty?
       valid = true
       schema.properties.each do |key, subschema|
-        if data.key?(key)
-          valid = strict_and valid,
-            validate_data(subschema, data[key], errors, path + [key])
-        end
+        next unless data.key?(key)
+        valid = strict_and valid,
+          validate_data(subschema, data[key], errors, path + [key])
       end
       valid
     end
