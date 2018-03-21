@@ -2,16 +2,6 @@ require "uri"
 
 module JsonSchema
   class Validator
-    TYPE_MAP = {
-      "array"   => Array,
-      "boolean" => [FalseClass, TrueClass],
-      "integer" => Integer,
-      "number"  => [Integer, Float],
-      "null"    => NilClass,
-      "object"  => Hash,
-      "string"  => String,
-    }
-
     attr_accessor :errors
 
     def initialize(schema)
@@ -511,9 +501,8 @@ module JsonSchema
     end
 
     def validate_type(schema, data, errors, path)
-      return true if !schema.type || schema.type.empty?
-      valid_types = schema.type.flat_map { |t| TYPE_MAP[t] }.compact
-      if valid_types.any? { |t| data.is_a?(t) }
+      return true if schema.type.empty?
+      if schema.type_parsed.include?(data.class)
         true
       else
         key = find_parent(schema)
