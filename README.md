@@ -30,6 +30,9 @@ schema.validate!(data)
 schema.links.each do |link|
   puts "#{link.method} #{link.href}"
 end
+
+# abort on first error, instead of listing them all:
+schema.validate!(data, true)
 ```
 
 Errors have a `message` (for humans), and `type` (for machines).
