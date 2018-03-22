@@ -501,7 +501,7 @@ module JsonSchema
     end
 
     def validate_type(schema, data, errors, path)
-      return true if schema.type.empty?
+      return true if !schema.type || schema.type.empty?
       if schema.type_parsed.include?(data.class)
         true
       else
