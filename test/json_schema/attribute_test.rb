@@ -14,7 +14,7 @@ describe JsonSchema::Attributes do
     obj = TestAttributes.new
     obj.schema = "foo"
     assert_equal "foo", obj.schema
-    assert_equal({:schema => :schema, :named => :schema_named},
+    assert_equal({:schema => :schema, :named => :schema_named, :cached => :cached},
       obj.class.schema_attrs)
   end
 
@@ -75,6 +75,16 @@ describe JsonSchema::Attributes do
     assert_equal nil, obj.schema
   end
 
+  it "cleans cached values when assigning parent attribute" do
+    obj = TestAttributes.new
+
+    obj.cached = "test"
+    assert_equal "test_123", obj.cached_parsed
+
+    obj.cached = "other"
+    assert_equal "other_123", obj.cached_parsed
+  end
+
   class TestAttributes
     include JsonSchema::Attributes
 
@@ -86,6 +96,11 @@ describe JsonSchema::Attributes do
 
     attr_schema :schema
     attr_schema :schema_named, :schema_name => :named
+
+    attr_schema :cached, :clear_cache => :@cached_parsed
+    def cached_parsed
+      @cached_parsed ||= "#{cached}_123"
+    end
 
     attr_copyable :copyable_default, :default => []
     attr_copyable :copyable_default_with_string, :default => "application/json"

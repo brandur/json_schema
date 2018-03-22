@@ -139,7 +139,7 @@ module JsonSchema
     # of strings.
     #
     # Type: Array[String]
-    attr_schema :type, :default => []
+    attr_schema :type, :default => [], :clear_cache => :@type_parsed
 
     # validation: array
     attr_schema :additional_items, :default => true, :schema_name => :additionalItems

@@ -34,4 +34,13 @@ describe JsonSchema::Schema do
       schema[:expanded]
     end
   end
+
+  it "updates type_parsed when type is changed" do
+    schema = JsonSchema::Schema.new
+    schema.type = ["integer"]
+    assert_equal [Integer], schema.type_parsed
+
+    schema.type = ["string"]
+    assert_equal [String], schema.type_parsed
+  end
 end
