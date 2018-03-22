@@ -29,8 +29,8 @@ module JsonSchema
       @errors.size == 0
     end
 
-    def validate!(data)
-      if !validate(data)
+    def validate!(data, fail_fast = false)
+      if !validate(data, fail_fast)
         raise AggregateError.new(@errors)
       end
     end

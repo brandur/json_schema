@@ -258,8 +258,8 @@ module JsonSchema
       [valid, validator.errors]
     end
 
-    def validate!(data)
-      Validator.new(self).validate!(data)
+    def validate!(data, fail_fast = false)
+      Validator.new(self).validate!(data, fail_fast)
     end
 
     # Link subobject for a hyperschema.
