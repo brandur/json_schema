@@ -1,5 +1,8 @@
 Unreleased
 
+0.18.0 2019-03-26
+	Speed up validation by pre-calculating Ruby types (#94)
+
 0.17.2 2019-02-20
 	Add minor optimization for an `any_of` that validates successfully (#93)
 
