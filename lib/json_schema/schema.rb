@@ -2,6 +2,16 @@ require "json"
 
 module JsonSchema
   class Schema
+    TYPE_MAP = {
+      "array"   => Array,
+      "boolean" => [FalseClass, TrueClass],
+      "integer" => Integer,
+      "number"  => [Integer, Float],
+      "null"    => NilClass,
+      "object"  => Hash,
+      "string"  => String,
+    }
+
     include Attributes
 
     def initialize
@@ -129,7 +139,7 @@ module JsonSchema
     # of strings.
     #
     # Type: Array[String]
-    attr_schema :type, :default => []
+    attr_schema :type, :default => [], :clear_cache => :@type_parsed
 
     # validation: array
     attr_schema :additional_items, :default => true, :schema_name => :additionalItems
@@ -197,6 +207,14 @@ module JsonSchema
     def expand_references!(options = {})
       ReferenceExpander.new.expand!(self, options)
       true
+    end
+
+    # An array of Ruby classes that are equivalent to the types defined in the
+    # schema.
+    #
+    # Type: Array[Class]
+    def type_parsed
+      @type_parsed ||= type.flat_map { |t| TYPE_MAP[t] }.compact
     end
 
     def inspect

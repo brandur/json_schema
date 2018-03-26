@@ -43,10 +43,18 @@ module JsonSchema
             end
           end
         end
+
+        if options[:clear_cache]
+          remove_method(:"#{attr}=")
+          define_method(:"#{attr}=") do |value|
+            instance_variable_set(options[:clear_cache], nil)
+            instance_variable_set(ref, value)
+          end
+        end
       end
 
       def attr_schema(attr, options = {})
-        attr_copyable(attr, :default => options[:default])
+        attr_copyable(attr, :default => options[:default], :clear_cache => options[:clear_cache])
         self.schema_attrs[options[:schema_name] || attr] = attr
       end
 
