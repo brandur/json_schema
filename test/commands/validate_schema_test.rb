@@ -15,6 +15,16 @@ describe Commands::ValidateSchema do
     refute success
   end
 
+  it "runs successfully in fail fast mode" do
+    temp_file(basic_schema) do |path|
+      @command.fail_fast = true
+      success = @command.run([schema_path, path])
+      assert_equal [], @command.errors
+      assert_equal ["#{path} is valid."], @command.messages
+      assert success
+    end
+  end
+
   it "runs successfully in detect mode" do
     temp_file(basic_schema) do |path|
       @command.extra_schemas << schema_path

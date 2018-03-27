@@ -30,6 +30,9 @@ schema.validate!(data)
 schema.links.each do |link|
   puts "#{link.method} #{link.href}"
 end
+
+# abort on first error, instead of listing them all:
+schema.validate!(data, fail_fast: true)
 ```
 
 Errors have a `message` (for humans), and `type` (for machines).
@@ -39,6 +42,11 @@ for more info.
 
 Non-bang methods return a two-element array, with `true`/`false` at index 0
 to indicate pass/fail, and an array of errors at index 1 (if any).
+
+Passing `fail_fast: true` (default: `false`) will cause the validator to abort
+on the first error it encounters and report just that. Even on fully valid data
+this can offer some speed improvement, since it doesn't have to collect error
+messages that might be later discarded (think of e.g. the `anyOf` directive).
 
 ## Development
 

@@ -8,7 +8,7 @@ describe JsonSchema::Validator do
   end
 
   it "can find data valid" do
-    assert validate
+    assert_valid
   end
 
   it "validates enum successfully" do
@@ -16,7 +16,7 @@ describe JsonSchema::Validator do
       "enum" => ["private", "public"]
     )
     data_sample["visibility"] = "public"
-    assert validate
+    assert_valid
   end
 
   it "validates enum unsuccessfully" do
@@ -24,7 +24,7 @@ describe JsonSchema::Validator do
       "enum" => ["private", "public"]
     )
     data_sample["visibility"] = "personal"
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{personal is not a member of ["private", "public"].}
     assert_includes error_types, :invalid_type
@@ -35,7 +35,7 @@ describe JsonSchema::Validator do
       "type" => ["object"]
     )
     @data_sample = { "name" => "cloudnasium" }
-    assert validate
+    assert_valid
   end
 
   it "validates type unsuccessfully" do
@@ -43,7 +43,7 @@ describe JsonSchema::Validator do
       "type" => ["object"]
     )
     @data_sample = 4
-    refute validate
+    refute_valid
     assert_includes error_messages, %{For 'definitions/app', 4 is not an object.}
     assert_includes error_types, :invalid_type
     assert_includes error_data, 4
@@ -54,7 +54,7 @@ describe JsonSchema::Validator do
       "type" => ["string"]
     )
     @data_sample = 4
-    refute validate
+    refute_valid
     assert_includes error_messages, %{For 'definitions/app', 4 is not a string.}
     assert_includes error_types, :invalid_type
 
@@ -62,7 +62,7 @@ describe JsonSchema::Validator do
       "type" => ["string", "null"]
     )
     @data_sample = 4
-    refute validate
+    refute_valid
     assert_includes error_messages, %{For 'definitions/app', 4 is not a string or null.}
     assert_includes error_types, :invalid_type
 
@@ -70,7 +70,7 @@ describe JsonSchema::Validator do
       "type" => ["object", "null", "string"]
     )
     @data_sample = 4
-    refute validate
+    refute_valid
     assert_includes error_messages, %{For 'definitions/app', 4 is not an object, null, or string.}
     assert_includes error_types, :invalid_type
   end
@@ -82,7 +82,7 @@ describe JsonSchema::Validator do
       }
     )
     data_sample["flags"] = ["websockets"]
-    assert validate
+    assert_valid
   end
 
   it "validates items with list unsuccessfully" do
@@ -92,7 +92,7 @@ describe JsonSchema::Validator do
       }
     )
     data_sample["flags"] = ["1337"]
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{1337 does not match /^[a-z][a-z\\-]*[a-z]$/.}
     assert_includes error_types, :pattern_failed
@@ -107,7 +107,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "https"]
-    assert validate
+    assert_valid
   end
 
   it "validates items with tuple with additionalItems boolean successfully" do
@@ -119,7 +119,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "https", "websockets"]
-    assert validate
+    assert_valid
   end
 
   it "validates items with tuple with additionalItems boolean unsuccessfully" do
@@ -131,7 +131,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "https", "websockets"]
-    refute validate
+    refute_valid
     assert_includes error_messages, %{No more than 2 items are allowed; 3 were supplied.}
     assert_includes error_types, :max_items_failed
     assert_includes error_data, ["cedar", "https", "websockets"]
@@ -146,7 +146,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "https", "websockets"]
-    assert validate
+    assert_valid
   end
 
   it "validates items with tuple with additionalItems schema unsuccessfully for non-conforming additional item" do
@@ -158,7 +158,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "https", "websockets"]
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{websockets is not a member of ["foo", "bar"].}
     assert_includes error_types, :invalid_type
@@ -174,7 +174,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "https", "websockets", "1337"]
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{websockets is not a member of ["foo", "bar"].}
     assert_includes error_types, :invalid_type
@@ -194,7 +194,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "1337", "websockets"]
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{websockets is not a member of ["foo", "bar"].}
     assert_includes error_types, :invalid_type
@@ -213,7 +213,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar"]
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{2 items required; only 1 was supplied.}
     assert_includes error_types, :min_items_failed
@@ -229,7 +229,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "https", "websockets"]
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{No more than 2 items are allowed; 3 were supplied.}
       assert_includes error_types, :max_items_failed
@@ -245,7 +245,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["flags"] = ["cedar", "1337"]
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{1337 is not a member of ["http", "https"].}
     assert_includes error_types, :invalid_type
@@ -257,7 +257,7 @@ describe JsonSchema::Validator do
       "maxItems" => 10
     )
     data_sample["flags"] = (0...10).to_a
-    assert validate
+    assert_valid
   end
 
   it "validates maxItems unsuccessfully" do
@@ -265,7 +265,7 @@ describe JsonSchema::Validator do
       "maxItems" => 10
     )
     data_sample["flags"] = (0...11).to_a
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{No more than 10 items are allowed; 11 were supplied.}
     assert_includes error_types, :max_items_failed
@@ -277,7 +277,7 @@ describe JsonSchema::Validator do
       "minItems" => 1
     )
     data_sample["flags"] = ["websockets"]
-    assert validate
+    assert_valid
   end
 
   it "validates minItems unsuccessfully" do
@@ -285,7 +285,7 @@ describe JsonSchema::Validator do
       "minItems" => 1
     )
     data_sample["flags"] = []
-    refute validate
+    refute_valid
     assert_includes error_messages, %{1 item required; only 0 were supplied.}
     assert_includes error_types, :min_items_failed
     assert_includes error_data, []
@@ -296,7 +296,7 @@ describe JsonSchema::Validator do
       "uniqueItems" => true
     )
     data_sample["flags"] = ["websockets"]
-    assert validate
+    assert_valid
   end
 
   it "validates uniqueItems unsuccessfully" do
@@ -304,7 +304,7 @@ describe JsonSchema::Validator do
       "uniqueItems" => true
     )
     data_sample["flags"] = ["websockets", "websockets"]
-    refute validate
+    refute_valid
     assert_includes error_messages, %{Duplicate items are not allowed.}
     assert_includes error_types, :unique_items_failed
     assert_includes error_data, ["websockets", "websockets"]
@@ -316,7 +316,7 @@ describe JsonSchema::Validator do
       "maximum"          => 10
     )
     data_sample["id"] = 11
-    refute validate
+    refute_valid
     assert_includes error_messages, %{11 must be less than or equal to 10.}
     assert_includes error_types, :max_failed
     assert_includes error_data, 11
@@ -328,7 +328,7 @@ describe JsonSchema::Validator do
       "maximum"          => 10
     )
     data_sample["id"] = 10
-    refute validate
+    refute_valid
     assert_includes error_messages, %{10 must be less than 10.}
     assert_includes error_types, :max_failed
   end
@@ -339,7 +339,7 @@ describe JsonSchema::Validator do
       "maximum"          => 10.0
     )
     data_sample["cost"] = 10.1
-    refute validate
+    refute_valid
     assert_includes error_messages, %{10.1 must be less than or equal to 10.0.}
     assert_includes error_types, :max_failed
   end
@@ -350,7 +350,7 @@ describe JsonSchema::Validator do
       "maximum"          => 10.0
     )
     data_sample["cost"] = 10.0
-    refute validate
+    refute_valid
     assert_includes error_messages, %{10.0 must be less than 10.0.}
     assert_includes error_types, :max_failed
   end
@@ -361,7 +361,7 @@ describe JsonSchema::Validator do
       "minimum"          => 1
     )
     data_sample["id"] = 0
-    refute validate
+    refute_valid
     assert_includes error_messages, %{0 must be greater than or equal to 1.}
     assert_includes error_types, :min_failed
     assert_includes error_data, 0
@@ -373,7 +373,7 @@ describe JsonSchema::Validator do
       "minimum"          => 1
     )
     data_sample["id"] = 1
-    refute validate
+    refute_valid
     assert_includes error_messages, %{1 must be greater than 1.}
   end
 
@@ -383,7 +383,7 @@ describe JsonSchema::Validator do
       "minimum"          => 0.0
     )
     data_sample["cost"] = -0.01
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{-0.01 must be greater than or equal to 0.0.}
     assert_includes error_types, :min_failed
@@ -395,7 +395,7 @@ describe JsonSchema::Validator do
       "minimum"          => 0.0
     )
     data_sample["cost"] = 0.0
-    refute validate
+    refute_valid
     assert_includes error_messages, %{0.0 must be greater than 0.0.}
     assert_includes error_types, :min_failed
   end
@@ -405,7 +405,7 @@ describe JsonSchema::Validator do
       "multipleOf" => 2
     )
     data_sample["id"] = 1
-    refute validate
+    refute_valid
     assert_includes error_messages, %{1 is not a multiple of 2.}
     assert_includes error_types, :multiple_of_failed
     assert_includes error_data, 1
@@ -416,7 +416,7 @@ describe JsonSchema::Validator do
       "multipleOf" => 0.01
     )
     data_sample["cost"] = 0.005
-    refute validate
+    refute_valid
     assert_includes error_messages, %{0.005 is not a multiple of 0.01.}
     assert_includes error_types, :multiple_of_failed
   end
@@ -426,7 +426,7 @@ describe JsonSchema::Validator do
       "additionalProperties" => true
     )
     data_sample["foo"] = "bar"
-    assert validate
+    assert_valid
   end
 
   it "validates additionalProperties boolean unsuccessfully" do
@@ -438,7 +438,7 @@ describe JsonSchema::Validator do
     )
     data_sample["foo"] = "bar"
     data_sample["matches_pattern"] = "yes!"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{"foo" is not a permitted key.}
     assert_includes error_types, :invalid_keys
   end
@@ -453,7 +453,7 @@ describe JsonSchema::Validator do
     data_sample["foo"] = "bar"
     data_sample["baz"] = "blah"
     data_sample["matches_pattern"] = "yes!"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{"baz", "foo" are not permitted keys.}
     assert_includes error_types, :invalid_keys
   end
@@ -465,7 +465,7 @@ describe JsonSchema::Validator do
       }
     )
     data_sample["foo"] = true
-    assert validate
+    assert_valid
   end
 
   it "validates additionalProperties schema unsuccessfully" do
@@ -479,7 +479,7 @@ describe JsonSchema::Validator do
     )
     data_sample["foo"] = 4
     data_sample["matches_pattern"] = "yes!"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{For 'additionalProperties', 4 is not a boolean.}
     assert_includes error_types, :invalid_type
   end
@@ -489,7 +489,7 @@ describe JsonSchema::Validator do
       "production" => "ssl"
     )
     data_sample["production"] = true
-    refute validate
+    refute_valid
     assert_includes error_messages,
       %{"ssl" wasn't supplied.}
   end
@@ -506,7 +506,7 @@ describe JsonSchema::Validator do
     )
     data_sample["cost"] = 10.0
     data_sample["ssl"] = true
-    refute validate
+    refute_valid
     assert_includes error_messages, %{10.0 must be greater than or equal to 20.0.}
     assert_includes error_types, :min_failed
   end
@@ -516,7 +516,7 @@ describe JsonSchema::Validator do
       "maxProperties" => 0
     )
     data_sample["name"] = "cloudnasium"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{No more than 0 properties are allowed; 1 was supplied.}
     assert_includes error_types, :max_properties_failed
     assert_includes error_data, { "name" => "cloudnasium" }
@@ -527,7 +527,7 @@ describe JsonSchema::Validator do
       "minProperties" => 2
     )
     data_sample["name"] = "cloudnasium"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{At least 2 properties are required; 1 was supplied.}
     assert_includes error_types, :min_properties_failed
     assert_includes error_data, { "name" => "cloudnasium" }
@@ -545,7 +545,7 @@ describe JsonSchema::Validator do
       ""    => 123,
       "KEY" => 456
     }
-    refute validate
+    refute_valid
     assert_includes error_messages, %{For 'definitions/config_vars', 456 is not a null or string.}
     assert_includes error_types, :invalid_type
   end
@@ -563,7 +563,7 @@ describe JsonSchema::Validator do
       "required" => ["name"]
     )
     data_sample.delete("name")
-    refute validate
+    refute_valid
     assert_includes error_messages, %{"name" wasn't supplied.}
     assert_includes error_types, :required_failed
     assert_includes error_data, ["name"]
@@ -573,7 +573,7 @@ describe JsonSchema::Validator do
     pointer("#/definitions/app").merge!(
       "strictProperties" => false
     )
-    assert validate
+    assert_valid
   end
 
   it "validates strictProperties unsuccessfully" do
@@ -585,7 +585,7 @@ describe JsonSchema::Validator do
     )
     data_sample["extra_key"] = "value"
     data_sample["matches_pattern"] = "yes!"
-    refute validate
+    refute_valid
     missing = @schema.properties.keys.sort - ["name"]
     assert_includes error_messages, %{"#{missing.join('", "')}" weren't supplied.}
     assert_includes error_messages, %{"extra_key" is not a permitted key.}
@@ -600,7 +600,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["contrived"] = "ab"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{Not all subschemas of "allOf" matched.}
     assert_includes error_types, :all_of_failed
   end
@@ -613,7 +613,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["contrived"] = "ab"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{At least 3 characters are required; only 2 were supplied.}
     assert_includes error_data, "ab"
   end
@@ -629,7 +629,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["contrived"] = "ab"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{Not all subschemas of "allOf" matched.}
     assert_includes error_types, :all_of_failed
     all_of_error = @validator.errors.find { |error| error.type == :all_of_failed }
@@ -649,7 +649,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["contrived"] = "ab"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{No subschema in "anyOf" matched.}
     assert_includes error_types, :any_of_failed
     any_of_error = @validator.errors.find { |error| error.type == :any_of_failed }
@@ -670,7 +670,7 @@ describe JsonSchema::Validator do
       ]
     )
     data_sample["contrived"] = "foo"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{More than one subschema in "oneOf" matched.}
     assert_includes error_types, :one_of_failed
     one_of_error = @validator.errors.find { |error| error.type == :one_of_failed }
@@ -686,7 +686,7 @@ describe JsonSchema::Validator do
       "not" => { "pattern" => "^$" }
     )
     data_sample["contrived"] = ""
-    refute validate
+    refute_valid
     assert_includes error_messages, %{Matched "not" subschema.}
     assert_includes error_types, :not_failed
     assert_includes error_data, ""
@@ -697,7 +697,7 @@ describe JsonSchema::Validator do
       "format" => "date"
     )
     data_sample["owner"] = "2014-05-13"
-    assert validate
+    assert_valid
   end
 
   it "validates date format unsuccessfully" do
@@ -705,7 +705,7 @@ describe JsonSchema::Validator do
       "format" => "date"
     )
     data_sample["owner"] = "13/05/2014"
-    refute validate
+    refute_valid
   end
 
   it "validates date-time format successfully" do
@@ -713,7 +713,7 @@ describe JsonSchema::Validator do
       "format" => "date-time"
     )
     data_sample["owner"] = "2014-05-13T08:42:40Z"
-    assert validate
+    assert_valid
   end
 
   it "validates date-time format with time zone successfully" do
@@ -721,7 +721,7 @@ describe JsonSchema::Validator do
       "format" => "date-time"
     )
     data_sample["owner"] = "2014-05-13T08:42:40-00:00"
-    assert validate
+    assert_valid
   end
 
   it "validates date-time format with time fraction successfully" do
@@ -729,7 +729,7 @@ describe JsonSchema::Validator do
       "format" => "date-time"
     )
     data_sample["owner"] = "2014-05-13T08:42:40.444Z"
-    assert validate
+    assert_valid
   end
 
   it "validates date-time format unsuccessfully" do
@@ -737,7 +737,7 @@ describe JsonSchema::Validator do
       "format" => "date-time"
     )
     data_sample["owner"] = "2014-05-13T08:42:40"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{2014-05-13T08:42:40 is not a valid date-time.}
     assert_includes error_types, :invalid_format
     assert_includes error_data, "2014-05-13T08:42:40"
@@ -748,7 +748,7 @@ describe JsonSchema::Validator do
       "format" => "email"
     )
     data_sample["owner"] = "dwarf@example.com"
-    assert validate
+    assert_valid
   end
 
   it "validates email format with long TLDs successfully" do
@@ -756,7 +756,7 @@ describe JsonSchema::Validator do
       "format" => "email"
     )
     data_sample["owner"] = "dwarf@example.technology"
-    assert validate
+    assert_valid
   end
 
   it "validates email format unsuccessfully" do
@@ -764,7 +764,7 @@ describe JsonSchema::Validator do
       "format" => "email"
     )
     data_sample["owner"] = "@example.com"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{@example.com is not a valid email.}
     assert_includes error_types, :invalid_format
   end
@@ -774,7 +774,7 @@ describe JsonSchema::Validator do
       "format" => "hostname"
     )
     data_sample["owner"] = "example.com"
-    assert validate
+    assert_valid
   end
 
   it "validates hostname format unsuccessfully" do
@@ -782,7 +782,7 @@ describe JsonSchema::Validator do
       "format" => "hostname"
     )
     data_sample["owner"] = "@example.com"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{@example.com is not a valid hostname.}
     assert_includes error_types, :invalid_format
   end
@@ -792,7 +792,7 @@ describe JsonSchema::Validator do
       "format" => "ipv4"
     )
     data_sample["owner"] = "1.2.3.4"
-    assert validate
+    assert_valid
   end
 
   it "validates ipv4 format unsuccessfully" do
@@ -800,7 +800,7 @@ describe JsonSchema::Validator do
       "format" => "ipv4"
     )
     data_sample["owner"] = "1.2.3.4.5"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{1.2.3.4.5 is not a valid ipv4.}
     assert_includes error_types, :invalid_format
   end
@@ -810,7 +810,7 @@ describe JsonSchema::Validator do
       "format" => "ipv6"
     )
     data_sample["owner"] = "1::3:4:5:6:7:8"
-    assert validate
+    assert_valid
   end
 
   it "validates ipv6 format unsuccessfully" do
@@ -818,7 +818,7 @@ describe JsonSchema::Validator do
       "format" => "ipv6"
     )
     data_sample["owner"] = "1::3:4:5:6:7:8:9"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{1::3:4:5:6:7:8:9 is not a valid ipv6.}
     assert_includes error_types, :invalid_format
   end
@@ -828,7 +828,7 @@ describe JsonSchema::Validator do
       "format" => "regex"
     )
     data_sample["owner"] = "^owner@heroku\.com$"
-    assert validate
+    assert_valid
   end
 
   it "validates regex format successfully" do
@@ -836,7 +836,7 @@ describe JsonSchema::Validator do
       "format" => "regex"
     )
     data_sample["owner"] = "^owner($"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{^owner($ is not a valid regex.}
     assert_includes error_types, :invalid_format
   end
@@ -846,7 +846,7 @@ describe JsonSchema::Validator do
       "format" => "uri"
     )
     data_sample["owner"] = "https://example.com"
-    assert validate
+    assert_valid
   end
 
   it "validates relative uri format successfully" do
@@ -854,7 +854,7 @@ describe JsonSchema::Validator do
       "format" => "uri"
     )
     data_sample["owner"] = "schemata/app"
-    assert validate
+    assert_valid
   end
 
   it "validates uri format unsuccessfully" do
@@ -862,7 +862,7 @@ describe JsonSchema::Validator do
       "format" => "uri"
     )
     data_sample["owner"] = "http://example.com[]"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{http://example.com[] is not a valid uri.}
     assert_includes error_types, :invalid_format
   end
@@ -872,7 +872,7 @@ describe JsonSchema::Validator do
       "format" => "uri-reference"
     )
     data_sample["owner"] = "https://example.com"
-    assert validate
+    assert_valid
   end
 
   it "validates relative uri format successfully" do
@@ -880,7 +880,7 @@ describe JsonSchema::Validator do
       "format" => "uri"
     )
     data_sample["owner"] = "#hello"
-    assert validate
+    assert_valid
   end
 
   it "validates uri format unsuccessfully" do
@@ -888,7 +888,7 @@ describe JsonSchema::Validator do
       "format" => "uri-reference"
     )
     data_sample["owner"] = "http://example.com[]"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{http://example.com[] is not a valid uri-reference.}
     assert_includes error_types, :invalid_format
   end
@@ -898,7 +898,7 @@ describe JsonSchema::Validator do
       "format" => "uuid"
     )
     data_sample["owner"] = "01234567-89ab-cdef-0123-456789abcdef"
-    assert validate
+    assert_valid
   end
 
   it "validates uuid format unsuccessfully" do
@@ -906,7 +906,7 @@ describe JsonSchema::Validator do
       "format" => "uuid"
     )
     data_sample["owner"] = "123"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{123 is not a valid uuid.}
     assert_includes error_types, :invalid_format
   end
@@ -916,7 +916,7 @@ describe JsonSchema::Validator do
       "maxLength" => 3
     )
     data_sample["name"] = "abcd"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{Only 3 characters are allowed; 4 were supplied.}
     assert_includes error_types, :max_length_failed
   end
@@ -926,7 +926,7 @@ describe JsonSchema::Validator do
       "minLength" => 3
     )
     data_sample["name"] = "ab"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{At least 3 characters are required; only 2 were supplied.}
     assert_includes error_types, :min_length_failed
   end
@@ -936,7 +936,7 @@ describe JsonSchema::Validator do
       "pattern" => "^[a-z][a-z0-9-]{3,30}$",
     )
     data_sample["name"] = "ab"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{ab does not match /^[a-z][a-z0-9-]{3,30}$/.}
     assert_includes error_types, :pattern_failed
     assert_includes error_data, "ab"
@@ -947,7 +947,7 @@ describe JsonSchema::Validator do
       "enum" => ["private", "public"]
     )
     data_sample["visibility"] = "personal"
-    refute validate
+    refute_valid
     assert_equal "#/visibility", @validator.errors[0].pointer
   end
 
@@ -957,7 +957,7 @@ describe JsonSchema::Validator do
       "not" => { "$ref" => "#/definitions/app" }
     )
     data_sample["visibility"] = "personal"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{Validation loop detected.}
   end
 =end
@@ -970,7 +970,7 @@ describe JsonSchema::Validator do
       "format" => "the-answer"
     )
     data_sample["owner"] = "42"
-    assert validate
+    assert_valid
   end
 
   it "validates custom formats unsuccessfully" do
@@ -981,7 +981,7 @@ describe JsonSchema::Validator do
       "format" => "the-answer"
     )
     data_sample["owner"] = "43"
-    refute validate
+    refute_valid
     assert_includes error_messages, %{43 is not a valid the-answer.}
     assert_includes error_types, :invalid_format
   end
@@ -1043,11 +1043,26 @@ describe JsonSchema::Validator do
     @schema_sample ||= DataScaffold.schema_sample
   end
 
-  def validate
+  def validator
     @schema = JsonSchema.parse!(schema_sample)
     @schema.expand_references!
     @schema = @schema.definitions["app"]
-    @validator = JsonSchema::Validator.new(@schema)
-    @validator.validate(data_sample)
+    JsonSchema::Validator.new(@schema)
+  end
+
+  # assert_valid asserts that both the "fail fast" and the "full error messages"
+  # code paths consider the data sample valid for the set schema.
+  def assert_valid
+    @validator = validator
+    assert @validator.validate(data_sample, fail_fast: true)
+    assert @validator.validate(data_sample, fail_fast: false)
+  end
+
+  # refute_valid asserts that both the "fail fast" and the "full error messages"
+  # code paths consider the data sample erroneous for the set schema.
+  def refute_valid
+    @validator = validator
+    refute @validator.validate(data_sample, fail_fast: true)
+    refute @validator.validate(data_sample, fail_fast: false)
   end
 end

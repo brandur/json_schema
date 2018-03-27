@@ -21,6 +21,9 @@ parser = OptionParser.new { |opts|
   opts.on("-s", "--schema SCHEMA", "Additional schema to use for references") do |s|
     command.extra_schemas << s
   end
+  opts.on("-f", "--fail-fast", "Abort after encountering the first validation error") do |s|
+    command.fail_fast = true
+  end
 }
 
 if $0 == __FILE__

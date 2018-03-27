@@ -5,6 +5,7 @@ require_relative "../json_schema"
 module Commands
   class ValidateSchema
     attr_accessor :detect
+    attr_accessor :fail_fast
     attr_accessor :extra_schemas
 
     attr_accessor :errors
@@ -12,6 +13,7 @@ module Commands
 
     def initialize
       @detect = false
+      @fail_fast = false
       @extra_schemas = []
 
       @errors = []
@@ -46,7 +48,7 @@ module Commands
           end
         end
 
-        valid, errors = schema.validate(data)
+        valid, errors = schema.validate(data, fail_fast: fail_fast)
 
         if valid
           @messages += ["#{data_file} is valid."]
