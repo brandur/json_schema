@@ -48,7 +48,7 @@ module Commands
           end
         end
 
-        valid, errors = schema.validate(data, fail_fast)
+        valid, errors = schema.validate(data, fail_fast: fail_fast)
 
         if valid
           @messages += ["#{data_file} is valid."]

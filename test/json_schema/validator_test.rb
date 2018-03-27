@@ -1050,15 +1050,19 @@ describe JsonSchema::Validator do
     JsonSchema::Validator.new(@schema)
   end
 
+  # assert_valid asserts that both the "fail fast" and the "full error messages"
+  # code paths consider the data sample valid for the set schema.
   def assert_valid
     @validator = validator
-    assert @validator.validate(data_sample, true)
-    assert @validator.validate(data_sample, false)
+    assert @validator.validate(data_sample, fail_fast: true)
+    assert @validator.validate(data_sample, fail_fast: false)
   end
 
+  # refute_valid asserts that both the "fail fast" and the "full error messages"
+  # code paths consider the data sample erroneous for the set schema.
   def refute_valid
     @validator = validator
-    refute @validator.validate(data_sample, true)
-    refute @validator.validate(data_sample, false)
+    refute @validator.validate(data_sample, fail_fast: true)
+    refute @validator.validate(data_sample, fail_fast: false)
   end
 end
