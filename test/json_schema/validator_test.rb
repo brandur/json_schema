@@ -38,6 +38,16 @@ describe JsonSchema::Validator do
     assert_valid
   end
 
+  it "validates sub-type successfully" do
+    pointer("#/definitions/app").merge!(
+      "type" => ["object"]
+    )
+    class SomeClass < Hash; end
+    @data_sample = SomeClass.new
+    @data_sample["name"] = "yayrails"
+    assert_valid
+  end
+
   it "validates type unsuccessfully" do
     pointer("#/definitions/app").merge!(
       "type" => ["object"]

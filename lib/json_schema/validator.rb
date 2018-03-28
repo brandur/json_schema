@@ -526,7 +526,7 @@ module JsonSchema
 
     def validate_type(schema, data, errors, path)
       return true if !schema.type || schema.type.empty?
-      if schema.type_parsed.include?(data.class)
+      if schema.type_parsed.any? { |t| data.is_a?(t) }
         true
       else
         key = find_parent(schema)
