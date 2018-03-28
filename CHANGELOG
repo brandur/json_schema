@@ -1,5 +1,8 @@
 Unreleased
 
+0.19.1 2019-03-28
+	Fix regression in that subtypes would not validate type (#98)
+
 0.19.0 2019-03-27
 	Implement `fail_fast` option to short circuit validation (#96)
 	Drop support for Ruby 1.9 (EOL'ed for 3+ years now) (#96)
