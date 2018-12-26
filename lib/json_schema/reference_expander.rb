@@ -225,6 +225,15 @@ module JsonSchema
         schema.one_of.each { |s| yielder << s }
         schema.definitions.each { |_, s| yielder << s }
         schema.pattern_properties.each { |_, s| yielder << s }
+
+        if schema.properties.is_a?(Hash)
+          schema.properties&.each_key do |key|
+            if !schema.required&.include?(key) && !schema.properties[key].type.include?("null")
+              schema.properties[key].type << "null"
+            end
+          end
+        end
+
         schema.properties.each { |_, s| yielder << s }
 
         if additional = schema.additional_properties
