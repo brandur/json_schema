@@ -249,15 +249,14 @@ module JsonSchema
       # dependencies can either be simple or "schema"; only replace the
       # latter
       schema.dependencies.values.
-        select { |s| s.is_a?(Schema) }.
-        each { |s| yield s }
+        each { |s| yield s if s.is_a?(Schema) }
 
       # schemas contained inside hyper-schema links objects
       if schema.links
-        schema.links.map { |l| [l.schema, l.target_schema] }.
-          flatten.
-          compact.
-          each { |s| yield s }
+        schema.links.each { |l|
+          yield l.schema if l.schema
+          yield l.target_schema if l.target_schema
+        }
       end
     end
 
