@@ -71,7 +71,7 @@ module JsonSchema
       paths = @schema_paths[uri] ||= {}
       paths[schema.pointer] = schema
 
-      schema_children(schema).each do |subschema|
+      schema_children(schema) do |subschema|
         build_schema_paths(uri, subschema)
       end
 
@@ -114,7 +114,7 @@ module JsonSchema
       # correct all parent references to point back to ref_schema instead of
       # new_schema
       if ref_schema.original?
-        schema_children(ref_schema).each do |schema|
+        schema_children(ref_schema) do |schema|
           schema.parent = ref_schema
         end
       end
@@ -219,47 +219,45 @@ module JsonSchema
     end
 
     def schema_children(schema)
-      Enumerator.new do |yielder|
-        schema.all_of.each { |s| yielder << s }
-        schema.any_of.each { |s| yielder << s }
-        schema.one_of.each { |s| yielder << s }
-        schema.definitions.each { |_, s| yielder << s }
-        schema.pattern_properties.each { |_, s| yielder << s }
-        schema.properties.each { |_, s| yielder << s }
+      schema.all_of.each { |s| yield s }
+      schema.any_of.each { |s| yield s }
+      schema.one_of.each { |s| yield s }
+      schema.definitions.each { |_, s| yield s }
+      schema.pattern_properties.each { |_, s| yield s }
+      schema.properties.each { |_, s| yield s }
 
-        if additional = schema.additional_properties
-          if additional.is_a?(Schema)
-            yielder << additional
-          end
+      if additional = schema.additional_properties
+        if additional.is_a?(Schema)
+          yield additional
         end
+      end
 
-        if schema.not
-          yielder << schema.not
+      if schema.not
+        yield schema.not
+      end
+
+      # can either be a single schema (list validation) or multiple (tuple
+      # validation)
+      if items = schema.items
+        if items.is_a?(Array)
+          items.each { |s| yield s }
+        else
+          yield items
         end
+      end
 
-        # can either be a single schema (list validation) or multiple (tuple
-        # validation)
-        if items = schema.items
-          if items.is_a?(Array)
-            items.each { |s| yielder << s }
-          else
-            yielder << items
-          end
-        end
+      # dependencies can either be simple or "schema"; only replace the
+      # latter
+      schema.dependencies.values.
+        select { |s| s.is_a?(Schema) }.
+        each { |s| yield s }
 
-        # dependencies can either be simple or "schema"; only replace the
-        # latter
-        schema.dependencies.values.
-          select { |s| s.is_a?(Schema) }.
-          each { |s| yielder << s }
-
-        # schemas contained inside hyper-schema links objects
-        if schema.links
-          schema.links.map { |l| [l.schema, l.target_schema] }.
-            flatten.
-            compact.
-            each { |s| yielder << s }
-        end
+      # schemas contained inside hyper-schema links objects
+      if schema.links
+        schema.links.map { |l| [l.schema, l.target_schema] }.
+          flatten.
+          compact.
+          each { |s| yield s }
       end
     end
 
@@ -267,19 +265,21 @@ module JsonSchema
       # prevent endless recursion
       return [] unless schema.original?
 
-      schema_children(schema).reduce([]) do |arr, subschema|
+      arr = []
+      schema_children(schema) do |subschema|
         if !subschema.expanded?
           arr += [subschema.reference]
         else
           arr += unresolved_refs(subschema)
         end
       end
+      arr
     end
 
     def traverse_schema(schema)
       add_reference(schema)
 
-      schema_children(schema).each do |subschema|
+      schema_children(schema) do |subschema|
         if subschema.reference && !subschema.expanded?
           dereference(subschema, [])
         end
