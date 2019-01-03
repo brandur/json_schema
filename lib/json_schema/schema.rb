@@ -264,7 +264,7 @@ module JsonSchema
 
     def pointer
       if parent
-        parent.pointer + "/".freeze + fragment
+        (parent.pointer + "/".freeze + fragment).freeze
       else
         fragment
       end
