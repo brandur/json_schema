@@ -248,8 +248,8 @@ module JsonSchema
 
       # dependencies can either be simple or "schema"; only replace the
       # latter
-      schema.dependencies.values.
-        each { |s| yield s if s.is_a?(Schema) }
+      schema.dependencies.
+        each_value { |s| yield s if s.is_a?(Schema) }
 
       # schemas contained inside hyper-schema links objects
       if schema.links
