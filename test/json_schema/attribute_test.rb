@@ -26,7 +26,13 @@ describe JsonSchema::Attributes do
 
     hash = obj.copyable_default_with_object
     assert_equal({}, hash)
-    assert_raises(FrozenError) do
+    ex = if defined?(FrozenError)
+           FrozenError
+         else
+           RuntimeError
+         end
+
+    assert_raises(ex) do
       hash[:x] = 123
     end
 
