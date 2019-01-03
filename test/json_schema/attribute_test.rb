@@ -26,7 +26,9 @@ describe JsonSchema::Attributes do
 
     hash = obj.copyable_default_with_object
     assert_equal({}, hash)
-    hash[:x] = 123
+    assert_raises(FrozenError) do
+      hash[:x] = 123
+    end
 
     # This is a check to make sure that the new object is not the same object
     # as the one that we just mutated above. When assigning defaults the module
