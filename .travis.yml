@@ -8,6 +8,9 @@ rvm:
   - 2.4.1
   - 2.5
 
+before_script:
+  - gem install bundler
+
 script: bundle exec rake
 
 notifications:
