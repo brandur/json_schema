@@ -1,19 +1,22 @@
 Unreleased
 
-0.19.1 2019-03-28
+0.20.0 2019-01-03
+	Various performance improvements (#102)
+
+0.19.1 2018-03-28
 	Fix regression in that subtypes would not validate type (#98)
 
-0.19.0 2019-03-27
+0.19.0 2018-03-27
 	Implement `fail_fast` option to short circuit validation (#96)
 	Drop support for Ruby 1.9 (EOL'ed for 3+ years now) (#96)
 
-0.18.0 2019-03-26
+0.18.0 2018-03-26
 	Speed up validation by pre-calculating Ruby types (#94)
 
-0.17.2 2019-02-20
+0.17.2 2018-02-20
 	Add minor optimization for an `any_of` that validates successfully (#93)
 
-0.17.1 2019-02-12
+0.17.1 2018-02-12
 	Add minor optimization using `Enumerable#flat_map` (#91)
 
 0.17.0 2017-09-01
