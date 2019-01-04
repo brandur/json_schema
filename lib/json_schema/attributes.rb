@@ -33,13 +33,16 @@ module JsonSchema
           # remove the reader already created by attr_accessor
           remove_method(attr)
 
-          need_dup = [Array, Hash, Set].include?(default.class)
+          if [Array, Hash, Set].include?(default.class)
+            default = default.freeze
+          end
+
           define_method(attr) do
             val = instance_variable_get(ref)
             if !val.nil?
               val
             else
-              need_dup ? default.class.new : default
+              default
             end
           end
         end
