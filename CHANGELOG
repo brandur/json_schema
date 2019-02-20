@@ -1,5 +1,8 @@
 Unreleased
 
+0.20.2 2019-02-20
+	Dereference external subschema with nested reference (#106)
+
 0.20.1 2019-01-03
 	Various performance improvements (#102)
 
