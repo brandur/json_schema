@@ -265,57 +265,6 @@ describe JsonSchema::ReferenceExpander do
     assert schema.expanded?
   end
 
-  it "expands a schema with a reference to an external schema with a nested property reference" do
-    sample1 = {
-      "$schema" => "http://json-schema.org/draft-04/hyper-schema",
-      "type" => "object",
-      "properties" => {
-        "foo" => {
-          "$ref" => "http://json-schema.org/b.json#/definitions/bar"
-        },
-        "foo2" => {
-          "$ref" => "http://json-schema.org/b.json#/definitions/baz"
-        }
-      }
-    }
-    schema1 = JsonSchema::Parser.new.parse!(sample1)
-    schema1.uri = "http://json-schema.org/a.json"
-
-    sample2 = {
-      "$schema" => "http://json-schema.org/draft-04/hyper-schema",
-      "type" => "object",
-      "definitions" => {
-        "bar" => {
-          "type" => "object",
-          "properties" => {
-            "omg" => {
-              "$ref" => "#/definitions/baz"
-            }
-          }
-        },
-        "baz" => {
-          "type" => "string",
-          "maxLength" => 3
-        }
-      }
-    }
-    schema2 = JsonSchema::Parser.new.parse!(sample2)
-    schema2.uri = "http://json-schema.org/b.json"
-
-    # Initialize a store and add our schema to it.
-    store = JsonSchema::DocumentStore.new
-    store.add_schema(schema1)
-    store.add_schema(schema2)
-
-    expander = JsonSchema::ReferenceExpander.new
-    expander.expand!(schema1, store: store)
-
-    # These both point to the same definition, 'baz', but
-    # 'foo' has a level of indirection.
-    assert_equal 3, schema1.properties["foo2"].max_length
-    assert_equal 3, schema1.properties["foo"].properties["omg"].max_length
-  end
-
   it "expands a reference to a link" do
     pointer("#/properties").merge!(
       "link" => { "$ref" => "#/links/0" }
