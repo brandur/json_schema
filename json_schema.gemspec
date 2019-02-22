@@ -11,13 +11,4 @@ Gem::Specification.new do |s|
 
   s.executables   = ["validate-schema"]
   s.files         = Dir["README.md", "LICENSE", "bin/*", "schemas/*", "{lib,test}/**/*.rb"]
-
-  s.add_development_dependency 'ecma-re-validator', '~> 0.1'
-  s.add_development_dependency "minitest", "~> 5.3"
-  s.add_development_dependency "rake", "~> 10.3"
-
-  s.add_development_dependency "byebug"
-  s.add_development_dependency "pry"
-  s.add_development_dependency "pry-byebug"
-  s.add_development_dependency "simplecov"
 end
