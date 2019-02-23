@@ -117,14 +117,15 @@ module JsonSchema
           # schema as the reference schema.
           next if ref_schema == subschema
 
-          subref = subschema.reference
-          # the subschema's ref is local to the file that the
-          # subschema is in; however since there's no URI
-          # the 'resolve_pointer' method would try to look it up
-          # within @schema. So: manually reconstruct the reference to
-          # use the URI of the parent ref.
-          subschema.reference = JsonReference::Reference.new("#{ref.uri}#{subref.pointer}")
-          dereference(subschema, ref_stack + [subref])
+          if !subschema.reference.uri
+            # the subschema's ref is local to the file that the
+            # subschema is in; however since there's no URI
+            # the 'resolve_pointer' method would try to look it up
+            # within @schema. So: manually reconstruct the reference to
+            # use the URI of the parent ref.
+            subschema.reference = JsonReference::Reference.new("#{ref.uri}#{subschema.reference.pointer}")
+          end
+          dereference(subschema, ref_stack)
         end
       end
 
