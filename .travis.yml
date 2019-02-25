@@ -7,20 +7,12 @@ rvm:
   - 2.3.8
   - 2.4.5
   - 2.5.3
-  - 2.6.0
-
-before_install:
-  # Bundler 2.0 killed support for old Rubies. Let's continue to build with
-  # them for now by using an old Bundler. It's plausible to just get rid of
-  # this if it becomes untenable/difficult to upkeep.
-  - gem install bundler -v '< 2'
+  - 2.6.1
 
 script: bundle exec rake
 
 notifications:
   email: false
-
-sudo: false
 
 git:
   depth: 10
