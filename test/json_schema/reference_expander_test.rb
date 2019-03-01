@@ -320,6 +320,59 @@ describe JsonSchema::ReferenceExpander do
     assert_equal 3, schema1.properties["foo"].properties["omg"].max_length
   end
 
+  it "it handles oneOf with nested references to an external schema" do
+    sample1 = {
+      "$schema" => "http://json-schema.org/draft-04/hyper-schema",
+      "type" => "object",
+      "properties" => {
+        "foo" => {
+          "$ref" => "http://json-schema.org/b.json#"
+        }
+      }
+    }
+    schema1 = JsonSchema::Parser.new.parse!(sample1)
+    schema1.uri = "http://json-schema.org/a.json"
+
+    sample2 = {
+      "$schema" => "http://json-schema.org/draft-04/hyper-schema",
+      "type" => "object",
+      "properties" => {
+        "bar" => {
+          "oneOf" => [
+            {"type" => "null"},
+            {"$ref" => "http://json-schema.org/c.json#"}
+          ]
+        }
+      },
+    }
+    schema2 = JsonSchema::Parser.new.parse!(sample2)
+    schema2.uri = "http://json-schema.org/b.json"
+
+    sample3 = {
+      "$schema" => "http://json-schema.org/draft-04/hyper-schema",
+      "type" => "object",
+      "properties" => {
+        "baz" => {
+          "type" => "string",
+          "maxLength" => 3
+        }
+      }
+    }
+    schema3 = JsonSchema::Parser.new.parse!(sample3)
+    schema3.uri = "http://json-schema.org/c.json"
+
+    # Initialize a store and add our schema to it.
+    store = JsonSchema::DocumentStore.new
+    store.add_schema(schema1)
+    store.add_schema(schema2)
+    store.add_schema(schema3)
+
+    expander = JsonSchema::ReferenceExpander.new
+    expander.expand(schema1, store: store)
+
+    assert_equal 3, schema1.properties["foo"].properties["bar"].one_of[1].properties["baz"].max_length
+  end
+
   it "expands a schema with a reference to an external schema with a nested local property reference" do
     sample1 = {
       "$schema" => "http://json-schema.org/draft-04/hyper-schema",

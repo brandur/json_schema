@@ -87,6 +87,18 @@ module JsonSchema
     def dereference(ref_schema, ref_stack)
       ref = ref_schema.reference
 
+      # Some schemas don't have a reference, but do
+      # have children. If that's the case, we need to
+      # dereference the subschemas.
+      if !ref
+        schema_children(ref_schema) do |subschema|
+          next unless subschema.reference
+
+          dereference(subschema, ref_stack)
+        end
+        return true
+      end
+
       # detects a reference cycle
       if ref_stack.include?(ref)
         message = %{Reference loop detected: #{ref_stack.sort.join(", ")}.}
@@ -114,9 +126,12 @@ module JsonSchema
           # schema as the reference schema.
           next if ref_schema == subschema
 
-          next if subschema.expanded?
-
           if subschema.reference
+            # If the subschema has a reference, then
+            # we don't need to recurse if the schema is
+            # already expanded.
+            next if subschema.expanded?
+
             if !subschema.reference.uri
               # the subschema's ref is local to the file that the
               # subschema is in; however since there's no URI
