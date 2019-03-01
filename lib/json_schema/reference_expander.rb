@@ -84,7 +84,7 @@ module JsonSchema
       end
     end
 
-    def dereference(ref_schema, ref_stack)
+    def dereference(ref_schema, ref_stack, parent_ref: nil)
       ref = ref_schema.reference
 
       # Some schemas don't have a reference, but do
@@ -93,6 +93,10 @@ module JsonSchema
       if !ref
         schema_children(ref_schema) do |subschema|
           next unless subschema.reference
+
+          if !subschema.reference.uri && parent_ref
+            subschema.reference = JsonReference::Reference.new("#{parent_ref.uri}#{subschema.reference.pointer}")
+          end
 
           dereference(subschema, ref_stack)
         end
@@ -142,7 +146,13 @@ module JsonSchema
             end
           end
 
-          dereference(subschema, ref_stack)
+          # If we're recursing into a schema via a global reference, then if
+          # the current subschema doesn't have a reference, we have no way of
+          # figuring out what schema we're in. The resolve_pointer method will
+          # default to looking it up in the initial schema. Instead, we're
+          # passing the parent ref here, so we can grab the URI
+          # later if needed.
+          dereference(subschema, ref_stack, parent_ref: ref)
         end
       end
 
