@@ -84,8 +84,24 @@ module JsonSchema
       end
     end
 
-    def dereference(ref_schema, ref_stack)
+    def dereference(ref_schema, ref_stack, parent_ref: nil)
       ref = ref_schema.reference
+
+      # Some schemas don't have a reference, but do
+      # have children. If that's the case, we need to
+      # dereference the subschemas.
+      if !ref
+        schema_children(ref_schema) do |subschema|
+          next unless subschema.reference
+
+          if !subschema.reference.uri && parent_ref
+            subschema.reference = JsonReference::Reference.new("#{parent_ref.uri}#{subschema.reference.pointer}")
+          end
+
+          dereference(subschema, ref_stack)
+        end
+        return true
+      end
 
       # detects a reference cycle
       if ref_stack.include?(ref)
@@ -110,22 +126,33 @@ module JsonSchema
       # references.
       if ref.uri
         schema_children(new_schema) do |subschema|
-          next if subschema.expanded?
-          next unless subschema.reference
-
           # Don't bother if the subschema points to the same
           # schema as the reference schema.
           next if ref_schema == subschema
 
-          if !subschema.reference.uri
-            # the subschema's ref is local to the file that the
-            # subschema is in; however since there's no URI
-            # the 'resolve_pointer' method would try to look it up
-            # within @schema. So: manually reconstruct the reference to
-            # use the URI of the parent ref.
-            subschema.reference = JsonReference::Reference.new("#{ref.uri}#{subschema.reference.pointer}")
+          if subschema.reference
+            # If the subschema has a reference, then
+            # we don't need to recurse if the schema is
+            # already expanded.
+            next if subschema.expanded?
+
+            if !subschema.reference.uri
+              # the subschema's ref is local to the file that the
+              # subschema is in; however since there's no URI
+              # the 'resolve_pointer' method would try to look it up
+              # within @schema. So: manually reconstruct the reference to
+              # use the URI of the parent ref.
+              subschema.reference = JsonReference::Reference.new("#{ref.uri}#{subschema.reference.pointer}")
+            end
           end
-          dereference(subschema, ref_stack)
+
+          # If we're recursing into a schema via a global reference, then if
+          # the current subschema doesn't have a reference, we have no way of
+          # figuring out what schema we're in. The resolve_pointer method will
+          # default to looking it up in the initial schema. Instead, we're
+          # passing the parent ref here, so we can grab the URI
+          # later if needed.
+          dereference(subschema, ref_stack, parent_ref: ref)
         end
       end
 
