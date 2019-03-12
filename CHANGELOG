@@ -1,5 +1,8 @@
 Unreleased
 
+0.20.4 2019-03-11
+	Dereference schema children for subschemas without a reference #110
+
 0.20.3 2019-02-22
 	Handle expansion for nested external property (#108)
 
