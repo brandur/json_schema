@@ -1,5 +1,8 @@
 Unreleased
 
+0.20.5 2019-05-07
+	Do not expand a subschema if already expanded #113
+
 0.20.4 2019-03-11
 	Dereference schema children for subschemas without a reference #110
 
