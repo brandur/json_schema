@@ -146,6 +146,17 @@ module JsonSchema
             end
           end
 
+          if subschema.items && subschema.items.reference
+            next if subschema.expanded?
+
+            if !subschema.items.reference.uri
+              # The subschema's ref is local to the file that the
+              # subschema is in. Manually reconstruct the reference
+              # so we can resolve it.
+              subschema.items.reference = JsonReference::Reference.new("#{ref.uri}#{subschema.items.reference.pointer}")
+            end
+          end
+
           # If we're recursing into a schema via a global reference, then if
           # the current subschema doesn't have a reference, we have no way of
           # figuring out what schema we're in. The resolve_pointer method will

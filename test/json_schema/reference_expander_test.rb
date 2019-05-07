@@ -265,6 +265,87 @@ describe JsonSchema::ReferenceExpander do
     assert schema.expanded?
   end
 
+  it "expands a schema with a reference to an external schema in a oneOf array" do
+    sample1 = {
+      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "id" => "http://json-schema.org/draft-04/schema#",
+      "definitions" => {
+        "schemaArray" => {
+          "type" => "array",
+          "minItems" => 1,
+          "items" => { "$ref" => "#" }
+        }
+      }
+    }
+    schema1 = JsonSchema::Parser.new.parse!(sample1)
+
+    sample2 = {
+      "$schema" => "http://json-schema.org/draft-04/hyper-schema#",
+      "id" => "http://json-schema.org/draft-04/hyper-schema#",
+      "allOf" => [
+        {
+          "$ref" => "http://json-schema.org/draft-04/schema#"
+        }
+      ]
+    }
+    schema2 = JsonSchema::Parser.new.parse!(sample2)
+
+    store = JsonSchema::DocumentStore.new
+    expander = JsonSchema::ReferenceExpander.new
+
+    store.add_schema(schema1)
+    store.add_schema(schema2)
+
+    expander.expand!(schema2, store: store)
+
+    assert schema1.expanded?
+    assert schema2.expanded?
+  end
+
+  it "expands a schema with a nested reference to an external schema in a oneOf array" do
+    sample1 = {
+      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "id" => "http://json-schema.org/draft-04/schema#",
+      "definitions" => {
+        "thingy" => {
+          "type" => ["string"]
+        },
+        "schemaArray" => {
+          "type" => "array",
+          "minItems" => 1,
+          "items" => { "$ref" => "#/definitions/thingy" }
+        }
+      },
+      "properties" => {
+        "whatsit" => {
+          "$ref" => "#/definitions/schemaArray"
+        },
+      }
+    }
+    schema1 = JsonSchema::Parser.new.parse!(sample1)
+
+    sample2 = {
+      "$schema" => "http://json-schema.org/draft-04/hyper-schema#",
+      "id" => "http://json-schema.org/draft-04/hyper-schema#",
+      "allOf" => [
+        {
+          "$ref" => "http://json-schema.org/draft-04/schema#"
+        }
+      ]
+    }
+    schema2 = JsonSchema::Parser.new.parse!(sample2)
+
+    store = JsonSchema::DocumentStore.new
+    expander = JsonSchema::ReferenceExpander.new
+
+    store.add_schema(schema1)
+    store.add_schema(schema2)
+
+    expander.expand!(schema2, store: store)
+
+    assert_equal ["string"], schema2.all_of[0].properties["whatsit"].items.type
+  end
+
   it "expands a schema with a reference to an external schema with a nested external property reference" do
     sample1 = {
       "$schema" => "http://json-schema.org/draft-04/hyper-schema",
