@@ -16,6 +16,8 @@ module JsonSchema
       String     => "string",
       TrueClass  => "boolean",
     }
+    EMPTY_ARRAY = [].freeze
+    EMPTY_HASH = {}.freeze
 
     attr_accessor :errors
 
@@ -101,21 +103,21 @@ module JsonSchema
     end
 
     def parse_all_of(schema)
-      if schema.all_of
+      if schema.all_of && !schema.all_of.empty?
         schema.all_of = schema.all_of.each_with_index.
           map { |s, i| parse_data(s, schema, "allOf/#{i}") }
       end
     end
 
     def parse_any_of(schema)
-      if schema.any_of
+      if schema.any_of && !schema.any_of.empty?
         schema.any_of = schema.any_of.each_with_index.
           map { |s, i| parse_data(s, schema, "anyOf/#{i}") }
       end
     end
 
     def parse_one_of(schema)
-      if schema.one_of
+      if schema.one_of && !schema.one_of.empty?
         schema.one_of = schema.one_of.each_with_index.
           map { |s, i| parse_data(s, schema, "oneOf/#{i}") }
       end
@@ -140,7 +142,7 @@ module JsonSchema
     end
 
     def parse_definitions(schema)
-      if schema.definitions
+      if schema.definitions && !schema.definitions.empty?
         # leave the original data reference intact
         schema.definitions = schema.definitions.dup
         schema.definitions.each do |key, definition|
@@ -151,7 +153,7 @@ module JsonSchema
     end
 
     def parse_dependencies(schema)
-      if schema.dependencies
+      if schema.dependencies && !schema.dependencies.empty?
         # leave the original data reference intact
         schema.dependencies = schema.dependencies.dup
         schema.dependencies.each do |k, s|
@@ -181,7 +183,7 @@ module JsonSchema
     end
 
     def parse_links(schema)
-      if schema.links
+      if schema.links && !schema.links.empty?
         schema.links = schema.links.each_with_index.map { |l, i|
           link             = Schema::Link.new
           link.parent      = schema
@@ -231,7 +233,7 @@ module JsonSchema
     end
 
     def parse_pattern_properties(schema)
-      if schema.pattern_properties
+      if schema.pattern_properties && !schema.pattern_properties.empty?
         # leave the original data reference intact
         properties = schema.pattern_properties.dup
         properties = properties.map do |k, s|
@@ -254,8 +256,8 @@ module JsonSchema
 
     def parse_properties(schema)
       # leave the original data reference intact
-      schema.properties = schema.properties.dup
-      if schema.properties && schema.properties.is_a?(Hash)
+      if schema.properties && schema.properties.is_a?(Hash) && !schema.properties.empty?
+        schema.properties = schema.properties.dup
         schema.properties.each do |key, definition|
           subschema = parse_data(definition, schema, "properties/#{key}")
           schema.properties[key] = subschema
@@ -282,11 +284,11 @@ module JsonSchema
       schema.default     = schema.data["default"]
 
       # validation: any
-      schema.all_of        = validate_type(schema, [Array], "allOf") || []
-      schema.any_of        = validate_type(schema, [Array], "anyOf") || []
-      schema.definitions   = validate_type(schema, [Hash], "definitions") || {}
+      schema.all_of        = validate_type(schema, [Array], "allOf") || EMPTY_ARRAY
+      schema.any_of        = validate_type(schema, [Array], "anyOf") || EMPTY_ARRAY
+      schema.definitions   = validate_type(schema, [Hash], "definitions") || EMPTY_HASH
       schema.enum          = validate_type(schema, [Array], "enum")
-      schema.one_of        = validate_type(schema, [Array], "oneOf") || []
+      schema.one_of        = validate_type(schema, [Array], "oneOf") || EMPTY_ARRAY
       schema.not           = validate_type(schema, [Hash], "not")
       schema.type          = validate_type(schema, [Array, String], "type")
       schema.type          = [schema.type] if schema.type.is_a?(String)
@@ -309,11 +311,11 @@ module JsonSchema
       # validation: object
       schema.additional_properties =
         validate_type(schema, BOOLEAN + [Hash], "additionalProperties")
-      schema.dependencies       = validate_type(schema, [Hash], "dependencies") || {}
+      schema.dependencies       = validate_type(schema, [Hash], "dependencies") || EMPTY_HASH
       schema.max_properties     = validate_type(schema, [Integer], "maxProperties")
       schema.min_properties     = validate_type(schema, [Integer], "minProperties")
-      schema.pattern_properties = validate_type(schema, [Hash], "patternProperties") || {}
-      schema.properties         = validate_type(schema, [Hash], "properties") || {}
+      schema.pattern_properties = validate_type(schema, [Hash], "patternProperties") || EMPTY_HASH
+      schema.properties         = validate_type(schema, [Hash], "properties") || EMPTY_HASH
       schema.required           = validate_type(schema, [Array], "required")
       schema.strict_properties  = validate_type(schema, BOOLEAN, "strictProperties")
 
