@@ -1,5 +1,8 @@
 Unreleased
 
+0.20.6 2019-05-16
+	Reduce empty Array/Hash allocations (optimization) #114
+
 0.20.5 2019-05-07
 	Do not expand a subschema if already expanded #113
 
