@@ -16,6 +16,8 @@ module JsonSchema
       String     => "string",
       TrueClass  => "boolean",
     }
+
+    # Reuse these frozen objects to avoid allocations
     EMPTY_ARRAY = [].freeze
     EMPTY_HASH = {}.freeze
 
