@@ -67,7 +67,8 @@ ruby -Ilib -Itest test/json_schema/validator_test.rb -n /anyOf/
 
 1. Update the version in `json_schema.gemspec` as appropriate for [semantic
    versioning](http://semver.org) and add details to `CHANGELOG`.
-2. Run the `release` task:
+2. `git commit` those changes with a message like "Bump version to x.y.z".
+3. Run the `release` task:
 
     ```
     bundle exec rake release
