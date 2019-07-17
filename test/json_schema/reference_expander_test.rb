@@ -454,6 +454,38 @@ describe JsonSchema::ReferenceExpander do
     assert_equal 3, schema1.properties["foo"].properties["bar"].one_of[1].properties["baz"].max_length
   end
 
+  it "does not infinitely recurse when external ref is local to its schema" do
+    sample1 = {
+      "id" => "http://json-schema.org/draft-04/schema#",
+      "$schema" => "http://json-schema.org/draft-04/schema#",
+      "properties" => {
+        "additionalItems" => {
+          "anyOf" => [ { "$ref" => "#" } ]
+        }
+      }
+    }
+    schema1 = JsonSchema::Parser.new.parse!(sample1)
+    sample2 = {
+      "$schema" => "http://json-schema.org/draft-04/hyper-schema#",
+      "id" => "http://json-schema.org/draft-04/hyper-schema#",
+      "allOf" => [
+        { "$ref" => "http://json-schema.org/draft-04/schema#" }
+      ]
+    }
+    schema2 = JsonSchema::Parser.new.parse!(sample2)
+
+    store = JsonSchema::DocumentStore.new
+    expander = JsonSchema::ReferenceExpander.new
+
+    store.add_schema(schema1)
+    store.add_schema(schema2)
+
+    expander.expand!(schema2, store: store)
+
+    assert schema1.expanded?
+    assert schema2.expanded?
+  end
+
   it "it handles oneOf with nested references to a local schema" do
     sample1 = {
       "$schema" => "http://json-schema.org/draft-04/hyper-schema",

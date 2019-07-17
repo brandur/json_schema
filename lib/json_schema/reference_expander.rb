@@ -93,6 +93,7 @@ module JsonSchema
       if !ref
         schema_children(ref_schema) do |subschema|
           next unless subschema.reference
+          next if ref_schema.uri == parent_ref.uri.to_s
 
           if !subschema.reference.uri && parent_ref
             subschema.reference = JsonReference::Reference.new("#{parent_ref.uri}#{subschema.reference.pointer}")
