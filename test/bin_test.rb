@@ -1,12 +1,10 @@
 require "test_helper"
 
 #
-# The purpose of this sets of tests is just to include our Ruby executables
-# where possible so that we can get very basic sanity checks on their syntax
-# (which is something that of course Ruby can't do by default).
+# The purpose of this sets of tests is just to test our Ruby executables
+# where possible so that we can get very basic sanity checks on their syntax.
 #
-# We can do this without actually executing them because they're gated by `if
-# $0 == __FILE__` statements.
+# We can do this without actually executing them with a "ruby -c" call.
 #
 
 describe "executables in bin/" do
@@ -15,6 +13,7 @@ describe "executables in bin/" do
   end
 
   it "has roughly valid Ruby structure for validate-schema" do
-    load File.join(@bin_dir, "validate-schema")
+    IO.popen(["ruby", "-c", File.join(@bin_dir, "validate-schema")]) { |io| io.read }
+    assert_equal $?.exitstatus, 0, "Ruby syntax check failed; see error above"
   end
 end

@@ -26,17 +26,15 @@ parser = OptionParser.new { |opts|
   end
 }
 
-if $0 == __FILE__
-  parser.parse!
-  success = command.run(ARGV.dup)
+parser.parse!
+success = command.run(ARGV.dup)
 
-  if success
-    command.messages.each { |m| $stdout.puts(m) }
-  elsif !command.errors.empty?
-    command.errors.each { |e| $stderr.puts(e) }
-    exit(1)
-  else
-    print_usage!
-    exit(1)
-  end
+if success
+  command.messages.each { |m| $stdout.puts(m) }
+elsif !command.errors.empty?
+  command.errors.each { |e| $stderr.puts(e) }
+  exit(1)
+else
+  print_usage!
+  exit(1)
 end
