@@ -362,10 +362,10 @@ module JsonSchema
     end
 
     def validate_type(schema, types, field)
-      friendly_types =
-        types.map { |t| FRIENDLY_TYPES[t] || t }.sort.uniq.join("/")
       value = schema.data[field]
       if !value.nil? && !types.any? { |t| value.is_a?(t) }
+        friendly_types =
+          types.map { |t| FRIENDLY_TYPES[t] || t }.sort.uniq.join("/")
         message = %{#{value.inspect} is not a valid "#{field}", must be a #{friendly_types}.}
         @errors << SchemaError.new(schema, message, :invalid_type)
         nil
