@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name          = "json_schema"
-  s.version       = "0.20.8"
+  s.version       = "0.20.9"
 
   s.summary       = "A JSON Schema V4 and Hyperschema V4 parser and validator."
 

@@ -1,5 +1,8 @@
 Unreleased
 
+0.20.9 2020-06-15
+	Only build `friendly_types` on error (optimization) (#120)
+
 0.20.8 2019-09-12
 	Remove filename check on executable to allow run with Rbenv (#119)
 
