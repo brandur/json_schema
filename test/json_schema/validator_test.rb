@@ -734,6 +734,22 @@ describe JsonSchema::Validator do
     assert_valid
   end
 
+  it "validates date-time format with hour-only time zone successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "date-time"
+    )
+    data_sample["owner"] = "2014-05-13T08:42:40+09"
+    assert_valid
+  end
+
+  it "validates date-time format with colonless time zone successfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "date-time"
+    )
+    data_sample["owner"] = "2014-05-13T08:42:40+0930"
+    assert_valid
+  end
+
   it "validates date-time format with time fraction successfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "date-time"
