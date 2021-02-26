@@ -567,7 +567,7 @@ module JsonSchema
     end
 
     DEFAULT_FORMAT_VALIDATORS = {
-      "date" => ->(data) { data =~ DATE_PATTERN },
+      "date" => ->(data) { data =~ DATE_PATTERN && Date.parse(data) rescue false },
       "date-time" => ->(data) { data =~ DATE_TIME_PATTERN },
       "email" => ->(data) { data =~ EMAIL_PATTERN },
       "hostname" => ->(data) { data =~ HOSTNAME_PATTERN },
