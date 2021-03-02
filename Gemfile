@@ -4,7 +4,7 @@ gemspec
 
 gem 'ecma-re-validator', '~> 0.1'
 gem 'minitest', '~> 5.3'
-gem 'rake', '~> 10.3'
+gem 'rake', ">= 12.3.3"
 gem 'simplecov'
 
 if RUBY_VERSION >= "2.3.0"
