@@ -718,6 +718,14 @@ describe JsonSchema::Validator do
     refute_valid
   end
 
+  it "validates date format when month and day exceed valid range unsuccessfully" do
+    pointer("#/definitions/app/definitions/owner").merge!(
+      "format" => "date"
+    )
+    data_sample["owner"] = "2014-24-60"
+    refute_valid
+  end
+
   it "validates date-time format successfully" do
     pointer("#/definitions/app/definitions/owner").merge!(
       "format" => "date-time"
