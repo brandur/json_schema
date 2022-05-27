@@ -19,7 +19,7 @@ module JsonSchema
       # Logic wise, we could simply define this method without meta programming
       # and decide every time to either call fast_and or strict_end.
       # Unfortunately this has a small overhead, that adds up over the runtime
-      # of the validator – about 5% if we check @fail_fast everytime.
+      # of the validator – about 5% if we check @fail_fast every time.
       # For more details, please see https://github.com/brandur/json_schema/pull/96
       and_operation = method(@fail_fast ? :fast_and : :strict_and)
       define_singleton_method(:strict_or_fast_and, and_operation)

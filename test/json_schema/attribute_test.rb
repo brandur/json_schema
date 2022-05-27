@@ -38,7 +38,7 @@ describe JsonSchema::Attributes do
 
     # This is a check to make sure that the new object is not the same object
     # as the one that we just mutated above. When assigning defaults the module
-    # should dup any common data strcutures that it puts in here.
+    # should dup any common data structures that it puts in here.
     obj = TestAttributes.new
     hash = obj.copyable_default_with_object
     assert_equal({}, hash)
