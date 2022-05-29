@@ -146,7 +146,7 @@ module DataScaffold
               "type" => ["boolean"]
             },
             "visibility" => {
-              "description" => "the visibility of hte app",
+              "description" => "the visibility of the app",
               "enum" => ["private", "public"],
               "example" => false,
               "readOnly" => false,
