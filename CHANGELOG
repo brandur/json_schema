@@ -1,4 +1,5 @@
 Unreleased
+	Correct spelling mistakes (#124)
 
 0.21.0 2021-03-02
 	Handle invalid date range in date format validation (#122)
